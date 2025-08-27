@@ -1,6 +1,5 @@
 import { Button } from '@/components/ui/button';
 import { ChefHat, Sparkles, Leaf } from 'lucide-react';
-import heroImage from '@/assets/tropical-hero.jpg';
 
 interface TropicalHeroProps {
   onGetStarted: () => void;
@@ -9,30 +8,27 @@ interface TropicalHeroProps {
 export const TropicalHero = ({ onGetStarted }: TropicalHeroProps) => {
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Background Image */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${heroImage})` }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background/80 to-secondary/20" />
-      </div>
+      {/* Background Gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-secondary/10" />
       
       {/* Content */}
       <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
-        <div className="flex justify-center mb-6">
+        {/* Logo and Brand */}
+        <div className="flex justify-center mb-8">
           <div className="flex items-center gap-4 text-6xl">
-            🥭🍍🥝
+            <ChefHat className="w-16 h-16 text-primary" />
+            <Leaf className="w-16 h-16 text-accent" />
           </div>
         </div>
         
         <h1 className="text-6xl md:text-8xl font-bold mb-6 bg-gradient-sunset bg-clip-text text-transparent leading-tight">
-          Fresh Tropical
+          Tropical
           <br />
-          Juices
+          AI Chef
         </h1>
         
         <p className="text-xl md:text-2xl mb-8 text-foreground/80 max-w-2xl mx-auto leading-relaxed">
-          Discover the perfect blend of tropical fruits and healthy goodness. 
+          Discover the perfect blend of tropical fruits and healthy vegetables. 
           Create personalized juice recipes that energize your body and delight your taste buds.
         </p>
         

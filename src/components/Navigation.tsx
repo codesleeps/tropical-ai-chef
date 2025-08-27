@@ -1,8 +1,14 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, ShoppingCart, User, Leaf } from 'lucide-react';
+import { Menu, ShoppingCart, User, Leaf, ChefHat, ChevronDown } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -17,6 +23,15 @@ export const Navigation = () => {
     { name: 'Orders', path: '/orders' },
   ];
 
+  const vegetableItems = [
+    { name: 'Kale', path: '/vegetables/kale' },
+    { name: 'Cucumber', path: '/vegetables/cucumber' },
+    { name: 'Spinach', path: '/vegetables/spinach' },
+    { name: 'Beetroot', path: '/vegetables/beetroot' },
+    { name: 'Ginger', path: '/vegetables/ginger' },
+    { name: 'Sorrel (Hibiscus)', path: '/vegetables/sorrel' },
+  ];
+
   const isActive = (path: string) => location.pathname === path;
 
   return (
@@ -25,9 +40,12 @@ export const Navigation = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <div className="text-2xl">🥭</div>
+            <div className="flex items-center gap-2">
+              <ChefHat className="w-6 h-6 text-primary" />
+              <Leaf className="w-5 h-5 text-accent" />
+            </div>
             <span className="font-bold text-xl bg-gradient-tropical bg-clip-text text-transparent">
-              Fresh Tropical Juices
+              Tropical AI Chef
             </span>
           </Link>
 
@@ -46,6 +64,25 @@ export const Navigation = () => {
                 {item.name}
               </Link>
             ))}
+            
+            {/* Vegetables Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center gap-2 font-medium hover:text-primary">
+                  Vegetables
+                  <ChevronDown className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="center" className="w-48">
+                {vegetableItems.map((item) => (
+                  <DropdownMenuItem key={item.path} asChild>
+                    <Link to={item.path} className="cursor-pointer">
+                      {item.name}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/* Action Buttons */}
@@ -83,6 +120,24 @@ export const Navigation = () => {
                     {item.name}
                   </Link>
                 ))}
+                
+                {/* Vegetables Section in Mobile Menu */}
+                <div className="border-t pt-4">
+                  <h3 className="font-medium text-lg mb-3 text-foreground/70">Vegetables</h3>
+                  <div className="space-y-2">
+                    {vegetableItems.map((item) => (
+                      <Link
+                        key={item.path}
+                        to={item.path}
+                        onClick={() => setIsOpen(false)}
+                        className="block text-base font-medium transition-smooth hover:text-primary text-foreground/70"
+                      >
+                        {item.name}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+                
                 <div className="border-t pt-4 space-y-2">
                   <Button variant="ghost" className="w-full justify-start">
                     <User className="w-4 h-4 mr-2" />
