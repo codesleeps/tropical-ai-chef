@@ -54,8 +54,7 @@ All colors MUST be HSL.
     --sidebar-border: 220 13% 91%;
 
     --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
+    
     /* Tropical Gradients and Animations */
     --gradient-tropical: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));
     --gradient-fresh: linear-gradient(180deg, hsl(var(--accent)), hsl(var(--primary)));
