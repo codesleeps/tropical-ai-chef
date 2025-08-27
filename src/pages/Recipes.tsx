@@ -5,6 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Sparkles, Heart, Share2, Save } from 'lucide-react';
+import { Navigation } from '@/components/Navigation';
+import { Footer } from '@/components/Footer';
 
 const Recipes = () => {
   const [currentRecipe, setCurrentRecipe] = useState('');
@@ -52,142 +54,146 @@ const Recipes = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
-      {/* Hero Section */}
-      <section className="py-20 px-6">
-        <div className="container mx-auto max-w-4xl text-center">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-sunset bg-clip-text text-transparent">
-            AI Recipe Generator
-          </h1>
-          <p className="text-xl text-foreground/70 mb-8 leading-relaxed">
-            Create personalized tropical juice recipes tailored to your taste preferences and health goals.
-          </p>
-          <div className="flex justify-center gap-4 text-4xl mb-8">
-            🥭🍍🥝🐉🧡
-          </div>
-        </div>
-      </section>
-
-      {/* Recipe Generator */}
-      <section className="px-6 pb-12">
-        <div className="container mx-auto">
-          <RecipeGenerator onRecipeGenerated={handleRecipeGenerated} />
-        </div>
-      </section>
-
-      {/* Current Recipe Display */}
-      {currentRecipe && (
-        <section className="px-6 pb-16">
-          <div className="container mx-auto">
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold mb-4 text-secondary">Your Custom Recipe</h2>
-              <div className="flex justify-center gap-4">
-                <Button variant="outline" className="flex items-center gap-2">
-                  <Save className="w-4 h-4" />
-                  Save Recipe
-                </Button>
-                <Button variant="outline" className="flex items-center gap-2">
-                  <Share2 className="w-4 h-4" />
-                  Share
-                </Button>
-                <Button className="gradient-tropical text-foreground flex items-center gap-2">
-                  <Heart className="w-4 h-4" />
-                  Add to Favorites
-                </Button>
-              </div>
+    <>
+      <Navigation />
+      <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
+        {/* Hero Section */}
+        <section className="py-20 px-6">
+          <div className="container mx-auto max-w-4xl text-center">
+            <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-sunset bg-clip-text text-transparent">
+              AI Recipe Generator
+            </h1>
+            <p className="text-xl text-foreground/70 mb-8 leading-relaxed">
+              Create personalized tropical juice recipes tailored to your taste preferences and health goals.
+            </p>
+            <div className="flex justify-center gap-4 text-4xl mb-8">
+              🥭🍍🥝🐉🧡
             </div>
-            <RecipeDisplay recipe={currentRecipe} />
           </div>
         </section>
-      )}
 
-      {/* Featured Recipes */}
-      <section className="px-6 pb-16 bg-muted/30">
-        <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4 bg-gradient-fresh bg-clip-text text-transparent">
-              Featured Recipes
+        {/* Recipe Generator */}
+        <section className="px-6 pb-12">
+          <div className="container mx-auto">
+            <RecipeGenerator onRecipeGenerated={handleRecipeGenerated} />
+          </div>
+        </section>
+
+        {/* Current Recipe Display */}
+        {currentRecipe && (
+          <section className="px-6 pb-16">
+            <div className="container mx-auto">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold mb-4 text-secondary">Your Custom Recipe</h2>
+                <div className="flex justify-center gap-4">
+                  <Button variant="outline" className="flex items-center gap-2">
+                    <Save className="w-4 h-4" />
+                    Save Recipe
+                  </Button>
+                  <Button variant="outline" className="flex items-center gap-2">
+                    <Share2 className="w-4 h-4" />
+                    Share
+                  </Button>
+                  <Button className="gradient-tropical text-foreground flex items-center gap-2">
+                    <Heart className="w-4 h-4" />
+                    Add to Favorites
+                  </Button>
+                </div>
+              </div>
+              <RecipeDisplay recipe={currentRecipe} />
+            </div>
+          </section>
+        )}
+
+        {/* Featured Recipes */}
+        <section className="px-6 pb-16 bg-muted/30">
+          <div className="container mx-auto max-w-6xl">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold mb-4 bg-gradient-fresh bg-clip-text text-transparent">
+                Featured Recipes
+              </h2>
+              <p className="text-foreground/70">
+                Try these popular recipes created by our AI and loved by our community
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {featuredRecipes.map((recipe, index) => (
+                <Card key={index} className="shadow-tropical border-0 hover:scale-105 transition-bounce cursor-pointer">
+                  <CardHeader>
+                    <div className="flex justify-between items-start mb-3">
+                      <Badge variant="secondary">{recipe.style}</Badge>
+                      <div className="text-2xl">🥤</div>
+                    </div>
+                    <CardTitle className="text-xl">{recipe.name}</CardTitle>
+                    <CardDescription>{recipe.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex flex-wrap gap-2">
+                        {recipe.fruits.map((fruit) => (
+                          <Badge key={fruit} variant="outline" className="text-xs">
+                            {fruit}
+                          </Badge>
+                        ))}
+                      </div>
+                      
+                      <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-1 text-foreground/70">
+                          <Sparkles className="w-4 h-4" />
+                          {recipe.time}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {renderStars(recipe.rating)}
+                          <span className="text-foreground/70 ml-1">({recipe.reviews})</span>
+                        </div>
+                      </div>
+                      
+                      <Button className="w-full gradient-tropical text-foreground">
+                        Try This Recipe
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* How It Works */}
+        <section className="px-6 pb-16">
+          <div className="container mx-auto max-w-4xl">
+            <h2 className="text-3xl font-bold text-center mb-12 text-secondary">
+              How Our AI Creates Perfect Recipes
             </h2>
-            <p className="text-foreground/70">
-              Try these popular recipes created by our AI and loved by our community
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {featuredRecipes.map((recipe, index) => (
-              <Card key={index} className="shadow-tropical border-0 hover:scale-105 transition-bounce cursor-pointer">
-                <CardHeader>
-                  <div className="flex justify-between items-start mb-3">
-                    <Badge variant="secondary">{recipe.style}</Badge>
-                    <div className="text-2xl">🥤</div>
-                  </div>
-                  <CardTitle className="text-xl">{recipe.name}</CardTitle>
-                  <CardDescription>{recipe.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex flex-wrap gap-2">
-                      {recipe.fruits.map((fruit) => (
-                        <Badge key={fruit} variant="outline" className="text-xs">
-                          {fruit}
-                        </Badge>
-                      ))}
-                    </div>
-                    
-                    <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-1 text-foreground/70">
-                        <Sparkles className="w-4 h-4" />
-                        {recipe.time}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        {renderStars(recipe.rating)}
-                        <span className="text-foreground/70 ml-1">({recipe.reviews})</span>
-                      </div>
-                    </div>
-                    
-                    <Button className="w-full gradient-tropical text-foreground">
-                      Try This Recipe
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section className="px-6 pb-16">
-        <div className="container mx-auto max-w-4xl">
-          <h2 className="text-3xl font-bold text-center mb-12 text-secondary">
-            How Our AI Creates Perfect Recipes
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="text-4xl mb-4">🎯</div>
-              <h3 className="font-bold text-lg mb-2 text-primary">Analyze Preferences</h3>
-              <p className="text-sm text-foreground/70">
-                Our AI considers your fruit choices, dietary needs, and taste preferences
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl mb-4">🧠</div>
-              <h3 className="font-bold text-lg mb-2 text-secondary">Smart Combinations</h3>
-              <p className="text-sm text-foreground/70">
-                Advanced algorithms find the perfect balance of flavors and nutrition
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl mb-4">✨</div>
-              <h3 className="font-bold text-lg mb-2 text-accent">Personalized Recipe</h3>
-              <p className="text-sm text-foreground/70">
-                Get a unique recipe with ingredients, instructions, and health benefits
-              </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="text-center">
+                <div className="text-4xl mb-4">🎯</div>
+                <h3 className="font-bold text-lg mb-2 text-primary">Analyze Preferences</h3>
+                <p className="text-sm text-foreground/70">
+                  Our AI considers your fruit choices, dietary needs, and taste preferences
+                </p>
+              </div>
+              <div className="text-center">
+                <div className="text-4xl mb-4">🧠</div>
+                <h3 className="font-bold text-lg mb-2 text-secondary">Smart Combinations</h3>
+                <p className="text-sm text-foreground/70">
+                  Advanced algorithms find the perfect balance of flavors and nutrition
+                </p>
+              </div>
+              <div className="text-center">
+                <div className="text-4xl mb-4">✨</div>
+                <h3 className="font-bold text-lg mb-2 text-accent">Personalized Recipe</h3>
+                <p className="text-sm text-foreground/70">
+                  Get a unique recipe with ingredients, instructions, and health benefits
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
-    </div>
+        </section>
+      </div>
+      <Footer />
+    </>
   );
 };
 

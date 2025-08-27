@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ShoppingCart, Clock, CheckCircle, Package, Truck, Calendar } from 'lucide-react';
+import { Navigation } from '@/components/Navigation';
+import { Footer } from '@/components/Footer';
 
 const Orders = () => {
   const [activeTab, setActiveTab] = useState('current');
@@ -89,54 +91,134 @@ const Orders = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
-      {/* Hero Section */}
-      <section className="py-20 px-6">
-        <div className="container mx-auto max-w-4xl text-center">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-sunset bg-clip-text text-transparent">
-            Your Orders
-          </h1>
-          <p className="text-xl text-foreground/70 mb-8 leading-relaxed">
-            Track your tropical juice deliveries and explore your order history.
-          </p>
-          <Button size="lg" className="gradient-tropical text-foreground font-bold">
-            <ShoppingCart className="w-5 h-5 mr-2" />
-            Create New Order
-          </Button>
-        </div>
-      </section>
+    <>
+      <Navigation />
+      <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
+        {/* Hero Section */}
+        <section className="py-20 px-6">
+          <div className="container mx-auto max-w-4xl text-center">
+            <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-sunset bg-clip-text text-transparent">
+              Your Orders
+            </h1>
+            <p className="text-xl text-foreground/70 mb-8 leading-relaxed">
+              Track your tropical juice deliveries and explore your order history.
+            </p>
+            <Button size="lg" className="gradient-tropical text-foreground font-bold">
+              <ShoppingCart className="w-5 h-5 mr-2" />
+              Create New Order
+            </Button>
+          </div>
+        </section>
 
-      {/* Order Tabs */}
-      <section className="px-6 pb-8">
-        <div className="container mx-auto max-w-4xl">
-          <div className="flex justify-center mb-8">
-            <div className="flex bg-muted rounded-lg p-1">
-              <Button
-                variant={activeTab === 'current' ? 'default' : 'ghost'}
-                onClick={() => setActiveTab('current')}
-                className={activeTab === 'current' ? 'gradient-tropical text-foreground' : ''}
-              >
-                Current Orders
-              </Button>
-              <Button
-                variant={activeTab === 'past' ? 'default' : 'ghost'}
-                onClick={() => setActiveTab('past')}
-                className={activeTab === 'past' ? 'gradient-tropical text-foreground' : ''}
-              >
-                Order History
-              </Button>
+        {/* Order Tabs */}
+        <section className="px-6 pb-8">
+          <div className="container mx-auto max-w-4xl">
+            <div className="flex justify-center mb-8">
+              <div className="flex bg-muted rounded-lg p-1">
+                <Button
+                  variant={activeTab === 'current' ? 'default' : 'ghost'}
+                  onClick={() => setActiveTab('current')}
+                  className={activeTab === 'current' ? 'gradient-tropical text-foreground' : ''}
+                >
+                  Current Orders
+                </Button>
+                <Button
+                  variant={activeTab === 'past' ? 'default' : 'ghost'}
+                  onClick={() => setActiveTab('past')}
+                  className={activeTab === 'past' ? 'gradient-tropical text-foreground' : ''}
+                >
+                  Order History
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Orders List */}
-      <section className="px-6 pb-16">
-        <div className="container mx-auto max-w-4xl">
-          <div className="space-y-6">
-            {activeTab === 'current' ? (
-              currentOrders.length > 0 ? (
-                currentOrders.map((order) => (
+        {/* Orders List */}
+        <section className="px-6 pb-16">
+          <div className="container mx-auto max-w-4xl">
+            <div className="space-y-6">
+              {activeTab === 'current' ? (
+                currentOrders.length > 0 ? (
+                  currentOrders.map((order) => (
+                    <Card key={order.id} className="shadow-tropical border-0">
+                      <CardHeader>
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <CardTitle className="text-xl mb-2">Order {order.id}</CardTitle>
+                            <CardDescription className="flex items-center gap-2">
+                              <Calendar className="w-4 h-4" />
+                              Ordered on {new Date(order.orderDate).toLocaleDateString()}
+                            </CardDescription>
+                          </div>
+                          <Badge className={`flex items-center gap-1 ${getStatusColor(order.status)}`}>
+                            {getStatusIcon(order.status)}
+                            {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          {/* Juice Items */}
+                          <div className="space-y-2">
+                            {order.juices.map((juice, index) => (
+                              <div key={index} className="flex justify-between items-center">
+                                <div className="flex items-center gap-3">
+                                  <div className="text-2xl">🥤</div>
+                                  <div>
+                                    <div className="font-medium">{juice.name}</div>
+                                    <div className="text-sm text-foreground/70">Qty: {juice.quantity}</div>
+                                  </div>
+                                </div>
+                                <div className="font-bold">${juice.price.toFixed(2)}</div>
+                              </div>
+                            ))}
+                          </div>
+                          
+                          <Separator />
+                          
+                          {/* Order Summary */}
+                          <div className="flex justify-between items-center font-bold text-lg">
+                            <span>Total</span>
+                            <span className="text-primary">${order.total.toFixed(2)}</span>
+                          </div>
+                          
+                          {/* Delivery Info */}
+                          <div className="bg-muted/50 rounded-lg p-4">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Truck className="w-4 h-4 text-secondary" />
+                              <span className="font-medium">Delivery Information</span>
+                            </div>
+                            <div className="text-sm text-foreground/70 space-y-1">
+                              <div>Expected: {new Date(order.estimatedDelivery).toLocaleDateString()}</div>
+                              <div>{order.deliveryAddress}</div>
+                            </div>
+                          </div>
+                          
+                          <div className="flex gap-3">
+                            <Button variant="outline" className="flex-1">
+                              Track Order
+                            </Button>
+                            <Button variant="outline" className="flex-1">
+                              Contact Support
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                ) : (
+                  <Card className="shadow-tropical border-0 text-center p-12">
+                    <div className="text-6xl mb-4">🛒</div>
+                    <h3 className="text-xl font-bold mb-2">No Current Orders</h3>
+                    <p className="text-foreground/70 mb-6">You don't have any active orders right now.</p>
+                    <Button className="gradient-tropical text-foreground">
+                      Start Shopping
+                    </Button>
+                  </Card>
+                )
+              ) : (
+                pastOrders.map((order) => (
                   <Card key={order.id} className="shadow-tropical border-0">
                     <CardHeader>
                       <div className="flex justify-between items-start">
@@ -144,12 +226,12 @@ const Orders = () => {
                           <CardTitle className="text-xl mb-2">Order {order.id}</CardTitle>
                           <CardDescription className="flex items-center gap-2">
                             <Calendar className="w-4 h-4" />
-                            Ordered on {new Date(order.orderDate).toLocaleDateString()}
+                            Delivered on {new Date(order.deliveredDate!).toLocaleDateString()}
                           </CardDescription>
                         </div>
                         <Badge className={`flex items-center gap-1 ${getStatusColor(order.status)}`}>
                           {getStatusIcon(order.status)}
-                          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                          Delivered
                         </Badge>
                       </div>
                     </CardHeader>
@@ -173,111 +255,35 @@ const Orders = () => {
                         
                         <Separator />
                         
-                        {/* Order Summary */}
-                        <div className="flex justify-between items-center font-bold text-lg">
-                          <span>Total</span>
-                          <span className="text-primary">${order.total.toFixed(2)}</span>
-                        </div>
-                        
-                        {/* Delivery Info */}
-                        <div className="bg-muted/50 rounded-lg p-4">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Truck className="w-4 h-4 text-secondary" />
-                            <span className="font-medium">Delivery Information</span>
+                        <div className="flex justify-between items-center">
+                          <div className="font-bold text-lg">
+                            Total: <span className="text-primary">${order.total.toFixed(2)}</span>
                           </div>
-                          <div className="text-sm text-foreground/70 space-y-1">
-                            <div>Expected: {new Date(order.estimatedDelivery).toLocaleDateString()}</div>
-                            <div>{order.deliveryAddress}</div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-foreground/70">Your Rating:</span>
+                            <div className="flex">{renderStars(order.rating!)}</div>
                           </div>
                         </div>
                         
                         <div className="flex gap-3">
                           <Button variant="outline" className="flex-1">
-                            Track Order
+                            Reorder
                           </Button>
                           <Button variant="outline" className="flex-1">
-                            Contact Support
+                            Write Review
                           </Button>
                         </div>
                       </div>
                     </CardContent>
                   </Card>
                 ))
-              ) : (
-                <Card className="shadow-tropical border-0 text-center p-12">
-                  <div className="text-6xl mb-4">🛒</div>
-                  <h3 className="text-xl font-bold mb-2">No Current Orders</h3>
-                  <p className="text-foreground/70 mb-6">You don't have any active orders right now.</p>
-                  <Button className="gradient-tropical text-foreground">
-                    Start Shopping
-                  </Button>
-                </Card>
-              )
-            ) : (
-              pastOrders.map((order) => (
-                <Card key={order.id} className="shadow-tropical border-0">
-                  <CardHeader>
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <CardTitle className="text-xl mb-2">Order {order.id}</CardTitle>
-                        <CardDescription className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4" />
-                          Delivered on {new Date(order.deliveredDate!).toLocaleDateString()}
-                        </CardDescription>
-                      </div>
-                      <Badge className={`flex items-center gap-1 ${getStatusColor(order.status)}`}>
-                        {getStatusIcon(order.status)}
-                        Delivered
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {/* Juice Items */}
-                      <div className="space-y-2">
-                        {order.juices.map((juice, index) => (
-                          <div key={index} className="flex justify-between items-center">
-                            <div className="flex items-center gap-3">
-                              <div className="text-2xl">🥤</div>
-                              <div>
-                                <div className="font-medium">{juice.name}</div>
-                                <div className="text-sm text-foreground/70">Qty: {juice.quantity}</div>
-                              </div>
-                            </div>
-                            <div className="font-bold">${juice.price.toFixed(2)}</div>
-                          </div>
-                        ))}
-                      </div>
-                      
-                      <Separator />
-                      
-                      <div className="flex justify-between items-center">
-                        <div className="font-bold text-lg">
-                          Total: <span className="text-primary">${order.total.toFixed(2)}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-foreground/70">Your Rating:</span>
-                          <div className="flex">{renderStars(order.rating!)}</div>
-                        </div>
-                      </div>
-                      
-                      <div className="flex gap-3">
-                        <Button variant="outline" className="flex-1">
-                          Reorder
-                        </Button>
-                        <Button variant="outline" className="flex-1">
-                          Write Review
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
+              )}
+            </div>
           </div>
-        </div>
-      </section>
-    </div>
+        </section>
+      </div>
+      <Footer />
+    </>
   );
 };
 
