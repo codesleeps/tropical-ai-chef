@@ -140,40 +140,6 @@ export const Navigation = () => {
                   </Link>
                 ))}
                 
-                {/* Vegetables Section in Mobile Menu */}
-                <div className="border-t pt-4">
-                  <h3 className="font-medium text-lg mb-3 text-foreground/70">Vegetables</h3>
-                  <div className="space-y-2">
-                    {vegetableItems.map((item) => (
-                      <Link
-                        key={item.path}
-                        to={item.path}
-                        onClick={() => setIsOpen(false)}
-                        className="block text-base font-medium transition-smooth hover:text-primary text-foreground/70"
-                      >
-                        {item.name}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-                
-                {/* Fruits Section in Mobile Menu */}
-                <div className="border-t pt-4">
-                  <h3 className="font-medium text-lg mb-3 text-foreground/70">Fruits</h3>
-                  <div className="space-y-2">
-                    {fruitItems.map((item) => (
-                      <Link
-                        key={item.path}
-                        to={item.path}
-                        onClick={() => setIsOpen(false)}
-                        className="block text-base font-medium transition-smooth hover:text-primary text-foreground/70"
-                      >
-                        {item.name}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-
                 <div className="border-t pt-4 space-y-2">
                   {user ? (
                     <div className="space-y-3">
