@@ -159,11 +159,11 @@ ${recipe.tips.map(tip => `- ${tip}`).join('\n')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <Label htmlFor="fruits" className="text-base font-semibold">Choose Your Fruits (Select up to 5)</Label>
-            <div className="border rounded-lg p-3 max-h-56 overflow-y-auto bg-background">
-              <div className="grid grid-cols-1 gap-3">
+            <div className="border rounded-lg p-2 max-h-56 overflow-y-auto bg-background">
+              <div className="grid grid-cols-1 gap-2">
                 {[
                   { value: "apples", label: "🍎 Apples" },
                   { value: "strawberries", label: "🍓 Strawberries" },
@@ -182,7 +182,7 @@ ${recipe.tips.map(tip => `- ${tip}`).join('\n')}
                   { value: "rambutan", label: "🦔 Rambutan" },
                   { value: "mangosteen", label: "💜 Mangosteen" }
                 ].map((fruit) => (
-                  <label key={fruit.value} className="flex items-center space-x-3 cursor-pointer hover:bg-accent/10 p-3 rounded-lg border border-transparent hover:border-accent/20 transition-all">
+                  <label key={fruit.value} className="flex items-center space-x-3 cursor-pointer hover:bg-accent/10 p-2 sm:p-3 rounded-lg border border-transparent hover:border-accent/20 transition-all touch-manipulation">
                     <input
                       type="checkbox"
                       value={fruit.value}
@@ -198,7 +198,7 @@ ${recipe.tips.map(tip => `- ${tip}`).join('\n')}
                           setFruits(fruits.filter(f => f !== fruit.value));
                         }
                       }}
-                      className="rounded border-gray-300 text-primary focus:ring-primary w-4 h-4"
+                      className="rounded border-gray-300 text-primary focus:ring-primary w-5 h-5 sm:w-4 sm:h-4"
                     />
                     <span className="text-sm font-medium">{fruit.label}</span>
                   </label>
@@ -212,8 +212,8 @@ ${recipe.tips.map(tip => `- ${tip}`).join('\n')}
           
           <div className="space-y-2">
             <Label htmlFor="vegetables" className="text-base font-semibold">Add Vegetables (Select up to 5)</Label>
-            <div className="border rounded-lg p-3 max-h-56 overflow-y-auto bg-background">
-              <div className="grid grid-cols-1 gap-3">
+            <div className="border rounded-lg p-2 max-h-56 overflow-y-auto bg-background">
+              <div className="grid grid-cols-1 gap-2">
                 {[
                   { value: "kale", label: "🥬 Kale" },
                   { value: "cucumber", label: "🥒 Cucumber" },
@@ -231,7 +231,7 @@ ${recipe.tips.map(tip => `- ${tip}`).join('\n')}
                   { value: "lemon", label: "🍋 Lemon" },
                   { value: "lime", label: "🍈 Lime" }
                 ].map((vegetable) => (
-                  <label key={vegetable.value} className="flex items-center space-x-3 cursor-pointer hover:bg-accent/10 p-3 rounded-lg border border-transparent hover:border-accent/20 transition-all">
+                  <label key={vegetable.value} className="flex items-center space-x-3 cursor-pointer hover:bg-accent/10 p-2 sm:p-3 rounded-lg border border-transparent hover:border-accent/20 transition-all touch-manipulation">
                     <input
                       type="checkbox"
                       value={vegetable.value}
@@ -247,7 +247,7 @@ ${recipe.tips.map(tip => `- ${tip}`).join('\n')}
                           setVegetables(vegetables.filter(v => v !== vegetable.value));
                         }
                       }}
-                      className="rounded border-gray-300 text-primary focus:ring-primary w-4 h-4"
+                      className="rounded border-gray-300 text-primary focus:ring-primary w-5 h-5 sm:w-4 sm:h-4"
                     />
                     <span className="text-sm font-medium">{vegetable.label}</span>
                   </label>

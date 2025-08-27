@@ -19,7 +19,7 @@ export const TropicalHero = ({ onGetStarted }: TropicalHeroProps) => {
       
       {/* Content */}
       <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
-        <h1 className="text-6xl md:text-8xl font-bold mb-6 leading-tight" style={{
+        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold mb-6 leading-tight" style={{
           background: 'linear-gradient(135deg, hsl(45, 100%, 55%) 0%, hsl(340, 82%, 55%) 100%)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
@@ -31,7 +31,7 @@ export const TropicalHero = ({ onGetStarted }: TropicalHeroProps) => {
           AI Chef
         </h1>
         
-        <p className="text-xl md:text-2xl mb-8 text-foreground/80 max-w-2xl mx-auto leading-relaxed">
+        <p className="text-lg sm:text-xl md:text-2xl mb-8 text-foreground/80 max-w-2xl mx-auto leading-relaxed px-4">
           Discover the perfect blend of tropical fruits and healthy vegetables. 
           Create personalized juice recipes that energize your body and delight your taste buds.
         </p>

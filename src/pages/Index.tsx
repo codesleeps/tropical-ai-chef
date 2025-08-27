@@ -90,13 +90,13 @@ const Index = () => {
       <section className="py-20 px-6 bg-muted/30 mt-16" id="features">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-primary">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 text-primary">
               Features
             </h2>
-            <h3 className="text-2xl md:text-3xl font-semibold mb-4 bg-gradient-fresh bg-clip-text text-transparent">
+            <h3 className="text-xl sm:text-2xl md:text-3xl font-semibold mb-4 bg-gradient-fresh bg-clip-text text-transparent">
               Why Choose Fresh Tropical Juices?
             </h3>
-            <p className="text-xl text-foreground/70 max-w-3xl mx-auto">
+            <p className="text-lg sm:text-xl text-foreground/70 max-w-3xl mx-auto px-4">
               Experience the perfect fusion of cutting-edge AI technology and nature's finest tropical fruits
             </p>
           </div>
