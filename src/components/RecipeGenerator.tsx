@@ -148,7 +148,7 @@ ${recipe.tips.map(tip => `- ${tip}`).join('\n')}
   };
 
   return (
-    <Card className="w-full max-w-2xl mx-auto shadow-tropical">
+    <Card className="w-full max-w-2xl mx-auto shadow-tropical px-2 sm:px-0">
       <CardHeader className="text-center">
         <CardTitle className="text-3xl font-bold bg-gradient-fresh bg-clip-text text-transparent flex items-center justify-center gap-2">
           <Sparkles className="w-8 h-8 text-secondary" />
@@ -386,7 +386,7 @@ ${recipe.tips.map(tip => `- ${tip}`).join('\n')}
         <Button 
           onClick={handleGenerate}
           disabled={!fruits.length || !style || isGenerating}
-          className="w-full gradient-sunset text-foreground font-bold text-lg py-8 hover:scale-105 transition-bounce shadow-tropical touch-manipulation"
+          className="w-full gradient-sunset text-foreground font-bold text-base sm:text-lg py-6 sm:py-8 hover:scale-105 transition-bounce shadow-tropical touch-manipulation min-h-[48px]"
         >
           {isGenerating ? (
             <div className="flex items-center gap-2">

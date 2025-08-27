@@ -18,7 +18,7 @@ export const TropicalHero = ({ onGetStarted }: TropicalHeroProps) => {
       </div>
       
       {/* Content */}
-      <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
+      <div className="relative z-10 text-center px-4 sm:px-6 max-w-4xl mx-auto">
         <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold mb-6 leading-tight" style={{
           background: 'linear-gradient(135deg, hsl(45, 100%, 55%) 0%, hsl(340, 82%, 55%) 100%)',
           WebkitBackgroundClip: 'text',
@@ -36,45 +36,45 @@ export const TropicalHero = ({ onGetStarted }: TropicalHeroProps) => {
           Create personalized juice recipes that energize your body and delight your taste buds.
         </p>
         
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
+        <div className="flex flex-col gap-4 justify-center items-center mb-8">
           <Button 
             size="lg" 
             onClick={onGetStarted}
-            className="gradient-tropical text-foreground font-bold text-lg px-8 py-6 hover:scale-105 transition-bounce shadow-tropical"
+            className="gradient-tropical text-foreground font-bold text-base sm:text-lg px-6 sm:px-8 py-4 sm:py-6 hover:scale-105 transition-bounce shadow-tropical touch-manipulation w-full sm:w-auto max-w-xs"
           >
-            <ChefHat className="w-6 h-6 mr-2" />
+            <ChefHat className="w-5 h-5 sm:w-6 sm:h-6 mr-2" />
             Start Creating Recipes
           </Button>
           
-          <div className="flex items-center gap-6 text-sm text-foreground/70">
+          <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 text-sm text-foreground/70 mt-4">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-secondary" />
+              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-secondary" />
               <span>AI-Powered</span>
             </div>
             <div className="flex items-center gap-2">
-              <Leaf className="w-5 h-5 text-accent" />
+              <Leaf className="w-4 h-4 sm:w-5 sm:h-5 text-accent" />
               <span>100% Natural</span>
             </div>
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto mb-20">
-          <div className="bg-card/80 backdrop-blur-sm rounded-lg p-6 shadow-tropical">
-            <div className="text-3xl mb-3">🌱</div>
-            <h3 className="font-bold text-lg mb-2 text-accent">Detox Blends</h3>
-            <p className="text-sm text-foreground/70">Cleansing recipes for a healthier you</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-3xl mx-auto mb-12 sm:mb-20 px-4">
+          <div className="bg-card/80 backdrop-blur-sm rounded-lg p-4 sm:p-6 shadow-tropical">
+            <div className="text-2xl sm:text-3xl mb-2 sm:mb-3">🌱</div>
+            <h3 className="font-bold text-base sm:text-lg mb-1 sm:mb-2 text-accent">Detox Blends</h3>
+            <p className="text-xs sm:text-sm text-foreground/70">Cleansing recipes for a healthier you</p>
           </div>
           
-          <div className="bg-card/80 backdrop-blur-sm rounded-lg p-6 shadow-tropical">
-            <div className="text-3xl mb-3">⚡</div>
-            <h3 className="font-bold text-lg mb-2 text-secondary">Energy Boosts</h3>
-            <p className="text-sm text-foreground/70">Power-packed juices for active lifestyles</p>
+          <div className="bg-card/80 backdrop-blur-sm rounded-lg p-4 sm:p-6 shadow-tropical">
+            <div className="text-2xl sm:text-3xl mb-2 sm:mb-3">⚡</div>
+            <h3 className="font-bold text-base sm:text-lg mb-1 sm:mb-2 text-secondary">Energy Boosts</h3>
+            <p className="text-xs sm:text-sm text-foreground/70">Power-packed juices for active lifestyles</p>
           </div>
           
-          <div className="bg-card/80 backdrop-blur-sm rounded-lg p-6 shadow-tropical">
-            <div className="text-3xl mb-3">🥤</div>
-            <h3 className="font-bold text-lg mb-2 text-primary">Creamy Smoothies</h3>
-            <p className="text-sm text-foreground/70">Rich, satisfying tropical blends</p>
+          <div className="bg-card/80 backdrop-blur-sm rounded-lg p-4 sm:p-6 shadow-tropical">
+            <div className="text-2xl sm:text-3xl mb-2 sm:mb-3">🥤</div>
+            <h3 className="font-bold text-base sm:text-lg mb-1 sm:mb-2 text-primary">Creamy Smoothies</h3>
+            <p className="text-xs sm:text-sm text-foreground/70">Rich, satisfying tropical blends</p>
           </div>
         </div>
       </div>
