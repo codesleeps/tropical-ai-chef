@@ -1,6 +1,8 @@
 // AI Recipe Generator Utility
 // This works client-side and can integrate with various AI services
 
+import { generateRecipeWithOllama, checkOllamaAvailability, getAvailableModels, OLLAMA_MODELS, type OllamaRecipeRequest } from './ollamaRecipeGenerator';
+
 export interface RecipeRequest {
   fruit: string;
   style: string;
@@ -17,6 +19,8 @@ export interface Recipe {
   prepTime: string;
   servings: string;
   emoji: string;
+  model?: string;
+  generationTime?: number;
 }
 
 // Option 1: OpenAI API (requires API key)
@@ -181,6 +185,77 @@ export function generateRecipeLocally(request: RecipeRequest): Recipe {
     servings: '2 servings',
     emoji: '🥤'
   };
+}
+
+// Check Ollama availability on startup
+let ollamaAvailable = false;
+let availableOllamaModels: string[] = [];
+
+export async function initializeOllama() {
+  try {
+    ollamaAvailable = await checkOllamaAvailability();
+    if (ollamaAvailable) {
+      availableOllamaModels = await getAvailableModels();
+      console.log('Ollama available with models:', availableOllamaModels);
+    }
+  } catch (error) {
+    console.log('Ollama not available:', error);
+  }
+}
+
+// Initialize Ollama when module loads
+initializeOllama();
+
+// Option 1: Ollama (Local AI - FREE)
+export async function generateRecipeWithOllamaLocal(
+  request: RecipeRequest,
+  model: string = 'llama3.3:latest'
+): Promise<Recipe> {
+  try {
+    if (!ollamaAvailable) {
+      throw new Error('Ollama is not available');
+    }
+    
+    const ollamaRequest: OllamaRecipeRequest = {
+      fruit: request.fruit,
+      style: request.style,
+      vegetables: request.vegetables,
+      dietaryRestrictions: request.dietaryRestrictions,
+      model: model
+    };
+    
+    const ollamaRecipe = await generateRecipeWithOllama(ollamaRequest, model);
+    
+    // Convert to standard Recipe format
+    return {
+      title: ollamaRecipe.title,
+      ingredients: ollamaRecipe.ingredients,
+      instructions: ollamaRecipe.instructions,
+      nutritionalBenefits: ollamaRecipe.nutritionalBenefits,
+      tips: ollamaRecipe.tips,
+      prepTime: ollamaRecipe.prepTime,
+      servings: ollamaRecipe.servings,
+      emoji: ollamaRecipe.emoji,
+      model: ollamaRecipe.model,
+      generationTime: ollamaRecipe.generationTime
+    };
+  } catch (error) {
+    console.error('Ollama generation error:', error);
+    throw error;
+  }
+}
+
+// Get Ollama model info
+export function getOllamaModels() {
+  return OLLAMA_MODELS;
+}
+
+export function isOllamaAvailable() {
+  return ollamaAvailable;
+}
+
+export function getAvailableOllamaModels() {
+  return availableOllamaModels;
 }
 
 // Helper functions

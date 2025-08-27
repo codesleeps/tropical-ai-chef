@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Textarea } from '@/components/ui/textarea';
 import { Sparkles, AlertCircle, Settings, Zap } from 'lucide-react';
 import { toast } from 'sonner';
-import { generateRecipeWithOpenAI, generateRecipeWithHuggingFace, generateRecipeLocally, type RecipeRequest } from '@/utils/aiRecipeGenerator';
+import { generateRecipeWithOpenAI, generateRecipeWithHuggingFace, generateRecipeLocally, generateRecipeWithOllamaLocal, getOllamaModels, isOllamaAvailable, getAvailableOllamaModels, type RecipeRequest } from '@/utils/aiRecipeGenerator';
 
 interface RecipeGeneratorProps {
   onRecipeGenerated: (recipe: string) => void;
@@ -21,8 +21,36 @@ export const RecipeGenerator = ({ onRecipeGenerated }: RecipeGeneratorProps) => 
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [aiService, setAiService] = useState<'local' | 'openai' | 'huggingface'>('local');
+  const [aiService, setAiService] = useState<'local' | 'ollama' | 'openai' | 'huggingface'>('local');
   const [apiKey, setApiKey] = useState('');
+  const [ollamaModel, setOllamaModel] = useState('llama3.3:latest');
+  const [ollamaAvailable, setOllamaAvailable] = useState(false);
+  const [ollamaModels, setOllamaModels] = useState<Record<string, any>>({});
+
+  // Initialize Ollama on component mount
+  useEffect(() => {
+    const initOllama = async () => {
+      const available = isOllamaAvailable();
+      const models = getOllamaModels();
+      setOllamaAvailable(available);
+      setOllamaModels(models);
+      
+      // Check if Ollama becomes available
+      if (!available) {
+        setTimeout(async () => {
+          const checkAvailable = await isOllamaAvailable();
+          if (checkAvailable) {
+            setOllamaAvailable(true);
+            setOllamaModels(getOllamaModels());
+            // Auto-switch to Ollama if it becomes available
+            setAiService('ollama');
+          }
+        }, 2000);
+      }
+    };
+    
+    initOllama();
+  }, []);
 
   const handleGenerate = async () => {
     if (!fruit || !style) {
@@ -44,6 +72,13 @@ export const RecipeGenerator = ({ onRecipeGenerated }: RecipeGeneratorProps) => 
       let recipe;
       
       switch (aiService) {
+        case 'ollama':
+          if (!ollamaAvailable) {
+            throw new Error('Ollama is not available. Please start Ollama or switch to another service.');
+          }
+          recipe = await generateRecipeWithOllamaLocal(request, ollamaModel);
+          break;
+          
         case 'openai':
           if (!apiKey) {
             throw new Error('OpenAI API key is required');
@@ -209,12 +244,43 @@ ${recipe.tips.map(tip => `- ${tip}`).join('\n')}
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="local">🤖 Local AI (Free)</SelectItem>
-              <SelectItem value="openai">🧠 OpenAI GPT-3.5</SelectItem>
-              <SelectItem value="huggingface">🤗 Hugging Face</SelectItem>
+              <SelectItem value="ollama" disabled={!ollamaAvailable}>
+                🚀 Ollama Local AI {ollamaAvailable ? '(FREE - Premium Quality)' : '(Not Available)'}
+              </SelectItem>
+              <SelectItem value="local">🤖 Local AI (FREE - Unlimited)</SelectItem>
+              <SelectItem value="openai">🧠 OpenAI GPT-3.5 (Premium)</SelectItem>
+              <SelectItem value="huggingface">🤗 Hugging Face (Budget)</SelectItem>
             </SelectContent>
           </Select>
           
+          {showAdvanced && aiService === 'ollama' && ollamaAvailable && (
+            <div className="space-y-2">
+              <Label htmlFor="ollamaModel" className="text-sm">
+                Select Ollama Model
+              </Label>
+              <Select value={ollamaModel} onValueChange={setOllamaModel}>
+                <SelectTrigger className="transition-smooth focus:shadow-glow">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(ollamaModels).map(([key, model]) => (
+                    <SelectItem key={key} value={key}>
+                      {model.name} ({model.size}) - {model.quality} quality
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <div className="text-xs text-muted-foreground space-y-1">
+                <p className="text-green-600 font-medium">
+                  🚀 Premium AI quality - Completely FREE!
+                </p>
+                <p>
+                  {ollamaModels[ollamaModel]?.description || 'Select a model for recipe generation'}
+                </p>
+              </div>
+            </div>
+          )}
+
           {showAdvanced && (aiService === 'openai' || aiService === 'huggingface') && (
             <div className="space-y-2">
               <Label htmlFor="apiKey" className="text-sm">
@@ -228,12 +294,17 @@ ${recipe.tips.map(tip => `- ${tip}`).join('\n')}
                 onChange={(e) => setApiKey(e.target.value)}
                 className="transition-smooth focus:shadow-glow"
               />
-              <p className="text-xs text-muted-foreground">
-                {aiService === 'openai' 
-                  ? 'Get your API key from https://platform.openai.com/api-keys'
-                  : 'Get your API key from https://huggingface.co/settings/tokens'
-                }
-              </p>
+              <div className="text-xs text-muted-foreground space-y-1">
+                <p>
+                  {aiService === 'openai' 
+                    ? 'Get your API key from https://platform.openai.com/api-keys'
+                    : 'Get your API key from https://huggingface.co/settings/tokens'
+                  }
+                </p>
+                <p className="text-amber-600 font-medium">
+                  💡 Tip: Local AI is FREE and unlimited - no API key needed!
+                </p>
+              </div>
             </div>
           )}
         </div>
@@ -264,9 +335,10 @@ ${recipe.tips.map(tip => `- ${tip}`).join('\n')}
         </Button>
         
         <div className="text-center text-xs text-muted-foreground">
-          {aiService === 'local' && 'Using local AI generation - no API key required'}
-          {aiService === 'openai' && 'Using OpenAI GPT-3.5 - requires API key'}
-          {aiService === 'huggingface' && 'Using Hugging Face - requires API key'}
+          {aiService === 'ollama' && '🚀 Premium AI Quality - Completely FREE with Ollama!'}
+          {aiService === 'local' && '🎉 FREE & Unlimited - Perfect for giving away!'}
+          {aiService === 'openai' && '💎 Premium AI - Costs per request'}
+          {aiService === 'huggingface' && '💰 Budget AI - Lower cost option'}
         </div>
       </CardContent>
     </Card>
