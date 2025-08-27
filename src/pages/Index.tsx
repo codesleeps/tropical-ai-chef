@@ -245,8 +245,13 @@ const Index = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-6 bg-gradient-to-br from-primary/20 via-secondary/10 to-accent/20">
+      <section className="py-20 px-6 bg-gradient-to-br from-primary/20 via-secondary/10 to-accent/20" id="get-started">
         <div className="container mx-auto max-w-4xl text-center">
+          <div className="text-center mb-8">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-sunset bg-clip-text text-transparent">
+              Ready to Start Your Tropical Journey?
+            </h2>
+          </div>
           <div className="flex justify-center mb-6">
             <div className="flex items-center gap-4 text-6xl">
               🌟✨🥭
