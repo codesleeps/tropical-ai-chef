@@ -63,9 +63,9 @@ export const RecipeGenerator = ({ onRecipeGenerated }: RecipeGeneratorProps) => 
     
     try {
       const request: RecipeRequest = {
-        fruits: fruits,
+        fruit: fruits.join(', '), // Join multiple fruits into a string
         style,
-        vegetables: vegetables || undefined,
+        vegetables: vegetables.length > 0 ? vegetables.join(', ') : undefined,
         dietaryRestrictions: dietaryRestrictions || undefined,
       };
 
@@ -113,9 +113,9 @@ export const RecipeGenerator = ({ onRecipeGenerated }: RecipeGeneratorProps) => 
       
       // Fallback to local generation
       const request: RecipeRequest = {
-        fruits: fruits,
+        fruit: fruits.join(', '), // Join multiple fruits into a string
         style,
-        vegetables: vegetables || undefined,
+        vegetables: vegetables.length > 0 ? vegetables.join(', ') : undefined,
         dietaryRestrictions: dietaryRestrictions || undefined,
       };
       const fallbackRecipe = generateRecipeLocally(request);
