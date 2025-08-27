@@ -58,7 +58,7 @@ export const TropicalHero = ({ onGetStarted }: TropicalHeroProps) => {
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto mb-20">
           <div className="bg-card/80 backdrop-blur-sm rounded-lg p-6 shadow-tropical">
             <div className="text-3xl mb-3">🌱</div>
             <h3 className="font-bold text-lg mb-2 text-accent">Detox Blends</h3>
