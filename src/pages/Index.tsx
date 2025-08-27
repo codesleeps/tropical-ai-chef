@@ -6,11 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ChefHat, Sparkles, Heart, Star, Users, Zap, Leaf, Shield, ArrowRight, Play } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Index = () => {
+  const navigate = useNavigate();
+  
   const handleGetStarted = () => {
-    window.location.href = '/recipes';
+    navigate('/recipes');
   };
 
   const features = [
