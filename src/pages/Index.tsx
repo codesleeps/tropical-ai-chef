@@ -90,9 +90,12 @@ const Index = () => {
       <section className="py-20 px-6 bg-muted/30 mt-16" id="features">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-fresh bg-clip-text text-transparent">
-              Why Choose Fresh Tropical Juices?
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-primary">
+              Features
             </h2>
+            <h3 className="text-2xl md:text-3xl font-semibold mb-4 bg-gradient-fresh bg-clip-text text-transparent">
+              Why Choose Fresh Tropical Juices?
+            </h3>
             <p className="text-xl text-foreground/70 max-w-3xl mx-auto">
               Experience the perfect fusion of cutting-edge AI technology and nature's finest tropical fruits
             </p>
@@ -120,9 +123,12 @@ const Index = () => {
       <section className="py-16 px-6" id="stats">
         <div className="container mx-auto max-w-4xl">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-sunset bg-clip-text text-transparent">
-              Our Impact
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-primary">
+              Stats
             </h2>
+            <h3 className="text-2xl md:text-3xl font-semibold mb-4 bg-gradient-sunset bg-clip-text text-transparent">
+              Our Impact
+            </h3>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
@@ -140,9 +146,12 @@ const Index = () => {
       <section className="py-20 px-6 bg-muted/30" id="how-it-works">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-sunset bg-clip-text text-transparent">
-              How It Works
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-primary">
+              Process
             </h2>
+            <h3 className="text-2xl md:text-3xl font-semibold mb-4 bg-gradient-sunset bg-clip-text text-transparent">
+              How It Works
+            </h3>
             <p className="text-xl text-foreground/70 max-w-3xl mx-auto">
               Creating your perfect tropical juice is as easy as 1-2-3
             </p>
@@ -210,9 +219,12 @@ const Index = () => {
       <section className="py-20 px-6" id="testimonials">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-fresh bg-clip-text text-transparent">
-              What Our Customers Say
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-primary">
+              Testimonials
             </h2>
+            <h3 className="text-2xl md:text-3xl font-semibold mb-4 bg-gradient-fresh bg-clip-text text-transparent">
+              What Our Customers Say
+            </h3>
             <p className="text-xl text-foreground/70">
               Join thousands of happy customers who've transformed their health with our tropical juices
             </p>
