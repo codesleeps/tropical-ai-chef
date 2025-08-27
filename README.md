@@ -62,7 +62,21 @@ This project is built with:
 
 ## How can I deploy this project?
 
+### Option 1: Lovable (Recommended)
 Simply open [Lovable](https://lovable.dev/projects/9409046f-c14b-478b-86e7-c25467e85a52) and click on Share -> Publish.
+
+### Option 2: GitHub Pages
+This project is configured for automatic deployment to GitHub Pages. Every push to the main branch will trigger a build and deployment.
+
+**Manual deployment:**
+```sh
+npm run deploy
+```
+
+**GitHub Pages setup:**
+1. Go to your repository Settings > Pages
+2. Set Source to "GitHub Actions"
+3. The workflow will automatically deploy from the `docs/` folder
 
 ## Can I connect a custom domain to my Lovable project?
 
