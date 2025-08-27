@@ -58,16 +58,26 @@ const Recipes = () => {
       <Navigation />
       <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
         {/* Hero Section */}
-        <section className="py-20 px-6">
-          <div className="container mx-auto max-w-4xl text-center">
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-sunset bg-clip-text text-transparent">
-              AI Recipe Generator
+        <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-accent/30 via-background/90 to-primary/30" />
+          <div className="relative z-10 container mx-auto max-w-4xl text-center px-6">
+            <div className="flex justify-center mb-6">
+              <div className="flex items-center gap-4 text-6xl">
+                🤖🥭✨
+              </div>
+            </div>
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-sunset bg-clip-text text-transparent leading-tight">
+              AI Recipe
+              <br />
+              Generator
             </h1>
-            <p className="text-xl text-foreground/70 mb-8 leading-relaxed">
+            <p className="text-xl md:text-2xl text-foreground/80 mb-8 max-w-3xl mx-auto leading-relaxed">
               Create personalized tropical juice recipes tailored to your taste preferences and health goals.
             </p>
-            <div className="flex justify-center gap-4 text-4xl mb-8">
-              🥭🍍🥝🐉🧡
+            <div className="flex justify-center gap-6 text-5xl">
+              <Sparkles className="w-12 h-12 text-secondary animate-pulse" />
+              <Heart className="w-12 h-12 text-primary animate-bounce" />
+              <Sparkles className="w-12 h-12 text-accent animate-pulse" />
             </div>
           </div>
         </section>

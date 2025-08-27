@@ -62,17 +62,27 @@ const Benefits = () => {
       <Navigation />
       <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
         {/* Hero Section */}
-        <section className="py-20 px-6">
-          <div className="container mx-auto max-w-4xl text-center">
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-sunset bg-clip-text text-transparent">
-              Health Benefits
+        <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-accent/30 via-background/90 to-primary/30" />
+          <div className="relative z-10 container mx-auto max-w-4xl text-center px-6">
+            <div className="flex justify-center mb-6">
+              <div className="flex items-center gap-4 text-6xl">
+                🥭🍍🥝🐉💚
+              </div>
+            </div>
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-sunset bg-clip-text text-transparent leading-tight">
+              Health
+              <br />
+              Benefits
             </h1>
-            <p className="text-xl text-foreground/70 mb-8 leading-relaxed">
+            <p className="text-xl md:text-2xl text-foreground/80 mb-8 max-w-3xl mx-auto leading-relaxed">
               Discover the incredible health benefits of tropical fruits and how our AI-crafted 
               recipes can transform your wellness journey.
             </p>
-            <div className="flex justify-center gap-4 text-4xl mb-8">
-              🥭🍍🥝🐉🧡
+            <div className="flex justify-center gap-6 text-5xl">
+              <Heart className="w-12 h-12 text-red-500 animate-pulse" />
+              <Zap className="w-12 h-12 text-yellow-500 animate-bounce" />
+              <Shield className="w-12 h-12 text-blue-500 animate-pulse" />
             </div>
           </div>
         </section>

@@ -92,12 +92,20 @@ const Blog = () => {
       <Navigation />
       <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
         {/* Hero Section */}
-        <section className="py-20 px-6">
-          <div className="container mx-auto max-w-4xl text-center">
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-sunset bg-clip-text text-transparent">
-              Tropical Wellness Blog
+        <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-secondary/30 via-background/90 to-accent/30" />
+          <div className="relative z-10 container mx-auto max-w-4xl text-center px-6">
+            <div className="flex justify-center mb-6">
+              <div className="flex items-center gap-4 text-6xl">
+                📚✨🌿
+              </div>
+            </div>
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-sunset bg-clip-text text-transparent leading-tight">
+              Tropical
+              <br />
+              Wellness Blog
             </h1>
-            <p className="text-xl text-foreground/70 mb-8 leading-relaxed">
+            <p className="text-xl md:text-2xl text-foreground/80 mb-8 max-w-3xl mx-auto leading-relaxed">
               Expert insights, delicious recipes, and the latest research on tropical nutrition 
               and healthy living.
             </p>
@@ -109,7 +117,7 @@ const Blog = () => {
                 placeholder="Search articles..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 transition-smooth focus:shadow-glow"
+                className="pl-10 transition-smooth focus:shadow-glow bg-card/80 backdrop-blur-sm"
               />
             </div>
           </div>
