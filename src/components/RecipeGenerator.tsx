@@ -14,8 +14,8 @@ interface RecipeGeneratorProps {
 }
 
 export const RecipeGenerator = ({ onRecipeGenerated }: RecipeGeneratorProps) => {
-  const [fruit, setFruit] = useState('');
-  const [vegetables, setVegetables] = useState('');
+  const [fruits, setFruits] = useState<string[]>([]);
+  const [vegetables, setVegetables] = useState<string[]>([]);
   const [style, setStyle] = useState('');
   const [dietaryRestrictions, setDietaryRestrictions] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -53,8 +53,8 @@ export const RecipeGenerator = ({ onRecipeGenerated }: RecipeGeneratorProps) => 
   }, []);
 
   const handleGenerate = async () => {
-    if (!fruit || !style) {
-      toast.error('Please select a fruit and style');
+    if (!fruits.length || !style) {
+      toast.error('Please select at least one fruit and style');
       return;
     }
     
@@ -63,7 +63,7 @@ export const RecipeGenerator = ({ onRecipeGenerated }: RecipeGeneratorProps) => 
     
     try {
       const request: RecipeRequest = {
-        fruit,
+        fruits: fruits,
         style,
         vegetables: vegetables || undefined,
         dietaryRestrictions: dietaryRestrictions || undefined,
@@ -113,7 +113,7 @@ export const RecipeGenerator = ({ onRecipeGenerated }: RecipeGeneratorProps) => 
       
       // Fallback to local generation
       const request: RecipeRequest = {
-        fruit,
+        fruits: fruits,
         style,
         vegetables: vegetables || undefined,
         dietaryRestrictions: dietaryRestrictions || undefined,
@@ -161,35 +161,102 @@ ${recipe.tips.map(tip => `- ${tip}`).join('\n')}
       <CardContent className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="fruit" className="text-base font-semibold">Choose Your Main Fruit</Label>
-            <Select value={fruit} onValueChange={setFruit}>
-              <SelectTrigger className="transition-smooth focus:shadow-glow">
-                <SelectValue placeholder="Select a tropical fruit" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="mango">🥭 Mango</SelectItem>
-                <SelectItem value="pineapple">🍍 Pineapple</SelectItem>
-                <SelectItem value="passion fruit">🫐 Passion Fruit</SelectItem>
-                <SelectItem value="dragon fruit">🐉 Dragon Fruit</SelectItem>
-                <SelectItem value="papaya">🧡 Papaya</SelectItem>
-                <SelectItem value="guava">🍃 Guava</SelectItem>
-                <SelectItem value="kiwi">🥝 Kiwi</SelectItem>
-                <SelectItem value="lychee">🌰 Lychee</SelectItem>
-                <SelectItem value="rambutan">🦔 Rambutan</SelectItem>
-                <SelectItem value="mangosteen">💜 Mangosteen</SelectItem>
-              </SelectContent>
-            </Select>
+            <Label htmlFor="fruits" className="text-base font-semibold">Choose Your Fruits (Select up to 5)</Label>
+            <div className="border rounded-lg p-3 max-h-48 overflow-y-auto bg-background">
+              <div className="grid grid-cols-1 gap-2">
+                {[
+                  { value: "apples", label: "🍎 Apples" },
+                  { value: "strawberries", label: "🍓 Strawberries" },
+                  { value: "blueberries", label: "🫐 Blueberries" },
+                  { value: "pomegranate", label: "🍇 Pomegranate" },
+                  { value: "raspberries", label: "🫐 Raspberries" },
+                  { value: "blackberries", label: "🫐 Blackberries" },
+                  { value: "mango", label: "🥭 Mango" },
+                  { value: "pineapple", label: "🍍 Pineapple" },
+                  { value: "passion fruit", label: "🫐 Passion Fruit" },
+                  { value: "dragon fruit", label: "🐉 Dragon Fruit" },
+                  { value: "papaya", label: "🧡 Papaya" },
+                  { value: "guava", label: "🍃 Guava" },
+                  { value: "kiwi", label: "🥝 Kiwi" },
+                  { value: "lychee", label: "🌰 Lychee" },
+                  { value: "rambutan", label: "🦔 Rambutan" },
+                  { value: "mangosteen", label: "💜 Mangosteen" }
+                ].map((fruit) => (
+                  <label key={fruit.value} className="flex items-center space-x-2 cursor-pointer hover:bg-accent/10 p-2 rounded">
+                    <input
+                      type="checkbox"
+                      value={fruit.value}
+                      checked={fruits.includes(fruit.value)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          if (fruits.length < 5) {
+                            setFruits([...fruits, fruit.value]);
+                          } else {
+                            toast.error('You can only select up to 5 fruits');
+                          }
+                        } else {
+                          setFruits(fruits.filter(f => f !== fruit.value));
+                        }
+                      }}
+                      className="rounded border-gray-300 text-primary focus:ring-primary"
+                    />
+                    <span className="text-sm">{fruit.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div className="text-xs text-muted-foreground">
+              Selected: {fruits.length}/5 fruits
+            </div>
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="vegetables" className="text-base font-semibold">Add Vegetables (Optional)</Label>
-            <Input
-              id="vegetables"
-              placeholder="e.g., spinach, cucumber, celery"
-              value={vegetables}
-              onChange={(e) => setVegetables(e.target.value)}
-              className="transition-smooth focus:shadow-glow"
-            />
+            <Label htmlFor="vegetables" className="text-base font-semibold">Add Vegetables (Select up to 5)</Label>
+            <div className="border rounded-lg p-3 max-h-48 overflow-y-auto bg-background">
+              <div className="grid grid-cols-1 gap-2">
+                {[
+                  { value: "kale", label: "🥬 Kale" },
+                  { value: "cucumber", label: "🥒 Cucumber" },
+                  { value: "spinach", label: "🥬 Spinach" },
+                  { value: "beetroot", label: "🫘 Beetroot" },
+                  { value: "ginger", label: "🫚 Ginger" },
+                  { value: "sorrel", label: "🌺 Sorrel (Hibiscus)" },
+                  { value: "celery", label: "🥬 Celery" },
+                  { value: "carrot", label: "🥕 Carrot" },
+                  { value: "bell pepper", label: "🫑 Bell Pepper" },
+                  { value: "broccoli", label: "🥦 Broccoli" },
+                  { value: "lettuce", label: "🥬 Lettuce" },
+                  { value: "mushroom", label: "🍄 Mushroom" },
+                  { value: "tomato", label: "🍅 Tomato" },
+                  { value: "lemon", label: "🍋 Lemon" },
+                  { value: "lime", label: "🍈 Lime" }
+                ].map((vegetable) => (
+                  <label key={vegetable.value} className="flex items-center space-x-2 cursor-pointer hover:bg-accent/10 p-2 rounded">
+                    <input
+                      type="checkbox"
+                      value={vegetable.value}
+                      checked={vegetables.includes(vegetable.value)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          if (vegetables.length < 5) {
+                            setVegetables([...vegetables, vegetable.value]);
+                          } else {
+                            toast.error('You can only select up to 5 vegetables');
+                          }
+                        } else {
+                          setVegetables(vegetables.filter(v => v !== vegetable.value));
+                        }
+                      }}
+                      className="rounded border-gray-300 text-primary focus:ring-primary"
+                    />
+                    <span className="text-sm">{vegetable.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div className="text-xs text-muted-foreground">
+              Selected: {vegetables.length}/5 vegetables
+            </div>
           </div>
         </div>
 
@@ -318,7 +385,7 @@ ${recipe.tips.map(tip => `- ${tip}`).join('\n')}
 
         <Button 
           onClick={handleGenerate}
-          disabled={!fruit || !style || isGenerating}
+          disabled={!fruits.length || !style || isGenerating}
           className="w-full gradient-sunset text-foreground font-bold text-lg py-6 hover:scale-105 transition-bounce shadow-tropical"
         >
           {isGenerating ? (

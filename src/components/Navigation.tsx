@@ -32,6 +32,15 @@ export const Navigation = () => {
     { name: 'Sorrel (Hibiscus)', path: '/vegetables/sorrel' },
   ];
 
+  const fruitItems = [
+    { name: 'Apples', path: '/fruits/apples' },
+    { name: 'Strawberries', path: '/fruits/strawberries' },
+    { name: 'Blueberries', path: '/fruits/blueberries' },
+    { name: 'Pomegranate', path: '/fruits/pomegranate' },
+    { name: 'Raspberries', path: '/fruits/raspberries' },
+    { name: 'Blackberries', path: '/fruits/blackberries' },
+  ];
+
   const isActive = (path: string) => location.pathname === path;
 
   return (
@@ -50,7 +59,7 @@ export const Navigation = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="flex items-center space-x-8">
             {navItems.map((item) => (
               <Link
                 key={item.path}
@@ -64,25 +73,6 @@ export const Navigation = () => {
                 {item.name}
               </Link>
             ))}
-            
-            {/* Vegetables Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center gap-2 font-medium hover:text-primary">
-                  Vegetables
-                  <ChevronDown className="w-4 h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="center" className="w-48">
-                {vegetableItems.map((item) => (
-                  <DropdownMenuItem key={item.path} asChild>
-                    <Link to={item.path} className="cursor-pointer">
-                      {item.name}
-                    </Link>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
 
           {/* Action Buttons */}
@@ -138,6 +128,23 @@ export const Navigation = () => {
                   </div>
                 </div>
                 
+                {/* Fruits Section in Mobile Menu */}
+                <div className="border-t pt-4">
+                  <h3 className="font-medium text-lg mb-3 text-foreground/70">Fruits</h3>
+                  <div className="space-y-2">
+                    {fruitItems.map((item) => (
+                      <Link
+                        key={item.path}
+                        to={item.path}
+                        onClick={() => setIsOpen(false)}
+                        className="block text-base font-medium transition-smooth hover:text-primary text-foreground/70"
+                      >
+                        {item.name}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+
                 <div className="border-t pt-4 space-y-2">
                   <Button variant="ghost" className="w-full justify-start">
                     <User className="w-4 h-4 mr-2" />
