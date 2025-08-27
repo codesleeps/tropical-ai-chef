@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -95,6 +95,9 @@ export const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
             <Sparkles className="w-6 h-6 inline mr-2" />
             Join Tropical AI Chef
           </DialogTitle>
+          <DialogDescription className="text-center text-muted-foreground">
+            Sign in to save your favorite recipes and get personalized recommendations
+          </DialogDescription>
         </DialogHeader>
         
         <Tabs defaultValue="signin" className="w-full" onValueChange={resetForm}>
