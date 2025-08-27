@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, ShoppingCart, User, Leaf, ChefHat, ChevronDown } from 'lucide-react';
+import { Menu, ShoppingCart, User, Leaf, ChefHat, ChevronDown, LogOut } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '@/components/auth/AuthContext';
+import { AuthModal } from '@/components/auth/AuthModal';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,7 +14,13 @@ import {
 
 export const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const location = useLocation();
+  const { user, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
 
   const navItems = [
     { name: 'Home', path: '/' },
@@ -77,10 +85,31 @@ export const Navigation = () => {
 
           {/* Action Buttons */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button variant="ghost" size="sm">
-              <User className="w-4 h-4 mr-2" />
-              Login
-            </Button>
+            {user ? (
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-foreground/70">
+                  {user.email}
+                </span>
+                <Button
+                  onClick={handleSignOut}
+                  variant="ghost"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sign Out
+                </Button>
+              </div>
+            ) : (
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => setIsAuthModalOpen(true)}
+              >
+                <User className="w-4 h-4 mr-2" />
+                Login
+              </Button>
+            )}
             <Button size="sm" className="gradient-tropical text-foreground">
               <ShoppingCart className="w-4 h-4 mr-2" />
               Cart
@@ -146,10 +175,33 @@ export const Navigation = () => {
                 </div>
 
                 <div className="border-t pt-4 space-y-2">
-                  <Button variant="ghost" className="w-full justify-start">
-                    <User className="w-4 h-4 mr-2" />
-                    Login
-                  </Button>
+                  {user ? (
+                    <div className="space-y-3">
+                      <div className="text-sm text-foreground/70 px-3">
+                        Signed in as: {user.email}
+                      </div>
+                      <Button
+                        onClick={handleSignOut}
+                        variant="ghost"
+                        className="w-full justify-start"
+                      >
+                        <LogOut className="w-4 h-4 mr-2" />
+                        Sign Out
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button 
+                      variant="ghost" 
+                      className="w-full justify-start"
+                      onClick={() => {
+                        setIsAuthModalOpen(true);
+                        setIsOpen(false);
+                      }}
+                    >
+                      <User className="w-4 h-4 mr-2" />
+                      Login
+                    </Button>
+                  )}
                   <Button className="w-full gradient-tropical text-foreground">
                     <ShoppingCart className="w-4 h-4 mr-2" />
                     Cart
@@ -160,6 +212,11 @@ export const Navigation = () => {
           </Sheet>
         </div>
       </div>
+      
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setIsAuthModalOpen(false)} 
+      />
     </nav>
   );
 };
