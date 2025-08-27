@@ -23,7 +23,8 @@ export const TropicalHero = ({ onGetStarted }: TropicalHeroProps) => {
           background: 'linear-gradient(135deg, hsl(45, 100%, 55%) 0%, hsl(340, 82%, 55%) 100%)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text'
+          backgroundClip: 'text',
+          WebkitTextStroke: '2px white'
         }}>
           Tropical
           <br />
