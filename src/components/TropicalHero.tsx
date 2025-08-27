@@ -19,15 +19,12 @@ export const TropicalHero = ({ onGetStarted }: TropicalHeroProps) => {
       
       {/* Content */}
       <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
-        {/* Logo and Brand */}
-        <div className="flex justify-center mb-8">
-          <div className="flex items-center gap-4 text-6xl">
-            <ChefHat className="w-16 h-16 text-primary" />
-            <Leaf className="w-16 h-16 text-accent" />
-          </div>
-        </div>
-        
-        <h1 className="text-6xl md:text-8xl font-bold mb-6 bg-gradient-sunset bg-clip-text text-transparent leading-tight">
+        <h1 className="text-6xl md:text-8xl font-bold mb-6 leading-tight" style={{
+          background: 'linear-gradient(135deg, hsl(45, 100%, 55%) 0%, hsl(340, 82%, 55%) 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text'
+        }}>
           Tropical
           <br />
           AI Chef
