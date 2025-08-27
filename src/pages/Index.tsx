@@ -1,5 +1,6 @@
 import { TropicalHero } from '@/components/TropicalHero';
 import { Navigation } from '@/components/Navigation';
+import { Footer } from '@/components/Footer';
 
 const Index = () => {
   const handleGetStarted = () => {
@@ -10,6 +11,7 @@ const Index = () => {
     <div className="min-h-screen">
       <Navigation />
       <TropicalHero onGetStarted={handleGetStarted} />
+      <Footer />
     </div>
   );
 };
