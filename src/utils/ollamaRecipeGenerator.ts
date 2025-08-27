@@ -118,7 +118,7 @@ export async function generateRecipeWithOllama(
     const generationTime = Date.now() - startTime;
     
     // Parse the recipe from the AI response
-    const recipe = parseOllamaRecipe(recipeText, model, generationTime);
+    const recipe = parseOllamaRecipe(recipeText, model, generationTime, request);
     
     return recipe;
     
@@ -161,7 +161,7 @@ Make it creative, delicious, and include tropical flavors. The recipe should be 
 }
 
 // Parse recipe from Ollama response
-function parseOllamaRecipe(text: string, model: string, generationTime: number): OllamaRecipe {
+function parseOllamaRecipe(text: string, model: string, generationTime: number, request?: OllamaRecipeRequest): OllamaRecipe {
   const lines = text.split('\n').filter(line => line.trim());
   
   let title = 'Tropical Paradise Blend';
@@ -204,7 +204,7 @@ function parseOllamaRecipe(text: string, model: string, generationTime: number):
   // Fallback if parsing didn't work well
   if (ingredients.length === 0) {
     ingredients = [
-      `2 cups fresh ${request.fruit}, chopped`,
+      `2 cups fresh ${request?.fruit || 'mango'}, chopped`,
       '1 cup coconut water',
       '1 tablespoon honey (optional)',
       'Ice cubes',

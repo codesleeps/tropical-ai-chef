@@ -87,7 +87,7 @@ const Index = () => {
       <TropicalHero onGetStarted={handleGetStarted} />
       
       {/* Features Section */}
-      <section className="py-20 px-6 bg-muted/30 mt-16">
+      <section className="py-20 px-6 bg-muted/30 mt-16" id="features">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-fresh bg-clip-text text-transparent">
@@ -117,8 +117,13 @@ const Index = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 px-6">
+      <section className="py-16 px-6" id="stats">
         <div className="container mx-auto max-w-4xl">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-sunset bg-clip-text text-transparent">
+              Our Impact
+            </h2>
+          </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
               <div key={index} className="text-center">
@@ -132,7 +137,7 @@ const Index = () => {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-20 px-6 bg-muted/30">
+      <section className="py-20 px-6 bg-muted/30" id="how-it-works">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-sunset bg-clip-text text-transparent">
@@ -202,7 +207,7 @@ const Index = () => {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-20 px-6">
+      <section className="py-20 px-6" id="testimonials">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-fresh bg-clip-text text-transparent">
