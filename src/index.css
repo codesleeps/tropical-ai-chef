@@ -114,6 +114,9 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
     scroll-behavior: smooth;
+    /* Mobile optimizations */
+    -webkit-overflow-scrolling: touch;
+    touch-action: manipulation;
   }
 }
 
@@ -144,5 +147,22 @@ All colors MUST be HSL.
   
   .transition-bounce {
     transition: var(--transition-bounce);
+  }
+  
+  /* Mobile-friendly touch targets */
+  @media (hover: none) and (pointer: coarse) {
+    button, .cursor-pointer {
+      min-height: 44px; /* Apple's recommended touch target size */
+    }
+    
+    /* Improve text readability on mobile */
+    body {
+      font-size: 16px; /* Prevents iOS zoom on focus */
+    }
+  }
+  
+  /* Utility class for better touch interactions */
+  .touch-manipulation {
+    touch-action: manipulation;
   }
 }
