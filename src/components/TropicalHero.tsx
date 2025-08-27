@@ -19,7 +19,7 @@ export const TropicalHero = ({ onGetStarted }: TropicalHeroProps) => {
       
       {/* Content */}
       <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
-        <h1 className="text-6xl md:text-8xl font-bold mb-6 leading-tight border-4 border-primary/30 rounded-2xl px-8 py-6 inline-block" style={{
+        <h1 className="text-6xl md:text-8xl font-bold mb-6 leading-tight border-4 border-primary/50 rounded-3xl px-12 py-8 inline-block backdrop-blur-sm bg-white/10 shadow-tropical" style={{
           background: 'linear-gradient(135deg, hsl(45, 100%, 55%) 0%, hsl(340, 82%, 55%) 100%)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
