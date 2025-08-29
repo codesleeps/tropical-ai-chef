@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useRef } from "react";
+import { useEffect, useCallback, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import {
   AnalyticsManager,
@@ -200,18 +200,34 @@ export const useErrorTracking = () => {
 
 // Hook for consent management
 export const useAnalyticsConsent = () => {
-  const hasConsent = ConsentManager.hasConsent();
+  const [hasConsent, setHasConsent] = useState(ConsentManager.hasConsent());
 
   const giveConsent = useCallback(() => {
     ConsentManager.giveConsent();
+    setHasConsent(true);
   }, []);
 
   const revokeConsent = useCallback(() => {
     ConsentManager.revokeConsent();
+    setHasConsent(false);
   }, []);
 
   const getConsentStatus = useCallback(() => {
     return ConsentManager.getConsentStatus();
+  }, []);
+
+  // Update hasConsent when component mounts or localStorage changes
+  useEffect(() => {
+    const updateConsentStatus = () => {
+      setHasConsent(ConsentManager.hasConsent());
+    };
+
+    // Listen for storage changes (for cross-tab consent updates)
+    window.addEventListener("storage", updateConsentStatus);
+
+    return () => {
+      window.removeEventListener("storage", updateConsentStatus);
+    };
   }, []);
 
   return {

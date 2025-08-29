@@ -98,7 +98,7 @@ export const RecipeGenerator = ({
   const [formData, setFormData] = useState<RecipeRequest>({
     fruit: "",
     style: "",
-    vegetables: "",
+    vegetables: "none",
     dietaryRestrictions: "",
   });
 
@@ -192,6 +192,12 @@ export const RecipeGenerator = ({
   ): Promise<Recipe> => {
     const errors: Error[] = [];
 
+    // Clean the request - convert "none" to empty string for vegetables
+    const cleanRequest = {
+      ...request,
+      vegetables: request.vegetables === "none" ? "" : request.vegetables,
+    };
+
     // Try primary service first
     try {
       switch (selectedService) {
@@ -199,20 +205,23 @@ export const RecipeGenerator = ({
           if (!hasOpenAIKey()) {
             throw new Error("OpenAI API key not configured");
           }
-          return await generateRecipeWithOpenAI(request, env.openaiApiKey!);
+          return await generateRecipeWithOpenAI(
+            cleanRequest,
+            env.openaiApiKey!
+          );
 
         case "ollama":
           if (!selectedModel) {
             throw new Error("No Ollama model selected");
           }
           return await generateRecipeWithOllama({
-            ...request,
+            ...cleanRequest,
             model: selectedModel,
           });
 
         case "local":
         default:
-          return generateRecipeLocally(request);
+          return generateRecipeLocally(cleanRequest);
       }
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
@@ -231,12 +240,12 @@ export const RecipeGenerator = ({
 
           switch (fallbackService) {
             case "local":
-              return generateRecipeLocally(request);
+              return generateRecipeLocally(cleanRequest);
 
             case "ollama":
               if (ollamaModels.length > 0) {
                 return await generateRecipeWithOllama({
-                  ...request,
+                  ...cleanRequest,
                   model: ollamaModels[0],
                 });
               }
@@ -245,7 +254,7 @@ export const RecipeGenerator = ({
             case "openai":
               if (hasOpenAIKey()) {
                 return await generateRecipeWithOpenAI(
-                  request,
+                  cleanRequest,
                   env.openaiApiKey!
                 );
               }
@@ -309,7 +318,8 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
             fruit: formData.fruit,
             style: formData.style,
             service: selectedService,
-            has_vegetables: !!formData.vegetables,
+            has_vegetables:
+              !!formData.vegetables && formData.vegetables !== "none",
             has_dietary_restrictions: !!formData.dietaryRestrictions.trim(),
           });
 
@@ -564,7 +574,7 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
               <SelectValue placeholder="Add vegetables for extra nutrition" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">No vegetables</SelectItem>
+              <SelectItem value="none">No vegetables</SelectItem>
               {VEGETABLES.map((vegetable) => (
                 <SelectItem key={vegetable} value={vegetable}>
                   {vegetable}
