@@ -1,83 +1,168 @@
-import { Link } from 'react-router-dom';
-import { Separator } from '@/components/ui/separator';
-import { Facebook, Twitter, Instagram, Mail, Phone, MapPin } from 'lucide-react';
+import React from "react";
+import { Link } from "react-router-dom";
+import { ChefHat, Leaf, Mail, Globe, Shield, FileText } from "lucide-react";
 
-export const Footer = () => {
+const Footer: React.FC = () => {
+  const currentYear = new Date().getFullYear();
+
+  const footerSections = [
+    {
+      title: "Platform",
+      links: [
+        { name: "Recipe Generator", path: "/recipes" },
+        { name: "About Us", path: "/about" },
+        { name: "Health Benefits", path: "/benefits" },
+        { name: "Blog", path: "/blog" },
+      ],
+    },
+    {
+      title: "Legal",
+      links: [
+        { name: "Legal Overview", path: "/legal", icon: FileText },
+        { name: "Privacy Policy", path: "/privacy-policy", icon: Shield },
+        { name: "Terms of Service", path: "/terms-of-service", icon: Globe },
+      ],
+    },
+    {
+      title: "Contact",
+      links: [
+        {
+          name: "General Inquiries",
+          path: "mailto:info@tropical-ai-chef.com",
+          external: true,
+          icon: Mail,
+        },
+        {
+          name: "Legal Questions",
+          path: "mailto:legal@tropical-ai-chef.com",
+          external: true,
+          icon: FileText,
+        },
+        {
+          name: "Privacy Concerns",
+          path: "mailto:privacy@tropical-ai-chef.com",
+          external: true,
+          icon: Shield,
+        },
+      ],
+    },
+  ];
+
   return (
-    <footer className="bg-muted/30 border-t">
-      <div className="container mx-auto px-6 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Brand */}
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              <span className="text-2xl">🥭</span>
-              <span className="font-bold text-lg bg-gradient-tropical bg-clip-text text-transparent">
-                Fresh Tropical Juices
+    <footer className="bg-gray-900 text-gray-300">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Main Footer Content */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {/* Brand Section */}
+          <div className="lg:col-span-1">
+            <div className="flex items-center space-x-2 mb-4">
+              <div className="flex items-center gap-2">
+                <ChefHat className="w-6 h-6 text-amber-500" />
+                <Leaf className="w-5 h-5 text-emerald-500" />
+              </div>
+              <span className="font-bold text-xl text-white">
+                Tropical AI Chef
               </span>
             </div>
-            <p className="text-sm text-foreground/70 mb-4">
-              AI-powered tropical juice recipes for a healthier, more delicious lifestyle.
+            <p className="text-gray-400 text-sm leading-relaxed mb-4">
+              AI-powered tropical recipe generation with a focus on health,
+              sustainability, and delicious flavors. Privacy-first and
+              GDPR-compliant by design.
             </p>
-            <div className="flex gap-3">
-              <Facebook className="w-5 h-5 text-foreground/60 hover:text-primary cursor-pointer" />
-              <Twitter className="w-5 h-5 text-foreground/60 hover:text-primary cursor-pointer" />
-              <Instagram className="w-5 h-5 text-foreground/60 hover:text-primary cursor-pointer" />
+            <div className="flex items-center space-x-2 text-sm text-emerald-400">
+              <Shield className="w-4 h-4" />
+              <span>Privacy-First Platform</span>
             </div>
           </div>
 
-          {/* Quick Links */}
-          <div>
-            <h3 className="font-bold mb-4">Quick Links</h3>
-            <div className="space-y-2 text-sm">
-              <Link to="/recipes" className="block text-foreground/70 hover:text-primary">Recipe Generator</Link>
-              <Link to="/about" className="block text-foreground/70 hover:text-primary">About Us</Link>
-              <Link to="/benefits" className="block text-foreground/70 hover:text-primary">Health Benefits</Link>
-              <Link to="/blog" className="block text-foreground/70 hover:text-primary">Blog</Link>
+          {/* Footer Sections */}
+          {footerSections.map((section) => (
+            <div key={section.title}>
+              <h3 className="font-semibold text-white mb-4">{section.title}</h3>
+              <ul className="space-y-3">
+                {section.links.map((link) => {
+                  const IconComponent = link.icon;
+                  const linkContent = (
+                    <div className="flex items-center space-x-2 text-sm text-gray-400 hover:text-white transition-colors duration-200">
+                      {IconComponent && <IconComponent className="w-4 h-4" />}
+                      <span>{link.name}</span>
+                    </div>
+                  );
+
+                  return (
+                    <li key={link.name}>
+                      {link.external ? (
+                        <a href={link.path} className="block">
+                          {linkContent}
+                        </a>
+                      ) : (
+                        <Link to={link.path} className="block">
+                          {linkContent}
+                        </Link>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
             </div>
+          ))}
+        </div>
+
+        {/* Divider */}
+        <div className="border-t border-gray-800 my-8"></div>
+
+        {/* Bottom Footer */}
+        <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
+          <div className="text-sm text-gray-400">
+            © {currentYear} Tropical AI Chef. All rights reserved.
           </div>
 
-          {/* Support */}
-          <div>
-            <h3 className="font-bold mb-4">Support</h3>
-            <div className="space-y-2 text-sm">
-              <Link to="/orders" className="block text-foreground/70 hover:text-primary">Track Orders</Link>
-              <a href="#" className="block text-foreground/70 hover:text-primary">Help Center</a>
-              <a href="#" className="block text-foreground/70 hover:text-primary">Contact Us</a>
-              <a href="#" className="block text-foreground/70 hover:text-primary">FAQ</a>
-            </div>
-          </div>
-
-          {/* Contact */}
-          <div>
-            <h3 className="font-bold mb-4">Contact</h3>
-            <div className="space-y-2 text-sm text-foreground/70">
-              <div className="flex items-center gap-2">
-                <Mail className="w-4 h-4" />
-                <span>hello@freshtropicaljuices.com</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Phone className="w-4 h-4" />
-                <span>1-800-TROPICAL</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <MapPin className="w-4 h-4" />
-                <span>Miami, FL</span>
-              </div>
-            </div>
+          <div className="flex items-center space-x-6 text-sm text-gray-400">
+            <Link
+              to="/privacy-policy"
+              className="hover:text-white transition-colors duration-200"
+            >
+              Privacy
+            </Link>
+            <span>•</span>
+            <Link
+              to="/terms-of-service"
+              className="hover:text-white transition-colors duration-200"
+            >
+              Terms
+            </Link>
+            <span>•</span>
+            <Link
+              to="/legal"
+              className="hover:text-white transition-colors duration-200"
+            >
+              Legal
+            </Link>
           </div>
         </div>
 
-        <Separator className="my-8" />
-        
-        <div className="flex flex-col md:flex-row justify-between items-center text-sm text-foreground/70">
-          <p>&copy; 2024 Fresh Tropical Juices. All rights reserved.</p>
-          <div className="flex gap-6 mt-4 md:mt-0">
-            <a href="#" className="hover:text-primary">Privacy Policy</a>
-            <a href="#" className="hover:text-primary">Terms of Service</a>
-            <a href="#" className="hover:text-primary">Cookie Policy</a>
+        {/* Compliance Notice */}
+        <div className="mt-6 pt-6 border-t border-gray-800">
+          <div className="bg-gray-800 rounded-lg p-4">
+            <div className="flex items-start space-x-3">
+              <Shield className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+              <div className="text-sm text-gray-300">
+                <p className="font-medium text-white mb-1">
+                  Privacy & Compliance Commitment
+                </p>
+                <p className="text-gray-400 leading-relaxed">
+                  We are committed to protecting your privacy and maintaining
+                  compliance with GDPR, CCPA, and other applicable data
+                  protection regulations. Our platform is designed with
+                  privacy-first principles and transparent data practices.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </footer>
   );
 };
+
+export default Footer;

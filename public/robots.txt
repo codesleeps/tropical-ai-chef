@@ -12,3 +12,19 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+# Sitemap location
+Sitemap: https://tropical-ai-chef.vercel.app/sitemap.xml
+
+# Block user-specific content
+Disallow: /orders
+
+# Allow common crawl paths
+Allow: /
+Allow: /recipes
+Allow: /about
+Allow: /benefits
+Allow: /blog
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1

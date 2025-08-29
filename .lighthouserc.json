@@ -1,0 +1,56 @@
+{
+  "ci": {
+    "collect": {
+      "numberOfRuns": 3,
+      "startServerCommand": "npm run preview",
+      "startServerReadyPattern": "Local:.*:([0-9]+)",
+      "startServerReadyTimeout": 30000,
+      "url": [
+        "http://localhost:4173",
+        "http://localhost:4173/about",
+        "http://localhost:4173/recipes",
+        "http://localhost:4173/benefits"
+      ],
+      "settings": {
+        "chromeFlags": "--no-sandbox --disable-dev-shm-usage",
+        "preset": "desktop",
+        "throttling": {
+          "rttMs": 40,
+          "throughputKbps": 10240,
+          "cpuSlowdownMultiplier": 1,
+          "requestLatencyMs": 0,
+          "downloadThroughputKbps": 0,
+          "uploadThroughputKbps": 0
+        }
+      }
+    },
+    "assert": {
+      "assertions": {
+        "categories:performance": ["warn", { "minScore": 0.85 }],
+        "categories:accessibility": ["error", { "minScore": 0.9 }],
+        "categories:best-practices": ["warn", { "minScore": 0.9 }],
+        "categories:seo": ["warn", { "minScore": 0.9 }],
+        "categories:pwa": ["warn", { "minScore": 0.8 }],
+
+        "first-contentful-paint": ["warn", { "maxNumericValue": 2000 }],
+        "largest-contentful-paint": ["warn", { "maxNumericValue": 2500 }],
+        "first-meaningful-paint": ["warn", { "maxNumericValue": 2000 }],
+        "speed-index": ["warn", { "maxNumericValue": 3000 }],
+        "interactive": ["warn", { "maxNumericValue": 3500 }],
+        "cumulative-layout-shift": ["warn", { "maxNumericValue": 0.1 }],
+
+        "uses-responsive-images": "warn",
+        "uses-optimized-images": "warn",
+        "modern-image-formats": "warn",
+        "unused-css-rules": "warn",
+        "render-blocking-resources": "warn",
+        "uses-rel-preconnect": "warn",
+        "uses-rel-preload": "warn"
+      }
+    },
+    "upload": {
+      "target": "temporary-public-storage",
+      "reportFilenamePattern": "lighthouse-%%PATHNAME%%-%%DATETIME%%.report.html"
+    }
+  }
+}

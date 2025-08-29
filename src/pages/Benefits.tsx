@@ -1,64 +1,141 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Heart, Zap, Shield, Leaf, Brain, Sparkles } from 'lucide-react';
-import { Navigation } from '@/components/Navigation';
-import { Footer } from '@/components/Footer';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Heart, Zap, Shield, Leaf, Brain, Sparkles } from "lucide-react";
+import { Navigation } from "@/components/Navigation";
+import { Footer } from "@/components/Footer";
+import SEO, { StructuredData } from "@/components/SEO";
 
 const Benefits = () => {
   const benefits = [
     {
       icon: Heart,
       title: "Heart Health",
-      description: "Rich in antioxidants and potassium that support cardiovascular wellness",
+      description:
+        "Rich in antioxidants and potassium that support cardiovascular wellness",
       fruits: ["Mango", "Passion Fruit", "Kiwi"],
-      color: "text-red-500"
+      color: "text-red-500",
     },
     {
       icon: Zap,
-      title: "Natural Energy", 
-      description: "Natural sugars and vitamins provide sustained energy without crashes",
+      title: "Natural Energy",
+      description:
+        "Natural sugars and vitamins provide sustained energy without crashes",
       fruits: ["Pineapple", "Dragon Fruit", "Papaya"],
-      color: "text-yellow-500"
+      color: "text-yellow-500",
     },
     {
       icon: Shield,
       title: "Immune Boost",
-      description: "High vitamin C content strengthens your body's natural defenses",
+      description:
+        "High vitamin C content strengthens your body's natural defenses",
       fruits: ["Guava", "Kiwi", "Passion Fruit"],
-      color: "text-blue-500"
+      color: "text-blue-500",
     },
     {
       icon: Leaf,
       title: "Detoxification",
       description: "Natural enzymes help cleanse and detoxify your system",
       fruits: ["Pineapple", "Papaya", "Coconut"],
-      color: "text-green-500"
+      color: "text-green-500",
     },
     {
       icon: Brain,
       title: "Mental Clarity",
-      description: "B-vitamins and natural compounds support cognitive function",
+      description:
+        "B-vitamins and natural compounds support cognitive function",
       fruits: ["Dragon Fruit", "Mango", "Coconut"],
-      color: "text-purple-500"
+      color: "text-purple-500",
     },
     {
       icon: Sparkles,
       title: "Skin Health",
       description: "Vitamins A, C, and E promote healthy, glowing skin",
       fruits: ["Papaya", "Mango", "Passion Fruit"],
-      color: "text-pink-500"
-    }
+      color: "text-pink-500",
+    },
   ];
 
   const nutritionFacts = [
-    { nutrient: "Vitamin C", amount: "150-300%", daily: "Daily Value", benefit: "Immune support & collagen production" },
-    { nutrient: "Fiber", amount: "8-12g", daily: "Per serving", benefit: "Digestive health & satiety" },
-    { nutrient: "Potassium", amount: "600-900mg", daily: "Per serving", benefit: "Heart health & muscle function" },
-    { nutrient: "Antioxidants", amount: "High", daily: "Content", benefit: "Cellular protection & anti-aging" }
+    {
+      nutrient: "Vitamin C",
+      amount: "150-300%",
+      daily: "Daily Value",
+      benefit: "Immune support & collagen production",
+    },
+    {
+      nutrient: "Fiber",
+      amount: "8-12g",
+      daily: "Per serving",
+      benefit: "Digestive health & satiety",
+    },
+    {
+      nutrient: "Potassium",
+      amount: "600-900mg",
+      daily: "Per serving",
+      benefit: "Heart health & muscle function",
+    },
+    {
+      nutrient: "Antioxidants",
+      amount: "High",
+      daily: "Content",
+      benefit: "Cellular protection & anti-aging",
+    },
   ];
 
   return (
     <>
+      {/* Page-specific SEO */}
+      <SEO
+        title="Health Benefits of Tropical Fruits - Nutrition Guide"
+        description="Discover the amazing health benefits of tropical fruits and vegetables. Learn about vitamins, antioxidants, and wellness benefits of natural juices."
+        keywords={[
+          "health benefits",
+          "tropical fruits",
+          "nutrition",
+          "vitamins",
+          "antioxidants",
+          "wellness",
+        ]}
+        type="article"
+        publishedTime="2025-08-29T00:00:00.000Z"
+        modifiedTime="2025-08-29T00:00:00.000Z"
+      />
+
+      {/* Article structured data */}
+      <StructuredData
+        type="Article"
+        data={{
+          headline:
+            "Health Benefits of Tropical Fruits - Complete Nutrition Guide",
+          description:
+            "Comprehensive guide to the health benefits of tropical fruits including nutritional facts, wellness benefits, and how they support your health journey.",
+          author: {
+            "@type": "Organization",
+            name: "Tropical AI Chef Team",
+          },
+          publisher: {
+            "@type": "Organization",
+            name: "Tropical AI Chef",
+            logo: {
+              "@type": "ImageObject",
+              url: "https://tropical-ai-chef.vercel.app/logo.png",
+            },
+          },
+          datePublished: "2025-08-29T00:00:00.000Z",
+          dateModified: "2025-08-29T00:00:00.000Z",
+          image: "https://tropical-ai-chef.vercel.app/benefits-hero.jpg",
+          articleSection: "Health & Nutrition",
+          keywords:
+            "tropical fruits, health benefits, nutrition, vitamins, antioxidants",
+        }}
+      />
+
       <Navigation />
       <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
         {/* Hero Section */}
@@ -66,9 +143,7 @@ const Benefits = () => {
           <div className="absolute inset-0 bg-gradient-to-br from-accent/30 via-background/90 to-primary/30" />
           <div className="relative z-10 container mx-auto max-w-4xl text-center px-6">
             <div className="flex justify-center mb-6">
-              <div className="flex items-center gap-4 text-6xl">
-                🥭🍍🥝🐉💚
-              </div>
+              <div className="flex items-center gap-4 text-6xl">🥭🍍🥝🐉💚</div>
             </div>
             <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-sunset bg-clip-text text-transparent leading-tight">
               Health
@@ -76,8 +151,8 @@ const Benefits = () => {
               Benefits
             </h1>
             <p className="text-xl md:text-2xl text-foreground/80 mb-8 max-w-3xl mx-auto leading-relaxed">
-              Discover the incredible health benefits of tropical fruits and how our AI-crafted 
-              recipes can transform your wellness journey.
+              Discover the incredible health benefits of tropical fruits and how
+              our AI-crafted recipes can transform your wellness journey.
             </p>
             <div className="flex justify-center gap-6 text-5xl">
               <Heart className="w-12 h-12 text-red-500 animate-pulse" />
@@ -95,9 +170,14 @@ const Benefits = () => {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {benefits.map((benefit, index) => (
-                <Card key={index} className="shadow-tropical border-0 hover:scale-105 transition-bounce">
+                <Card
+                  key={index}
+                  className="shadow-tropical border-0 hover:scale-105 transition-bounce"
+                >
                   <CardHeader className="text-center">
-                    <benefit.icon className={`w-12 h-12 mx-auto mb-4 ${benefit.color}`} />
+                    <benefit.icon
+                      className={`w-12 h-12 mx-auto mb-4 ${benefit.color}`}
+                    />
                     <CardTitle className="text-xl">{benefit.title}</CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -106,7 +186,11 @@ const Benefits = () => {
                     </CardDescription>
                     <div className="flex flex-wrap gap-2 justify-center">
                       {benefit.fruits.map((fruit, fruitIndex) => (
-                        <Badge key={fruitIndex} variant="secondary" className="text-xs">
+                        <Badge
+                          key={fruitIndex}
+                          variant="secondary"
+                          className="text-xs"
+                        >
                           {fruit}
                         </Badge>
                       ))}
@@ -129,10 +213,16 @@ const Benefits = () => {
                 <Card key={index} className="shadow-tropical border-0">
                   <CardContent className="p-6">
                     <div className="flex justify-between items-start mb-3">
-                      <h3 className="font-bold text-lg text-primary">{fact.nutrient}</h3>
+                      <h3 className="font-bold text-lg text-primary">
+                        {fact.nutrient}
+                      </h3>
                       <div className="text-right">
-                        <div className="font-bold text-xl text-secondary">{fact.amount}</div>
-                        <div className="text-sm text-foreground/70">{fact.daily}</div>
+                        <div className="font-bold text-xl text-secondary">
+                          {fact.amount}
+                        </div>
+                        <div className="text-sm text-foreground/70">
+                          {fact.daily}
+                        </div>
                       </div>
                     </div>
                     <p className="text-foreground/80">{fact.benefit}</p>
@@ -153,7 +243,9 @@ const Benefits = () => {
               <Card className="shadow-tropical border-0 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900">
                 <CardHeader className="text-center">
                   <div className="text-4xl mb-4">🌿</div>
-                  <CardTitle className="text-xl text-accent">Detox Cleanse</CardTitle>
+                  <CardTitle className="text-xl text-accent">
+                    Detox Cleanse
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2 text-sm">
@@ -169,7 +261,9 @@ const Benefits = () => {
               <Card className="shadow-tropical border-0 bg-gradient-to-br from-yellow-50 to-orange-100 dark:from-yellow-950 dark:to-orange-900">
                 <CardHeader className="text-center">
                   <div className="text-4xl mb-4">⚡</div>
-                  <CardTitle className="text-xl text-primary">Energy Boost</CardTitle>
+                  <CardTitle className="text-xl text-primary">
+                    Energy Boost
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2 text-sm">
@@ -185,7 +279,9 @@ const Benefits = () => {
               <Card className="shadow-tropical border-0 bg-gradient-to-br from-pink-50 to-purple-100 dark:from-pink-950 dark:to-purple-900">
                 <CardHeader className="text-center">
                   <div className="text-4xl mb-4">🥤</div>
-                  <CardTitle className="text-xl text-secondary">Creamy Smoothie</CardTitle>
+                  <CardTitle className="text-xl text-secondary">
+                    Creamy Smoothie
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2 text-sm">
