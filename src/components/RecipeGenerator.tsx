@@ -114,6 +114,9 @@ export const RecipeGenerator = ({
     dietaryRestrictions: "",
   });
 
+  const [selectedFruits, setSelectedFruits] = useState<string[]>([]);
+  const [selectedVegetables, setSelectedVegetables] = useState<string[]>([]);
+
   const [isGenerating, setIsGenerating] = useState(false);
   const [availableServices, setAvailableServices] = useState<
     GenerationService[]
@@ -124,8 +127,6 @@ export const RecipeGenerator = ({
   const [selectedModel, setSelectedModel] = useState<string>("");
   const [retryCount, setRetryCount] = useState(0);
   const [lastError, setLastError] = useState<string | null>(null);
-  const [selectedFruits, setSelectedFruits] = useState<string[]>([]);
-  const [selectedVegetables, setSelectedVegetables] = useState<string[]>([]);
 
   const { handleError, handleAsyncError, handleApiError } = useErrorHandler();
   const {
@@ -187,8 +188,10 @@ export const RecipeGenerator = ({
   });
 
   const validateForm = (): boolean => {
-    if (!formData.fruit || !formData.style) {
-      toast.error("Please select both a fruit and style for your recipe");
+    if (selectedFruits.length === 0 || !formData.style) {
+      toast.error(
+        "Please select at least one fruit and a style for your recipe"
+      );
       return false;
     }
 
@@ -216,6 +219,7 @@ export const RecipeGenerator = ({
     // Clean the request - convert "none" to empty string for vegetables
     const cleanRequest = {
       ...request,
+      fruits: selectedFruits.length > 0 ? selectedFruits : [request.fruit],
       vegetables: request.vegetables === "none" ? "" : request.vegetables,
     };
 
@@ -336,11 +340,13 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
         async () => {
           // Track recipe generation attempt
           trackEngagement("recipe_generation_started", {
-            fruit: formData.fruit,
+            fruits: selectedFruits,
+            fruit_count: selectedFruits.length,
+            vegetables: selectedVegetables,
+            vegetable_count: selectedVegetables.length,
             style: formData.style,
             service: selectedService,
-            has_vegetables:
-              !!formData.vegetables && formData.vegetables !== "none",
+            has_vegetables: selectedVegetables.length > 0,
             has_dietary_restrictions: !!formData.dietaryRestrictions.trim(),
           });
 
@@ -562,32 +568,67 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
             <div className="space-y-6">
               <div className="space-y-4">
                 <Label className="text-base font-medium">
-                  Primary Tropical Fruit *
+                  Tropical Fruits * (Select up to 5)
                 </Label>
+                <p className="text-sm text-muted-foreground mb-3">
+                  {selectedFruits.length}/5 selected
+                </p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                  {TROPICAL_FRUITS.map((fruit) => (
-                    <div
-                      key={fruit.id}
-                      onClick={() => {
-                        setFormData((prev) => ({ ...prev, fruit: fruit.name }));
-                        trackEngagement("ingredient_selected", {
-                          type: "fruit",
-                          value: fruit.name,
-                          step: 1,
-                        });
-                      }}
-                      className={`cursor-pointer rounded-xl p-4 text-center transition-all duration-200 hover:scale-105 border-2 ${
-                        formData.fruit === fruit.name
-                          ? "border-primary bg-primary/10 shadow-lg"
-                          : "border-border bg-card hover:border-primary/50"
-                      } ${fruit.color}`}
-                    >
-                      <div className="text-3xl mb-2">{fruit.emoji}</div>
-                      <div className="text-sm font-medium text-foreground">
-                        {fruit.name}
+                  {TROPICAL_FRUITS.map((fruit) => {
+                    const isSelected = selectedFruits.includes(fruit.name);
+                    const canSelect = selectedFruits.length < 5 || isSelected;
+
+                    return (
+                      <div
+                        key={fruit.id}
+                        onClick={() => {
+                          if (!canSelect && !isSelected) return;
+
+                          let newSelected;
+                          if (isSelected) {
+                            // Remove from selection
+                            newSelected = selectedFruits.filter(
+                              (f) => f !== fruit.name
+                            );
+                          } else {
+                            // Add to selection
+                            newSelected = [...selectedFruits, fruit.name];
+                          }
+
+                          setSelectedFruits(newSelected);
+                          // Update formData.fruit with primary fruit (first selected)
+                          setFormData((prev) => ({
+                            ...prev,
+                            fruit: newSelected.length > 0 ? newSelected[0] : "",
+                          }));
+
+                          trackEngagement("ingredient_selected", {
+                            type: "fruit",
+                            value: fruit.name,
+                            total_selected: newSelected.length,
+                            step: 1,
+                          });
+                        }}
+                        className={`cursor-pointer rounded-xl p-4 text-center transition-all duration-200 hover:scale-105 border-2 relative ${
+                          isSelected
+                            ? "border-primary bg-primary/10 shadow-lg"
+                            : canSelect
+                            ? "border-border bg-card hover:border-primary/50"
+                            : "border-border bg-card opacity-50 cursor-not-allowed"
+                        } ${fruit.color}`}
+                      >
+                        {isSelected && (
+                          <div className="absolute -top-2 -right-2 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-bold">
+                            {selectedFruits.indexOf(fruit.name) + 1}
+                          </div>
+                        )}
+                        <div className="text-3xl mb-2">{fruit.emoji}</div>
+                        <div className="text-sm font-medium text-foreground">
+                          {fruit.name}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 
@@ -634,15 +675,19 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
             <div className="space-y-4 max-w-2xl mx-auto">
               <div className="space-y-4">
                 <Label className="text-base font-medium">
-                  Additional Vegetables
+                  Additional Vegetables (Select up to 5)
                 </Label>
+                <p className="text-sm text-muted-foreground mb-3">
+                  {selectedVegetables.length}/5 selected
+                </p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                   <div
-                    onClick={() =>
-                      setFormData((prev) => ({ ...prev, vegetables: "none" }))
-                    }
+                    onClick={() => {
+                      setSelectedVegetables([]);
+                      setFormData((prev) => ({ ...prev, vegetables: "none" }));
+                    }}
                     className={`cursor-pointer rounded-xl p-3 text-center transition-all duration-200 hover:scale-105 border-2 ${
-                      formData.vegetables === "none"
+                      selectedVegetables.length === 0
                         ? "border-primary bg-primary/10 shadow-lg"
                         : "border-border bg-card hover:border-primary/50"
                     }`}
@@ -652,27 +697,63 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
                       None
                     </div>
                   </div>
-                  {VEGETABLES.map((vegetable) => (
-                    <div
-                      key={vegetable.id}
-                      onClick={() =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          vegetables: vegetable.name,
-                        }))
-                      }
-                      className={`cursor-pointer rounded-xl p-3 text-center transition-all duration-200 hover:scale-105 border-2 ${
-                        formData.vegetables === vegetable.name
-                          ? "border-primary bg-primary/10 shadow-lg"
-                          : "border-border bg-card hover:border-primary/50"
-                      } ${vegetable.color}`}
-                    >
-                      <div className="text-2xl mb-1">{vegetable.emoji}</div>
-                      <div className="text-xs font-medium text-foreground">
-                        {vegetable.name}
+                  {VEGETABLES.map((vegetable) => {
+                    const isSelected = selectedVegetables.includes(
+                      vegetable.name
+                    );
+                    const canSelect =
+                      selectedVegetables.length < 5 || isSelected;
+
+                    return (
+                      <div
+                        key={vegetable.id}
+                        onClick={() => {
+                          if (!canSelect && !isSelected) return;
+
+                          let newSelected;
+                          if (isSelected) {
+                            // Remove from selection
+                            newSelected = selectedVegetables.filter(
+                              (v) => v !== vegetable.name
+                            );
+                          } else {
+                            // Add to selection
+                            newSelected = [
+                              ...selectedVegetables,
+                              vegetable.name,
+                            ];
+                          }
+
+                          setSelectedVegetables(newSelected);
+                          // Update formData.vegetables with comma-separated list
+                          setFormData((prev) => ({
+                            ...prev,
+                            vegetables:
+                              newSelected.length > 0
+                                ? newSelected.join(", ")
+                                : "none",
+                          }));
+                        }}
+                        className={`cursor-pointer rounded-xl p-3 text-center transition-all duration-200 hover:scale-105 border-2 relative ${
+                          isSelected
+                            ? "border-primary bg-primary/10 shadow-lg"
+                            : canSelect
+                            ? "border-border bg-card hover:border-primary/50"
+                            : "border-border bg-card opacity-50 cursor-not-allowed"
+                        } ${vegetable.color}`}
+                      >
+                        {isSelected && (
+                          <div className="absolute -top-2 -right-2 w-5 h-5 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-bold">
+                            {selectedVegetables.indexOf(vegetable.name) + 1}
+                          </div>
+                        )}
+                        <div className="text-2xl mb-1">{vegetable.emoji}</div>
+                        <div className="text-xs font-medium text-foreground">
+                          {vegetable.name}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 
@@ -720,9 +801,11 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
               Generate Your Recipe
             </h3>
             <p className="text-sm text-muted-foreground">
-              {formData.fruit && formData.style
-                ? `Ready to create your ${formData.fruit} ${formData.style}!`
-                : "Select a fruit and style to get started"}
+              {selectedFruits.length > 0 && formData.style
+                ? `Ready to create your ${selectedFruits.join(", ")} ${
+                    formData.style
+                  }!`
+                : "Select at least one fruit and style to get started"}
             </p>
           </div>
 
@@ -738,15 +821,15 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
                 onClick={handleGenerateRecipe}
                 size="lg"
                 className="gradient-tropical text-foreground font-bold text-lg px-12 py-6 hover:scale-105 transition-all duration-200 shadow-tropical min-w-[280px]"
-                disabled={!formData.fruit || !formData.style}
+                disabled={selectedFruits.length === 0 || !formData.style}
               >
                 <Sparkles className="w-6 h-6 mr-3" />
                 Generate My Perfect Recipe
               </Button>
 
-              {(!formData.fruit || !formData.style) && (
+              {(selectedFruits.length === 0 || !formData.style) && (
                 <p className="text-sm text-amber-600 bg-amber-50 px-4 py-2 rounded-md border border-amber-200">
-                  💡 Please select both a fruit and style to continue
+                  💡 Please select at least one fruit and a style to continue
                 </p>
               )}
             </div>
