@@ -89,22 +89,29 @@ const Recipes = () => {
         <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-accent/30 via-background/90 to-primary/30" />
           <div className="relative z-10 container mx-auto max-w-4xl text-center px-6">
-            <div className="flex justify-center mb-6">
-              <div className="flex items-center gap-4 text-6xl">🤖🥭✨</div>
-            </div>
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-sunset bg-clip-text text-transparent leading-tight">
-              AI Recipe
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight relative">
+              <span className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent font-extrabold">
+                Create Amazing
+              </span>
               <br />
-              Generator
+              <span className="bg-gradient-to-r from-accent via-primary to-secondary bg-clip-text text-transparent font-extrabold">
+                Tropical Recipes
+              </span>
             </h1>
             <p className="text-xl md:text-2xl text-foreground/80 mb-8 max-w-3xl mx-auto leading-relaxed">
-              Create personalized tropical juice recipes tailored to your taste
-              preferences and health goals.
+              Our advanced AI analyzes your preferences to craft the perfect
+              tropical juice blend.
+              <br />
+              <span className="text-lg text-primary font-semibold">
+                ✨ Personalized • 🌿 Healthy • 🎯 Perfect for You
+              </span>
             </p>
-            <div className="flex justify-center gap-6 text-5xl">
-              <Sparkles className="w-12 h-12 text-secondary animate-pulse" />
-              <Heart className="w-12 h-12 text-primary animate-bounce" />
-              <Sparkles className="w-12 h-12 text-accent animate-pulse" />
+            <div className="flex justify-center gap-6 text-4xl mb-8">
+              <span className="animate-bounce delay-100">🥭</span>
+              <span className="animate-bounce delay-200">🍍</span>
+              <span className="animate-bounce delay-300">🥥</span>
+              <span className="animate-bounce delay-400">🥝</span>
+              <span className="animate-bounce delay-500">🫐</span>
             </div>
           </div>
         </section>
@@ -112,6 +119,17 @@ const Recipes = () => {
         {/* Recipe Generator */}
         <section className="px-6 pb-12">
           <div className="container mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl md:text-5xl font-bold mb-6 relative">
+                <span className="bg-gradient-to-r from-secondary via-primary to-accent bg-clip-text text-transparent">
+                  🎨 Design Your Recipe
+                </span>
+              </h2>
+              <p className="text-lg text-foreground/70 max-w-2xl mx-auto mb-8">
+                Select your favorite tropical fruits and let our AI create the
+                perfect recipe just for you!
+              </p>
+            </div>
             <RecipeGenerator onRecipeGenerated={handleRecipeGenerated} />
           </div>
         </section>

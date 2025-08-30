@@ -31,6 +31,8 @@ import { RecipeGenerationLoader } from "@/components/LoadingStates";
 import { useErrorHandler } from "@/hooks/use-error-handler";
 import { useSecureForm } from "@/hooks/use-security";
 import { useAnalytics, usePerformanceTracking } from "@/hooks/use-analytics";
+import { useFormSubmission } from "@/hooks/useLoadingState";
+import { HoverScale } from "@/components/PageTransition";
 import { toast } from "sonner";
 import {
   generateRecipeWithOpenAI,
@@ -53,17 +55,27 @@ interface RecipeGeneratorProps {
 type GenerationService = "local" | "ollama" | "openai";
 
 const TROPICAL_FRUITS = [
-  "Mango",
-  "Pineapple",
-  "Passion Fruit",
-  "Dragon Fruit",
-  "Papaya",
-  "Guava",
-  "Kiwi",
-  "Lychee",
-  "Rambutan",
-  "Mangosteen",
-  "Coconut",
+  { id: "mango", name: "Mango", emoji: "🥭", color: "bg-orange-100" },
+  { id: "pineapple", name: "Pineapple", emoji: "🍍", color: "bg-yellow-100" },
+  {
+    id: "passion-fruit",
+    name: "Passion Fruit",
+    emoji: "🟣",
+    color: "bg-purple-100",
+  },
+  {
+    id: "dragon-fruit",
+    name: "Dragon Fruit",
+    emoji: "🐲",
+    color: "bg-pink-100",
+  },
+  { id: "papaya", name: "Papaya", emoji: "🧡", color: "bg-orange-100" },
+  { id: "guava", name: "Guava", emoji: "🟢", color: "bg-green-100" },
+  { id: "kiwi", name: "Kiwi", emoji: "🥝", color: "bg-green-100" },
+  { id: "lychee", name: "Lychee", emoji: "🔴", color: "bg-red-100" },
+  { id: "rambutan", name: "Rambutan", emoji: "🔴", color: "bg-red-100" },
+  { id: "mangosteen", name: "Mangosteen", emoji: "🟣", color: "bg-purple-100" },
+  { id: "coconut", name: "Coconut", emoji: "🥥", color: "bg-white" },
 ];
 
 const JUICE_STYLES = [
@@ -80,16 +92,16 @@ const JUICE_STYLES = [
 ];
 
 const VEGETABLES = [
-  "Spinach",
-  "Kale",
-  "Cucumber",
-  "Celery",
-  "Carrot",
-  "Beetroot",
-  "Ginger",
-  "Turmeric",
-  "Mint",
-  "Parsley",
+  { id: "spinach", name: "Spinach", emoji: "🥬", color: "bg-green-100" },
+  { id: "kale", name: "Kale", emoji: "🥬", color: "bg-green-100" },
+  { id: "cucumber", name: "Cucumber", emoji: "🥒", color: "bg-green-100" },
+  { id: "celery", name: "Celery", emoji: "🥬", color: "bg-green-100" },
+  { id: "carrot", name: "Carrot", emoji: "🥕", color: "bg-orange-100" },
+  { id: "beetroot", name: "Beetroot", emoji: "🟣", color: "bg-purple-100" },
+  { id: "ginger", name: "Ginger", emoji: "🟤", color: "bg-yellow-100" },
+  { id: "turmeric", name: "Turmeric", emoji: "🟡", color: "bg-yellow-100" },
+  { id: "mint", name: "Mint", emoji: "🌿", color: "bg-green-100" },
+  { id: "parsley", name: "Parsley", emoji: "🌿", color: "bg-green-100" },
 ];
 
 export const RecipeGenerator = ({
@@ -112,6 +124,8 @@ export const RecipeGenerator = ({
   const [selectedModel, setSelectedModel] = useState<string>("");
   const [retryCount, setRetryCount] = useState(0);
   const [lastError, setLastError] = useState<string | null>(null);
+  const [selectedFruits, setSelectedFruits] = useState<string[]>([]);
+  const [selectedVegetables, setSelectedVegetables] = useState<string[]>([]);
 
   const { handleError, handleAsyncError, handleApiError } = useErrorHandler();
   const {
@@ -123,6 +137,13 @@ export const RecipeGenerator = ({
   } = useSecureForm("recipe-generator");
   const { trackRecipeGeneration, trackEngagement } = useAnalytics();
   const { measureFunction } = usePerformanceTracking();
+  const {
+    isSubmitting,
+    submitError,
+    submitSuccess,
+    submitForm,
+    resetSubmission,
+  } = useFormSubmission<Recipe>();
 
   // Check available services on component mount
   const checkAvailableServices = useCallback(async () => {
@@ -538,33 +559,36 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="fruit" className="text-base font-medium">
+            <div className="space-y-6">
+              <div className="space-y-4">
+                <Label className="text-base font-medium">
                   Primary Tropical Fruit *
                 </Label>
-                <Select
-                  value={formData.fruit}
-                  onValueChange={(value) => {
-                    setFormData((prev) => ({ ...prev, fruit: value }));
-                    trackEngagement("ingredient_selected", {
-                      type: "fruit",
-                      value,
-                      step: 1,
-                    });
-                  }}
-                >
-                  <SelectTrigger className="h-12">
-                    <SelectValue placeholder="🥭 Choose your main fruit" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TROPICAL_FRUITS.map((fruit) => (
-                      <SelectItem key={fruit} value={fruit}>
-                        {fruit}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                  {TROPICAL_FRUITS.map((fruit) => (
+                    <div
+                      key={fruit.id}
+                      onClick={() => {
+                        setFormData((prev) => ({ ...prev, fruit: fruit.name }));
+                        trackEngagement("ingredient_selected", {
+                          type: "fruit",
+                          value: fruit.name,
+                          step: 1,
+                        });
+                      }}
+                      className={`cursor-pointer rounded-xl p-4 text-center transition-all duration-200 hover:scale-105 border-2 ${
+                        formData.fruit === fruit.name
+                          ? "border-primary bg-primary/10 shadow-lg"
+                          : "border-border bg-card hover:border-primary/50"
+                      } ${fruit.color}`}
+                    >
+                      <div className="text-3xl mb-2">{fruit.emoji}</div>
+                      <div className="text-sm font-medium text-foreground">
+                        {fruit.name}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -608,28 +632,48 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
             </div>
 
             <div className="space-y-4 max-w-2xl mx-auto">
-              <div className="space-y-2">
-                <Label htmlFor="vegetables" className="text-base font-medium">
+              <div className="space-y-4">
+                <Label className="text-base font-medium">
                   Additional Vegetables
                 </Label>
-                <Select
-                  value={formData.vegetables}
-                  onValueChange={(value) =>
-                    setFormData((prev) => ({ ...prev, vegetables: value }))
-                  }
-                >
-                  <SelectTrigger className="h-12">
-                    <SelectValue placeholder="🥬 Add vegetables for extra nutrition" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">No vegetables</SelectItem>
-                    {VEGETABLES.map((vegetable) => (
-                      <SelectItem key={vegetable} value={vegetable}>
-                        {vegetable}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                  <div
+                    onClick={() =>
+                      setFormData((prev) => ({ ...prev, vegetables: "none" }))
+                    }
+                    className={`cursor-pointer rounded-xl p-3 text-center transition-all duration-200 hover:scale-105 border-2 ${
+                      formData.vegetables === "none"
+                        ? "border-primary bg-primary/10 shadow-lg"
+                        : "border-border bg-card hover:border-primary/50"
+                    }`}
+                  >
+                    <div className="text-2xl mb-1">🚫</div>
+                    <div className="text-xs font-medium text-foreground">
+                      None
+                    </div>
+                  </div>
+                  {VEGETABLES.map((vegetable) => (
+                    <div
+                      key={vegetable.id}
+                      onClick={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          vegetables: vegetable.name,
+                        }))
+                      }
+                      className={`cursor-pointer rounded-xl p-3 text-center transition-all duration-200 hover:scale-105 border-2 ${
+                        formData.vegetables === vegetable.name
+                          ? "border-primary bg-primary/10 shadow-lg"
+                          : "border-border bg-card hover:border-primary/50"
+                      } ${vegetable.color}`}
+                    >
+                      <div className="text-2xl mb-1">{vegetable.emoji}</div>
+                      <div className="text-xs font-medium text-foreground">
+                        {vegetable.name}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div className="space-y-2">

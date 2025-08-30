@@ -54,15 +54,28 @@ All colors MUST be HSL.
     --sidebar-border: 220 13% 91%;
 
     --sidebar-ring: 217.2 91.2% 59.8%;
-    
+
     /* Tropical Gradients and Animations */
-    --gradient-tropical: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));
-    --gradient-fresh: linear-gradient(180deg, hsl(var(--accent)), hsl(var(--primary)));
-    --gradient-sunset: linear-gradient(45deg, hsl(var(--primary)), hsl(var(--secondary)), hsl(var(--accent)));
-    
+    --gradient-tropical: linear-gradient(
+      135deg,
+      hsl(var(--primary)),
+      hsl(var(--secondary))
+    );
+    --gradient-fresh: linear-gradient(
+      180deg,
+      hsl(var(--accent)),
+      hsl(var(--primary))
+    );
+    --gradient-sunset: linear-gradient(
+      45deg,
+      hsl(var(--primary)),
+      hsl(var(--secondary)),
+      hsl(var(--accent))
+    );
+
     --shadow-tropical: 0 10px 40px -10px hsl(var(--primary) / 0.3);
     --shadow-glow: 0 0 30px hsl(var(--secondary) / 0.2);
-    
+
     --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   }
@@ -124,45 +137,68 @@ All colors MUST be HSL.
   .gradient-tropical {
     background: var(--gradient-tropical);
   }
-  
+
   .gradient-fresh {
     background: var(--gradient-fresh);
   }
-  
+
   .gradient-sunset {
     background: var(--gradient-sunset);
   }
-  
+
   .shadow-tropical {
     box-shadow: var(--shadow-tropical);
   }
-  
+
   .shadow-glow {
     box-shadow: var(--shadow-glow);
   }
-  
+
   .transition-smooth {
     transition: var(--transition-smooth);
   }
-  
+
   .transition-bounce {
     transition: var(--transition-bounce);
   }
-  
+
   /* Mobile-friendly touch targets */
   @media (hover: none) and (pointer: coarse) {
-    button, .cursor-pointer {
+    button,
+    .cursor-pointer {
       min-height: 44px; /* Apple's recommended touch target size */
     }
-    
+
     /* Improve text readability on mobile */
     body {
       font-size: 16px; /* Prevents iOS zoom on focus */
     }
   }
-  
+
   /* Utility class for better touch interactions */
   .touch-manipulation {
     touch-action: manipulation;
+  }
+
+  /* Custom Keyframe Animations */
+  @keyframes gradientShift {
+    0%,
+    100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  @keyframes textGlow {
+    0%,
+    100% {
+      text-shadow: 0 0 20px rgba(var(--primary), 0.5);
+    }
+    50% {
+      text-shadow: 0 0 30px rgba(var(--secondary), 0.8),
+        0 0 40px rgba(var(--accent), 0.3);
+    }
   }
 }
