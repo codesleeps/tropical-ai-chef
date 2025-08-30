@@ -1,38 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Background circle with tropical gradient -->
-  <circle cx="16" cy="16" r="16" fill="url(#tropicalGradient)"/>
-  
-  <!-- Mango shape -->
-  <ellipse cx="12" cy="11" rx="4" ry="6" fill="#FFB800" opacity="0.9"/>
-  <ellipse cx="12" cy="11" rx="3" ry="5" fill="#FFA000"/>
-  
-  <!-- Pineapple crown -->
-  <path d="M19 7 L21 5 L23 7 L25 5 L27 7 L25 9 L23 7 L21 9 L19 7" fill="#4CAF50"/>
-  
-  <!-- Pineapple body -->
-  <ellipse cx="23" cy="14" rx="3" ry="5" fill="#FFD54F"/>
-  <path d="M21 11 L25 11 M20 13 L26 13 M21 15 L25 15 M20 17 L26 17" stroke="#FF8F00" stroke-width="0.5"/>
-  
-  <!-- Coconut -->
-  <circle cx="9" cy="22" r="3.5" fill="#8D6E63"/>
-  <ellipse cx="9" cy="21" rx="2.5" ry="2" fill="#A1887F"/>
-  
-  <!-- AI sparkles -->
-  <circle cx="7" cy="5" r="1.2" fill="#E91E63" opacity="0.8"/>
-  <circle cx="27" cy="11" r="1" fill="#E91E63" opacity="0.6"/>
-  <circle cx="5" cy="15" r="0.8" fill="#E91E63" opacity="0.7"/>
-  <circle cx="25" cy="27" r="1" fill="#E91E63" opacity="0.8"/>
-  
-  <!-- Chef hat detail -->
-  <ellipse cx="16" cy="4" rx="2" ry="1" fill="#FFFFFF" opacity="0.8"/>
-  
-  <!-- Define gradient -->
   <defs>
-    <linearGradient id="tropicalGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="tropicalGradient32" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#FF6B35;stop-opacity:1" />
-      <stop offset="50%" style="stop-color:#F7931E;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#FFD23F;stop-opacity:1" />
+      <stop offset="30%" style="stop-color:#F7931E;stop-opacity:1" />
+      <stop offset="70%" style="stop-color:#FFD54F;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4CAF50;stop-opacity:1" />
     </linearGradient>
+    <radialGradient id="aiGlow32" cx="50%" cy="50%" r="30%">
+      <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#FFFFFF;stop-opacity:0" />
+    </radialGradient>
   </defs>
+  
+  <!-- Background circle -->
+  <circle cx="16" cy="16" r="16" fill="url(#tropicalGradient32)"/>
+  
+  <!-- Main tropical fruit -->
+  <ellipse cx="16" cy="14" rx="6" ry="8" fill="#FFB300" opacity="0.95"/>
+  <ellipse cx="16" cy="13" rx="4" ry="6" fill="#FF8F00" opacity="0.8"/>
+  <ellipse cx="16" cy="12" rx="2" ry="4" fill="#FF6F00" opacity="0.6"/>
+  
+  <!-- Tropical leaf accent -->
+  <path d="M22 8 Q26 10 24 14 Q22 12 20 10 Q21 9 22 8" fill="#4CAF50" opacity="0.8"/>
+  
+  <!-- AI neural network dots -->
+  <circle cx="8" cy="8" r="1.2" fill="#E1F5FE" opacity="0.9"/>
+  <circle cx="24" cy="24" r="1" fill="#E1F5FE" opacity="0.8"/>
+  <circle cx="6" cy="24" r="0.8" fill="#E1F5FE" opacity="0.7"/>
+  
+  <!-- Connecting lines for AI theme -->
+  <path d="M8 8 L16 14 L24 24" stroke="#E1F5FE" stroke-width="0.5" opacity="0.4"/>
+  <path d="M6 24 L16 14 L22 8" stroke="#E1F5FE" stroke-width="0.5" opacity="0.3"/>
+  
+  <!-- Central AI glow -->
+  <circle cx="16" cy="16" r="4" fill="url(#aiGlow32)"/>
 </svg>

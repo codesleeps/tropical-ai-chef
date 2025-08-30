@@ -1,69 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Background with rounded corners for iOS -->
-  <rect width="180" height="180" rx="36" fill="url(#tropicalGradient)"/>
-  
-  <!-- Main tropical fruits composition -->
-  <!-- Large mango -->
-  <ellipse cx="70" cy="65" rx="22" ry="35" fill="#FFB800" opacity="0.9"/>
-  <ellipse cx="70" cy="65" rx="18" ry="30" fill="#FFA000"/>
-  <ellipse cx="70" cy="60" rx="12" ry="20" fill="#FF8F00" opacity="0.8"/>
-  
-  <!-- Pineapple crown -->
-  <path d="M100 35 L110 25 L120 35 L130 25 L140 35 L150 25 L160 35 L150 45 L140 35 L130 45 L120 35 L110 45 L100 35" fill="#4CAF50"/>
-  <path d="M105 30 L115 20 L125 30 L135 20 L145 30 L155 20 L155 25 L145 35 L135 25 L125 35 L115 25 L105 35" fill="#66BB6A"/>
-  
-  <!-- Large pineapple body -->
-  <ellipse cx="130" cy="85" rx="18" ry="30" fill="#FFD54F"/>
-  <ellipse cx="130" cy="85" rx="15" ry="25" fill="#FFCC02"/>
-  
-  <!-- Pineapple pattern -->
-  <path d="M115 65 L145 65 M112 75 L148 75 M115 85 L145 85 M112 95 L148 95 M115 105 L145 105" stroke="#FF8F00" stroke-width="2"/>
-  <path d="M120 70 L140 70 M118 80 L142 80 M120 90 L140 90 M118 100 L142 100" stroke="#FF8F00" stroke-width="1.5"/>
-  
-  <!-- Large coconut -->
-  <circle cx="60" cy="130" r="20" fill="#8D6E63"/>
-  <ellipse cx="60" cy="125" rx="16" ry="12" fill="#A1887F"/>
-  <ellipse cx="60" cy="120" rx="10" ry="6" fill="#BCAAA4"/>
-  
-  <!-- Kiwi slice -->
-  <circle cx="120" cy="135" r="15" fill="#8BC34A"/>
-  <circle cx="120" cy="135" r="12" fill="#AED581"/>
-  <circle cx="120" cy="135" r="8" fill="#C8E6C9"/>
-  <circle cx="120" cy="135" r="4" fill="#E8F5E8"/>
-  <!-- Kiwi seeds -->
-  <circle cx="116" cy="131" r="1" fill="#4E342E"/>
-  <circle cx="124" cy="139" r="1" fill="#4E342E"/>
-  <circle cx="120" cy="127" r="0.8" fill="#4E342E"/>
-  <circle cx="112" cy="138" r="0.8" fill="#4E342E"/>
-  <circle cx="128" cy="132" r="0.8" fill="#4E342E"/>
-  
-  <!-- AI chef elements -->
-  <!-- Chef hat -->
-  <ellipse cx="90" cy="25" rx="12" ry="8" fill="#FFFFFF" opacity="0.9"/>
-  <rect x="85" y="25" width="10" height="6" fill="#FFFFFF" opacity="0.8"/>
-  
-  <!-- AI sparkles and magic -->
-  <circle cx="40" cy="40" r="4" fill="#E91E63" opacity="0.8"/>
-  <circle cx="160" cy="70" r="3" fill="#E91E63" opacity="0.6"/>
-  <circle cx="30" cy="90" r="2.5" fill="#E91E63" opacity="0.7"/>
-  <circle cx="150" cy="150" r="3.5" fill="#E91E63" opacity="0.8"/>
-  <circle cx="45" cy="160" r="2" fill="#E91E63" opacity="0.6"/>
-  
-  <!-- Magic wand effect -->
-  <path d="M20 20 L30 30 M25 15 L35 25 M15 25 L25 35" stroke="#E91E63" stroke-width="2" opacity="0.7"/>
-  <circle cx="25" cy="25" r="2" fill="#E91E63" opacity="0.9"/>
-  
-  <!-- Brand text curve (subtle) -->
-  <path d="M30 160 Q90 150 150 160" stroke="#FFFFFF" stroke-width="1" opacity="0.3" fill="none"/>
-  
-  <!-- Define gradient -->
   <defs>
-    <linearGradient id="tropicalGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="tropicalGradientApple" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#FF6B35;stop-opacity:1" />
-      <stop offset="30%" style="stop-color:#F7931E;stop-opacity:1" />
-      <stop offset="70%" style="stop-color:#FFD23F;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#4CAF50;stop-opacity:0.8" />
+      <stop offset="25%" style="stop-color:#F7931E;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFD54F;stop-opacity:1" />
+      <stop offset="75%" style="stop-color:#8BC34A;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4CAF50;stop-opacity:1" />
     </linearGradient>
+    <radialGradient id="aiGlowApple" cx="50%" cy="50%" r="25%">
+      <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:0.6" />
+      <stop offset="100%" style="stop-color:#FFFFFF;stop-opacity:0" />
+    </radialGradient>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="2" dy="4" stdDeviation="3" flood-opacity="0.3"/>
+    </filter>
   </defs>
+  
+  <!-- Background circle with shadow -->
+  <circle cx="90" cy="90" r="85" fill="url(#tropicalGradientApple)" filter="url(#shadow)"/>
+  
+  <!-- Main tropical fruit (mango-style) -->
+  <ellipse cx="90" cy="80" rx="35" ry="45" fill="#FFB300" opacity="0.95"/>
+  <ellipse cx="90" cy="75" rx="25" ry="35" fill="#FF8F00" opacity="0.8"/>
+  <ellipse cx="90" cy="70" rx="15" ry="25" fill="#FF6F00" opacity="0.6"/>
+  
+  <!-- Tropical leaves -->
+  <path d="M120 40 Q140 50 130 75 Q120 60 110 50 Q115 45 120 40" fill="#4CAF50" opacity="0.8"/>
+  <path d="M60 40 Q40 50 50 75 Q60 60 70 50 Q65 45 60 40" fill="#66BB6A" opacity="0.7"/>
+  
+  <!-- AI neural network nodes -->
+  <circle cx="45" cy="45" r="6" fill="#E1F5FE" opacity="0.9"/>
+  <circle cx="135" cy="135" r="5" fill="#E1F5FE" opacity="0.8"/>
+  <circle cx="30" cy="135" r="4" fill="#E1F5FE" opacity="0.7"/>
+  <circle cx="150" cy="60" r="3.5" fill="#E1F5FE" opacity="0.75"/>
+  
+  <!-- AI connecting network -->
+  <path d="M45 45 L90 80 L135 135" stroke="#E1F5FE" stroke-width="2" opacity="0.4"/>
+  <path d="M30 135 L90 80 L150 60" stroke="#E1F5FE" stroke-width="2" opacity="0.3"/>
+  <path d="M45 45 L150 60" stroke="#E1F5FE" stroke-width="1.5" opacity="0.2"/>
+  
+  <!-- Central AI core glow -->
+  <circle cx="90" cy="90" r="20" fill="url(#aiGlowApple)"/>
+  
+  <!-- Chef hat accent (subtle) -->
+  <ellipse cx="90" cy="30" rx="15" ry="8" fill="#FFFFFF" opacity="0.6"/>
+  <ellipse cx="90" cy="25" rx="12" ry="6" fill="#F5F5F5" opacity="0.8"/>
 </svg>
