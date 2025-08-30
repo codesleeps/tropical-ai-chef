@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Badge } from "@/components/ui/badge";
 import {
   Menu,
   ShoppingCart,
@@ -8,6 +9,8 @@ import {
   Leaf,
   ChefHat,
   ChevronDown,
+  Heart,
+  LogIn,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import {
@@ -16,10 +19,57 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAnalytics } from "@/hooks/use-analytics";
+import { toast } from "sonner";
 
 export const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [cartItems, setCartItems] = useState(0);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [favoriteCount, setFavoriteCount] = useState(3);
   const location = useLocation();
+  const { trackEvent } = useAnalytics();
+
+  // Handle login/logout
+  const handleAuthAction = () => {
+    if (isLoggedIn) {
+      setIsLoggedIn(false);
+      setCartItems(0);
+      setFavoriteCount(0);
+      toast.success("Successfully logged out! 👋");
+      trackEvent("user_logout", { from_page: location.pathname });
+    } else {
+      setIsLoggedIn(true);
+      setCartItems(2);
+      setFavoriteCount(3);
+      toast.success("Welcome back! 🌴", {
+        description: "You're now logged in to Tropical AI Chef",
+      });
+      trackEvent("user_login", { from_page: location.pathname });
+    }
+  };
+
+  // Handle cart action
+  const handleCartAction = () => {
+    if (!isLoggedIn) {
+      toast.info("Please log in to access your cart 🛒", {
+        description: "Create an account to save your favorite recipes",
+      });
+      trackEvent("cart_access_attempted", { authenticated: false });
+      return;
+    }
+
+    toast.success(`Cart opened! You have ${cartItems} items 🛍️`, {
+      description:
+        cartItems > 0
+          ? "Ready to checkout?"
+          : "Add some recipes to get started",
+    });
+    trackEvent("cart_opened", {
+      cart_items: cartItems,
+      from_page: location.pathname,
+    });
+  };
 
   const navItems = [
     { name: "Home", path: "/" },
@@ -71,7 +121,7 @@ export const Navigation = () => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`font-medium transition-smooth hover:text-primary ${
+                className={`font-medium transition-colors duration-200 hover:text-primary ${
                   isActive(item.path) ? "text-primary" : "text-foreground/70"
                 }`}
               >
@@ -81,14 +131,50 @@ export const Navigation = () => {
           </div>
 
           {/* Action Buttons */}
-          <div className="hidden lg:flex items-center space-x-4">
-            <Button variant="ghost" size="sm">
-              <User className="w-4 h-4 mr-2" />
-              Login
+          <div className="hidden lg:flex items-center space-x-3">
+            {isLoggedIn && (
+              <Button variant="ghost" size="sm" className="relative">
+                <Heart className="w-4 h-4 mr-2" />
+                Favorites
+                {favoriteCount > 0 && (
+                  <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-red-500">
+                    {favoriteCount}
+                  </Badge>
+                )}
+              </Button>
+            )}
+
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleAuthAction}
+              className="transition-all hover:scale-105"
+            >
+              {isLoggedIn ? (
+                <>
+                  <User className="w-4 h-4 mr-2" />
+                  Profile
+                </>
+              ) : (
+                <>
+                  <LogIn className="w-4 h-4 mr-2" />
+                  Login
+                </>
+              )}
             </Button>
-            <Button size="sm" className="gradient-tropical text-foreground">
+
+            <Button
+              size="sm"
+              className="gradient-tropical text-foreground relative transition-all hover:scale-105"
+              onClick={handleCartAction}
+            >
               <ShoppingCart className="w-4 h-4 mr-2" />
               Cart
+              {cartItems > 0 && (
+                <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-accent">
+                  {cartItems}
+                </Badge>
+              )}
             </Button>
           </div>
 
@@ -106,7 +192,7 @@ export const Navigation = () => {
                     key={item.path}
                     to={item.path}
                     onClick={() => setIsOpen(false)}
-                    className={`text-lg font-medium transition-smooth hover:text-primary ${
+                    className={`text-lg font-medium transition-colors duration-200 hover:text-primary ${
                       isActive(item.path)
                         ? "text-primary"
                         : "text-foreground/70"
@@ -116,14 +202,61 @@ export const Navigation = () => {
                   </Link>
                 ))}
 
-                <div className="border-t pt-4 space-y-2">
-                  <Button variant="ghost" className="w-full justify-start">
-                    <User className="w-4 h-4 mr-2" />
-                    Login
+                <div className="border-t pt-4 space-y-3">
+                  {isLoggedIn && (
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start relative"
+                      onClick={() => {
+                        setIsOpen(false);
+                        toast.success("Favorites opened! 💖");
+                      }}
+                    >
+                      <Heart className="w-4 h-4 mr-2" />
+                      Favorites
+                      {favoriteCount > 0 && (
+                        <Badge className="ml-auto h-5 w-5 flex items-center justify-center p-0 text-xs bg-red-500">
+                          {favoriteCount}
+                        </Badge>
+                      )}
+                    </Button>
+                  )}
+
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start"
+                    onClick={() => {
+                      setIsOpen(false);
+                      handleAuthAction();
+                    }}
+                  >
+                    {isLoggedIn ? (
+                      <>
+                        <User className="w-4 h-4 mr-2" />
+                        Profile & Logout
+                      </>
+                    ) : (
+                      <>
+                        <LogIn className="w-4 h-4 mr-2" />
+                        Login
+                      </>
+                    )}
                   </Button>
-                  <Button className="w-full gradient-tropical text-foreground">
+
+                  <Button
+                    className="w-full gradient-tropical text-foreground relative"
+                    onClick={() => {
+                      setIsOpen(false);
+                      handleCartAction();
+                    }}
+                  >
                     <ShoppingCart className="w-4 h-4 mr-2" />
                     Cart
+                    {cartItems > 0 && (
+                      <Badge className="ml-auto h-5 w-5 flex items-center justify-center p-0 text-xs bg-accent">
+                        {cartItems}
+                      </Badge>
+                    )}
                   </Button>
                 </div>
               </div>

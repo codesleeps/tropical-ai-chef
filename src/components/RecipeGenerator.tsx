@@ -420,39 +420,6 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
         <CardDescription className="text-lg">
           Create your perfect tropical juice recipe with AI assistance
         </CardDescription>
-
-        {/* Service Selection */}
-        <div className="flex flex-wrap gap-2 justify-center mt-4">
-          {availableServices.map((service) => (
-            <Badge
-              key={service}
-              variant={selectedService === service ? "default" : "outline"}
-              className={`cursor-pointer transition-all hover:scale-105 ${
-                selectedService === service
-                  ? "bg-primary text-primary-foreground"
-                  : ""
-              }`}
-              onClick={() => {
-                setSelectedService(service);
-                // Track service selection
-                trackEngagement("ai_service_selected", {
-                  service,
-                  previous_service: selectedService,
-                  available_services: availableServices.length,
-                });
-              }}
-            >
-              {service === "openai" && <Zap className="w-3 h-3 mr-1" />}
-              {service === "ollama" && <Sparkles className="w-3 h-3 mr-1" />}
-              {service === "local" && <ChefHat className="w-3 h-3 mr-1" />}
-              {getServiceDisplayName(service)}
-            </Badge>
-          ))}
-        </div>
-
-        <p className="text-sm text-muted-foreground mt-2">
-          {getServiceDescription(selectedService)}
-        </p>
       </CardHeader>
 
       <CardContent className="space-y-6">
@@ -477,148 +444,244 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
           </Alert>
         )}
 
-        {/* Ollama Model Selection */}
-        {selectedService === "ollama" && ollamaModels.length > 0 && (
-          <div className="space-y-2">
-            <Label htmlFor="model">Ollama Model</Label>
-            <Select value={selectedModel} onValueChange={setSelectedModel}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select an Ollama model" />
-              </SelectTrigger>
-              <SelectContent>
-                {ollamaModels.map((model) => (
-                  <SelectItem key={model} value={model}>
-                    {model}
-                    {OLLAMA_MODELS[model as keyof typeof OLLAMA_MODELS] && (
-                      <span className="text-xs text-muted-foreground ml-2">
-                        (
-                        {
-                          OLLAMA_MODELS[model as keyof typeof OLLAMA_MODELS]
-                            .size
-                        }
-                        )
-                      </span>
-                    )}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
-
         {/* Form Fields */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <Label htmlFor="fruit">Primary Tropical Fruit *</Label>
-            <Select
-              value={formData.fruit}
-              onValueChange={(value) => {
-                setFormData((prev) => ({ ...prev, fruit: value }));
-                // Track fruit selection
-                trackEngagement("ingredient_selected", {
-                  type: "fruit",
-                  value,
-                  step: 1,
-                });
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Choose your main fruit" />
-              </SelectTrigger>
-              <SelectContent>
-                {TROPICAL_FRUITS.map((fruit) => (
-                  <SelectItem key={fruit} value={fruit}>
-                    {fruit}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="style">Juice Style *</Label>
-            <Select
-              value={formData.style}
-              onValueChange={(value) => {
-                setFormData((prev) => ({ ...prev, style: value }));
-                // Track style selection
-                trackEngagement("recipe_style_selected", {
-                  style: value,
-                  step: 2,
-                });
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select your style" />
-              </SelectTrigger>
-              <SelectContent>
-                {JUICE_STYLES.map((style) => (
-                  <SelectItem key={style} value={style}>
-                    {style}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="vegetables">Additional Vegetables (Optional)</Label>
-          <Select
-            value={formData.vegetables}
-            onValueChange={(value) =>
-              setFormData((prev) => ({ ...prev, vegetables: value }))
-            }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Add vegetables for extra nutrition" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">No vegetables</SelectItem>
-              {VEGETABLES.map((vegetable) => (
-                <SelectItem key={vegetable} value={vegetable}>
-                  {vegetable}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="dietary">Dietary Restrictions (Optional)</Label>
-          <Textarea
-            id="dietary"
-            placeholder="e.g., vegan, gluten-free, low sugar, keto-friendly..."
-            value={formData.dietaryRestrictions}
-            onChange={(e) => {
-              const newValue = e.target.value;
-              setFormData((prev) => ({
-                ...prev,
-                dietaryRestrictions: newValue,
-              }));
-
-              // Validate input on change
-              if (newValue.trim()) {
-                validateField("dietaryRestrictions", newValue, "recipe");
-              }
-            }}
-            className={`min-h-20 ${
-              formErrors.dietaryRestrictions?.length > 0
-                ? "border-red-500 focus:border-red-500"
-                : ""
-            }`}
-          />
-          {formErrors.dietaryRestrictions?.length > 0 && (
-            <div className="text-sm text-red-600">
-              {formErrors.dietaryRestrictions.map((error, idx) => (
-                <p key={idx}>{error}</p>
+        <div className="space-y-8">
+          {/* AI Service Selection */}
+          <div className="space-y-4">
+            <div className="text-center">
+              <h3 className="text-2xl font-bold text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">
+                AI Service
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Select the AI service to generate your recipe
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2 justify-center">
+              {availableServices.map((service) => (
+                <Badge
+                  key={service}
+                  variant={selectedService === service ? "default" : "outline"}
+                  className={`cursor-pointer transition-all hover:scale-105 px-4 py-2 text-sm ${
+                    selectedService === service
+                      ? "bg-primary text-primary-foreground shadow-md"
+                      : "hover:bg-accent"
+                  }`}
+                  onClick={() => {
+                    setSelectedService(service);
+                    trackEngagement("ai_service_selected", {
+                      service,
+                      previous_service: selectedService,
+                      available_services: availableServices.length,
+                    });
+                  }}
+                >
+                  {service === "openai" && <Zap className="w-3 h-3 mr-1" />}
+                  {service === "ollama" && (
+                    <Sparkles className="w-3 h-3 mr-1" />
+                  )}
+                  {service === "local" && <ChefHat className="w-3 h-3 mr-1" />}
+                  {getServiceDisplayName(service)}
+                </Badge>
               ))}
             </div>
+            <p className="text-xs text-muted-foreground text-center">
+              {getServiceDescription(selectedService)}
+            </p>
+          </div>
+
+          {/* Ollama Model Selection */}
+          {selectedService === "ollama" && ollamaModels.length > 0 && (
+            <div className="space-y-4">
+              <div className="text-center">
+                <h3 className="text-lg font-semibold text-foreground mb-2">
+                  Select Ollama Model
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Choose the AI model for recipe generation
+                </p>
+              </div>
+              <div className="max-w-md mx-auto">
+                <Select value={selectedModel} onValueChange={setSelectedModel}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select an Ollama model" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ollamaModels.map((model) => (
+                      <SelectItem key={model} value={model}>
+                        {model}
+                        {OLLAMA_MODELS[model as keyof typeof OLLAMA_MODELS] && (
+                          <span className="text-xs text-muted-foreground ml-2">
+                            (
+                            {
+                              OLLAMA_MODELS[model as keyof typeof OLLAMA_MODELS]
+                                .size
+                            }
+                            )
+                          </span>
+                        )}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           )}
+
+          {/* Ingredients */}
+          <div className="space-y-4">
+            <div className="text-center">
+              <h3 className="text-2xl font-bold text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">
+                Ingredients
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Select your primary ingredients and style preferences
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="fruit" className="text-base font-medium">
+                  Primary Tropical Fruit *
+                </Label>
+                <Select
+                  value={formData.fruit}
+                  onValueChange={(value) => {
+                    setFormData((prev) => ({ ...prev, fruit: value }));
+                    trackEngagement("ingredient_selected", {
+                      type: "fruit",
+                      value,
+                      step: 1,
+                    });
+                  }}
+                >
+                  <SelectTrigger className="h-12">
+                    <SelectValue placeholder="🥭 Choose your main fruit" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TROPICAL_FRUITS.map((fruit) => (
+                      <SelectItem key={fruit} value={fruit}>
+                        {fruit}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="style" className="text-base font-medium">
+                  Juice Style *
+                </Label>
+                <Select
+                  value={formData.style}
+                  onValueChange={(value) => {
+                    setFormData((prev) => ({ ...prev, style: value }));
+                    trackEngagement("recipe_style_selected", {
+                      style: value,
+                      step: 2,
+                    });
+                  }}
+                >
+                  <SelectTrigger className="h-12">
+                    <SelectValue placeholder="🥤 Select your style" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {JUICE_STYLES.map((style) => (
+                      <SelectItem key={style} value={style}>
+                        {style}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+
+          {/* Additions */}
+          <div className="space-y-4">
+            <div className="text-center">
+              <h3 className="text-2xl font-bold text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">
+                Additions
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Enhance your recipe with vegetables and dietary preferences
+              </p>
+            </div>
+
+            <div className="space-y-4 max-w-2xl mx-auto">
+              <div className="space-y-2">
+                <Label htmlFor="vegetables" className="text-base font-medium">
+                  Additional Vegetables
+                </Label>
+                <Select
+                  value={formData.vegetables}
+                  onValueChange={(value) =>
+                    setFormData((prev) => ({ ...prev, vegetables: value }))
+                  }
+                >
+                  <SelectTrigger className="h-12">
+                    <SelectValue placeholder="🥬 Add vegetables for extra nutrition" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No vegetables</SelectItem>
+                    {VEGETABLES.map((vegetable) => (
+                      <SelectItem key={vegetable} value={vegetable}>
+                        {vegetable}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="dietary" className="text-base font-medium">
+                  Dietary Restrictions & Preferences
+                </Label>
+                <Textarea
+                  id="dietary"
+                  placeholder="💡 e.g., vegan, gluten-free, low sugar, keto-friendly, high protein..."
+                  value={formData.dietaryRestrictions}
+                  onChange={(e) => {
+                    const newValue = e.target.value;
+                    setFormData((prev) => ({
+                      ...prev,
+                      dietaryRestrictions: newValue,
+                    }));
+
+                    if (newValue.trim()) {
+                      validateField("dietaryRestrictions", newValue, "recipe");
+                    }
+                  }}
+                  className={`min-h-20 ${
+                    formErrors.dietaryRestrictions?.length > 0
+                      ? "border-red-500 focus:border-red-500"
+                      : ""
+                  }`}
+                />
+                {formErrors.dietaryRestrictions?.length > 0 && (
+                  <div className="text-sm text-red-600">
+                    {formErrors.dietaryRestrictions.map((error, idx) => (
+                      <p key={idx}>{error}</p>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Generate Button */}
-        <div className="text-center pt-4">
+        {/* Generate Recipe Section */}
+        <div className="space-y-6 pt-6 border-t border-border">
+          <div className="text-center">
+            <h3 className="text-2xl font-bold text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">
+              Generate Your Recipe
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              {formData.fruit && formData.style
+                ? `Ready to create your ${formData.fruit} ${formData.style}!`
+                : "Select a fruit and style to get started"}
+            </p>
+          </div>
+
           {isGenerating ? (
             <div className="space-y-4">
               <RecipeGenerationLoader
@@ -626,15 +689,23 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
               />
             </div>
           ) : (
-            <Button
-              onClick={handleGenerateRecipe}
-              size="lg"
-              className="gradient-tropical text-foreground font-bold text-lg px-8 py-6 hover:scale-105 transition-bounce shadow-tropical"
-              disabled={!formData.fruit || !formData.style}
-            >
-              <Sparkles className="w-6 h-6 mr-2" />
-              Generate My Recipe
-            </Button>
+            <div className="flex flex-col items-center gap-4">
+              <Button
+                onClick={handleGenerateRecipe}
+                size="lg"
+                className="gradient-tropical text-foreground font-bold text-lg px-12 py-6 hover:scale-105 transition-all duration-200 shadow-tropical min-w-[280px]"
+                disabled={!formData.fruit || !formData.style}
+              >
+                <Sparkles className="w-6 h-6 mr-3" />
+                Generate My Perfect Recipe
+              </Button>
+
+              {(!formData.fruit || !formData.style) && (
+                <p className="text-sm text-amber-600 bg-amber-50 px-4 py-2 rounded-md border border-amber-200">
+                  💡 Please select both a fruit and style to continue
+                </p>
+              )}
+            </div>
           )}
         </div>
 

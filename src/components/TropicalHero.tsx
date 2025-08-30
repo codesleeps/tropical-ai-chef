@@ -17,7 +17,7 @@ export const TropicalHero = ({ onGetStarted }: TropicalHeroProps) => {
         <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background/80 to-secondary/20" />
       </div>
 
-      {/* Content */}
+      {/* Main Hero Content Section */}
       <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
         <h1
           className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold mb-4 md:mb-6 leading-tight"
@@ -62,6 +62,7 @@ export const TropicalHero = ({ onGetStarted }: TropicalHeroProps) => {
           </div>
         </div>
 
+        {/* Recipe Type Showcase Section */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 max-w-3xl mx-auto mb-12 md:mb-20 px-4">
           <div className="bg-card/80 backdrop-blur-sm rounded-lg p-6 shadow-tropical">
             <div className="text-3xl mb-3">🌱</div>

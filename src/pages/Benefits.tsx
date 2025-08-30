@@ -138,7 +138,7 @@ const Benefits = () => {
 
       <Navigation />
       <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
-        {/* Hero Section */}
+        {/* Health Benefits Introduction Section */}
         <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-accent/30 via-background/90 to-primary/30" />
           <div className="relative z-10 container mx-auto max-w-4xl text-center px-6">
@@ -162,12 +162,18 @@ const Benefits = () => {
           </div>
         </section>
 
-        {/* Benefits Grid */}
+        {/* Benefits */}
         <section className="py-16 px-6">
           <div className="container mx-auto max-w-6xl">
-            <h2 className="text-3xl font-bold text-center mb-12 text-secondary">
-              Why Tropical Fruits Are Superfoods
-            </h2>
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold mb-2 text-secondary">
+                Benefits
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Discover the amazing health benefits that make tropical fruits
+                nature's powerhouse
+              </p>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {benefits.map((benefit, index) => (
                 <Card
@@ -202,12 +208,17 @@ const Benefits = () => {
           </div>
         </section>
 
-        {/* Nutrition Facts */}
+        {/* Nutrition */}
         <section className="py-16 px-6 bg-muted/30">
           <div className="container mx-auto max-w-4xl">
-            <h2 className="text-3xl font-bold text-center mb-12 bg-gradient-fresh bg-clip-text text-transparent">
-              Nutritional Powerhouse
-            </h2>
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold mb-2 bg-gradient-fresh bg-clip-text text-transparent">
+                Nutrition
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Essential nutrients packed in every tropical fruit serving
+              </p>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {nutritionFacts.map((fact, index) => (
                 <Card key={index} className="shadow-tropical border-0">
@@ -233,12 +244,17 @@ const Benefits = () => {
           </div>
         </section>
 
-        {/* Juice Styles Benefits */}
+        {/* Solutions */}
         <section className="py-16 px-6">
           <div className="container mx-auto max-w-6xl">
-            <h2 className="text-3xl font-bold text-center mb-12 text-secondary">
-              Targeted Wellness Solutions
-            </h2>
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold mb-2 text-secondary">
+                Solutions
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Customized juice blends for your specific health goals
+              </p>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <Card className="shadow-tropical border-0 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900">
                 <CardHeader className="text-center">

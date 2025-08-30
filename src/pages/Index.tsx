@@ -115,12 +115,12 @@ const Index = () => {
       <Navigation />
       <TropicalHero onGetStarted={handleGetStarted} />
 
-      {/* Features Section */}
+      {/* Features */}
       <section className="py-20 px-6 bg-muted/30 mt-16">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-fresh bg-clip-text text-transparent">
-              Why Choose Fresh Tropical Juices?
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              Features
             </h2>
             <p className="text-xl text-foreground/70 max-w-3xl mx-auto">
               Experience the perfect fusion of cutting-edge AI technology and
@@ -151,9 +151,17 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Stats Section */}
+      {/* Stats */}
       <section className="py-16 px-6">
         <div className="container mx-auto max-w-4xl">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              Stats
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Join our growing community of healthy living enthusiasts
+            </p>
+          </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 md:gap-8">
             {stats.map((stat, index) => (
               <div key={index} className="text-center">
@@ -168,11 +176,11 @@ const Index = () => {
         </div>
       </section>
 
-      {/* How It Works Section */}
+      {/* How It Works */}
       <section className="py-20 px-6 bg-muted/30">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-sunset bg-clip-text text-transparent">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               How It Works
             </h2>
             <p className="text-xl text-foreground/70 max-w-3xl mx-auto">
@@ -250,12 +258,12 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Testimonials Section */}
+      {/* Testimonials */}
       <section className="py-20 px-6">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-fresh bg-clip-text text-transparent">
-              What Our Customers Say
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              Testimonials
             </h2>
             <p className="text-xl text-foreground/70">
               Join thousands of happy customers who've transformed their health
@@ -296,14 +304,14 @@ const Index = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* Get Started */}
       <section className="py-20 px-6 bg-gradient-to-br from-primary/20 via-secondary/10 to-accent/20">
         <div className="container mx-auto max-w-4xl text-center">
           <div className="flex justify-center mb-6">
             <div className="flex items-center gap-4 text-6xl">🌟✨🥭</div>
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-sunset bg-clip-text text-transparent">
-            Ready to Start Your Tropical Journey?
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            Get Started
           </h2>
           <p className="text-xl text-foreground/80 mb-8 max-w-2xl mx-auto">
             Create your first AI-powered tropical juice recipe today and
@@ -332,7 +340,6 @@ const Index = () => {
           </div>
         </div>
       </section>
-
       <Footer />
     </div>
   );
