@@ -84,15 +84,15 @@ const Index = () => {
   const testimonials = [
     {
       name: "Sarah Johnson",
-      location: "Miami, FL",
+      location: "Edgbaston, Birmingham",
       rating: 5,
       comment:
         "The AI recipe generator is incredible! It created the perfect detox blend for my morning routine.",
       avatar: "👩‍💼",
     },
     {
-      name: "Mike Chen",
-      location: "Los Angeles, CA",
+      name: "Leroy Arthurs",
+      location: "Brixton, London",
       rating: 5,
       comment:
         "Fresh ingredients, amazing flavors, and the delivery is always on time. Highly recommended!",
@@ -100,7 +100,7 @@ const Index = () => {
     },
     {
       name: "Emma Rodriguez",
-      location: "New York, NY",
+      location: "Bournmouth, England",
       rating: 5,
       comment:
         "Finally found healthy juices that actually taste amazing. The tropical blends are my favorite!",

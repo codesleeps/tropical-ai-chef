@@ -80,7 +80,7 @@ const About = () => {
                   Our Journey
                 </h3>
                 <p className="text-lg text-foreground/80 mb-6 leading-relaxed">
-                  Founded in 2024, Fresh Tropical Juices was born from a simple
+                  Founded in 2016, Fresh Tropical Juices was born from a simple
                   idea: everyone deserves access to personalized, healthy, and
                   delicious tropical juice blends that fit their unique taste
                   preferences and nutritional needs.
@@ -234,7 +234,7 @@ const About = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
               {[
                 {
-                  name: "Maria Rodriguez",
+                  name: "Code Sleep",
                   role: "Founder & CEO",
                   emoji: "👩‍💼",
                   bio: "Former nutrition researcher with 15+ years in the health industry. Passionate about making healthy living accessible to everyone.",
@@ -245,10 +245,10 @@ const About = () => {
                   ],
                 },
                 {
-                  name: "James Chen",
+                  name: "Code Sleep",
                   role: "Head of AI",
                   emoji: "👨‍💻",
-                  bio: "AI engineer and former tech lead at Google. Specializes in machine learning algorithms for personalized nutrition recommendations.",
+                  bio: "AI engineer and former tech lead at Star Digital. Specializes in machine learning algorithms for personalized nutrition recommendations.",
                   skills: [
                     "Machine Learning",
                     "Data Science",
@@ -256,7 +256,7 @@ const About = () => {
                   ],
                 },
                 {
-                  name: "Sophie Williams",
+                  name: "Deep Seek AI",
                   role: "Nutrition Expert",
                   emoji: "👩‍⚕️",
                   bio: "Certified nutritionist and wellness coach. Ensures every recipe meets the highest standards for health and nutritional balance.",

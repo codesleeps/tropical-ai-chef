@@ -122,7 +122,7 @@ const Recipes = () => {
             <div className="text-center mb-12">
               <h2 className="text-4xl md:text-5xl font-bold mb-6 relative">
                 <span className="bg-gradient-to-r from-secondary via-primary to-accent bg-clip-text text-transparent">
-                  🎨 Design Your Recipe
+                   Create Your Recipe
                 </span>
               </h2>
               <p className="text-lg text-foreground/70 max-w-2xl mx-auto mb-8">
