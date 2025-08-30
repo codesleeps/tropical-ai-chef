@@ -63,7 +63,7 @@ export const TropicalHero = ({ onGetStarted }: TropicalHeroProps) => {
         </div>
 
         <h1
-          className={`text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold mb-4 md:mb-6 leading-tight transition-all duration-1000 relative ${
+          className={`text-6xl sm:text-7xl md:text-8xl lg:text-9xl xl:text-[12rem] font-bold mb-4 md:mb-6 leading-tight transition-all duration-1000 relative ${
             isLoaded ? "scale-100" : "scale-95"
           }`}
         >
