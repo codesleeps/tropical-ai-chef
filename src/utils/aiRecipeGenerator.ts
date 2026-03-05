@@ -123,51 +123,106 @@ export function generateRecipeLocally(request: RecipeRequest): Recipe {
   const primaryFruit = selectedFruits[0];
   const fruitList = selectedFruits.join(", ");
 
-  // Generate creative recipe names
-  const recipeNames = [
-    `${style.charAt(0).toUpperCase() + style.slice(1)} ${fruitList} Paradise`,
-    `Tropical ${primaryFruit} ${style} Delight`,
-    `${fruitList} ${style} Fusion`,
-    `Island ${primaryFruit} ${style} Blend`,
-    `${style.charAt(0).toUpperCase() + style.slice(1)} ${fruitList} Dream`,
+  // Generate creative recipe names - DYNAMIC system for maximum variety
+  const fruitPrefixes = [
+    "Tropical", "Island", "Sun-Kissed", "Golden", "Caribbean", "Pacific", 
+    "Midnight", "Emerald", "Rainforest", "Whipped", "Velvet", "Prism",
+    "Crystal", "Ocean", "Volcanic", "Coral", "Palm", "Jungle", "Citrus",
+    "Sunrise", "Moonlit", "Starlight", "Aurora", "Tide", "Wave", "Breeze"
   ];
+  
+  const stylePrefixes = [
+    "Sunrise", "Moonlit", "Starlight", "Twilight", "Dawn", "Dusk",
+    "Crystal", "Ocean", "Volcanic", "Coral", "Palm", "Jungle", "Citrus",
+    "Emerald", "Ruby", "Sapphire", "Amber", "Pearl", "Diamond", "Opal"
+  ];
+  
+  const creativeWords = [
+    "Paradise", "Oasis", "Dream", "Fusion", "Blend", "Serenade", "Breeze",
+    "Twist", "Magic", "Elixir", "Wave", "Vibe", "Rush", "Glow", "Bloom",
+    "Rush", "Pulse", "Spark", "Zen", "Chill", "Lux", "Kiss",
+    "Burst", "Splash", "Drift", "Float", "Spin", "Flow", "Ripple"
+  ];
+  
+  const nameStyles = [
+    (s: string, f: string, fl: string, c: string) => `${s} ${fl} ${c}`,
+    (s: string, f: string, fl: string, c: string) => `${f} ${s} ${c}`,
+    (s: string, f: string, fl: string, c: string) => `${c} ${fl} ${s}`,
+    (s: string, f: string, fl: string, c: string) => `${fl} ${c} ${s}`,
+    (s: string, f: string, fl: string, c: string) => `${f} ${c} Paradise`,
+    (s: string, f: string, fl: string, c: string) => `${c} ${f} Oasis`,
+    (s: string, f: string, fl: string, c: string) => `${s} ${f} Dream`,
+    (s: string, f: string, fl: string, c: string) => `${fl} ${c} Fusion`,
+    (s: string, f: string, fl: string, c: string) => `${c} ${fl} Elixir`,
+    (s: string, f: string, fl: string, c: string) => `${s} ${fl} Vibe`,
+  ];
+  
+  // Randomly pick each component
+  const prefix = fruitPrefixes[Math.floor(Math.random() * fruitPrefixes.length)];
+  const styleWord = stylePrefixes[Math.floor(Math.random() * stylePrefixes.length)];
+  const creative = creativeWords[Math.floor(Math.random() * creativeWords.length)];
+  const nameFn = nameStyles[Math.floor(Math.random() * nameStyles.length)];
+  
+  const randomName = nameFn(style, primaryFruit, fruitList, creative);
 
-  const randomName =
-    recipeNames[Math.floor(Math.random() * recipeNames.length)];
-
-  // Generate ingredients based on style and fruits
+  // Generate ingredients based on style and fruits - VARIED amounts
+  const amountVariations = ["1", "1.5", "2", "2.5"];
+  const amount1 = amountVariations[Math.floor(Math.random() * amountVariations.length)];
+  const amount2 = (Math.random() * 0.5 + 0.25).toFixed(1);
+  
   const baseIngredients = [
     selectedFruits.length === 1
-      ? `2 cups fresh ${primaryFruit}, chopped`
+      ? `${amount1} cups fresh ${primaryFruit}, chopped`
       : selectedFruits
-          .map((f, i) => `${i === 0 ? "1.5" : "0.5"} cups fresh ${f}, chopped`)
+          .map((f, i) => `${i === 0 ? amount1 : amount2} cups fresh ${f}, chopped`)
           .join("\n- "),
-    "1 cup coconut water",
-    "1/2 cup fresh orange juice",
-    "1 tablespoon honey (optional)",
+    `${Math.floor(Math.random() * 2 + 1)} cup ${["coconut water", "almond milk", "oat milk", "orange juice", "pineapple juice"][Math.floor(Math.random() * 5)]}`,
+    `${(Math.random() * 0.5 + 0.25).toFixed(1)} cup ${["orange juice", "lemon juice", "lime juice", "grapefruit juice"][Math.floor(Math.random() * 4)]}`,
+    `${(Math.random() * 2 + 0.5).toFixed(1)} tablespoon ${["honey", "maple syrup", "agave nectar", "stevia", "coconut sugar"][Math.floor(Math.random() * 5)]}`,
     "Ice cubes",
-    "Mint leaves for garnish",
+    `${["Mint leaves", "Basil leaves", "Cilantro", "Rosemary", "Lavender"][Math.floor(Math.random() * 5)]} for garnish`,
   ];
 
   if (vegetables && vegetables !== "none") {
-    baseIngredients.splice(2, 0, `1 cup ${vegetables}, chopped`);
+    baseIngredients.splice(2, 0, `${Math.floor(Math.random() * 2 + 1)} cup ${vegetables}, chopped`);
   }
 
-  // Add style-specific ingredients
+  // Add style-specific ingredients - EXPANDED
   const styleIngredients = {
-    smoothie: ["1/2 cup Greek yogurt", "1 banana"],
-    detox: ["1 cup spinach", "1/2 lemon, juiced", "1 inch ginger root"],
-    energy: ["1/2 cup pomegranate seeds", "1 tablespoon chia seeds"],
-    immunity: ["1 cup kale", "1 orange, peeled", "1 inch turmeric root"],
+    smoothie: [
+      `${(Math.random() * 0.5 + 0.25).toFixed(1)} cup ${["Greek yogurt", "coconut yogurt", "almond yogurt", "silken tofu"][Math.floor(Math.random() * 4)]}`,
+      `${["1/2", "3/4", "1"][Math.floor(Math.random() * 3)]} ${["banana", "frozen banana", "avocado", "mango chunks"][Math.floor(Math.random() * 4)]}`,
+      `${(Math.random() * 1 + 0.5).toFixed(1)} tablespoon ${["peanut butter", "almond butter", "cashew butter", "sunflower seed butter"][Math.floor(Math.random() * 4)]}`,
+    ],
+    detox: [
+      `${Math.floor(Math.random() * 3 + 1)} cup ${["spinach", "kale", "mixed greens", "arugula", "swiss chard"][Math.floor(Math.random() * 5)]}`,
+      `${(Math.random() * 0.5 + 0.25).toFixed(1)} ${["lemon", "lime", "grapefruit"][Math.floor(Math.random() * 3)]}, juiced`,
+      `${(Math.random() * 2 + 0.5).toFixed(1)} inch ${["ginger root", "turmeric root", "fresh mint", "cilantro"][Math.floor(Math.random() * 4)]}`,
+      `${(Math.random() * 1 + 0.5).toFixed(1)} tablespoon ${["chia seeds", "flax seeds", "hemp seeds", "pumpkin seeds"][Math.floor(Math.random() * 4)]}`,
+    ],
+    energy: [
+      `${(Math.random() * 0.75 + 0.25).toFixed(1)} cup ${["pomegranate seeds", "goji berries", "acai berries", "mulberries"][Math.floor(Math.random() * 4)]}`,
+      `${(Math.random() * 2 + 0.5).toFixed(1)} tablespoon ${["chia seeds", "hemp seeds", "flax seeds", "sunflower seeds"][Math.floor(Math.random() * 4)]}`,
+      `${(Math.random() * 1 + 0.5).toFixed(1)} tablespoon ${["cocoa nibs", "cacao powder", "espresso powder", "matcha powder"][Math.floor(Math.random() * 4)]}`,
+      `${(Math.random() * 0.5 + 0.25).toFixed(1)} cup ${["oats", "quinoa", "millet", "buckwheat"][Math.floor(Math.random() * 4)]}`,
+    ],
+    immunity: [
+      `${Math.floor(Math.random() * 2 + 1)} cup ${["kale", "spinach", "collard greens", "mustard greens"][Math.floor(Math.random() * 4)]}`,
+      `${["1", "1.5", "2"][Math.floor(Math.random() * 3)]} ${["orange", "tangerine", "blood orange", "mandarin"][Math.floor(Math.random() * 4)]}, peeled`,
+      `${(Math.random() * 2 + 0.5).toFixed(1)} inch ${["turmeric root", "ginger root", "fresh ginger"][Math.floor(Math.random() * 3)]}`,
+      `${(Math.random() * 1 + 0.5).toFixed(1)} tablespoon ${["elderberry syrup", "propolis", "echinacea extract", "garlic-infused honey"][Math.floor(Math.random() * 4)]}`,
+    ],
     digestive: [
-      "1 cup cucumber",
-      "1/2 cup aloe vera juice",
-      "1 teaspoon fennel seeds",
+      `${Math.floor(Math.random() * 2 + 1)} cup ${["cucumber", "zucchini", "celery", "fennel bulb"][Math.floor(Math.random() * 4)]}`,
+      `${(Math.random() * 0.75 + 0.25).toFixed(1)} cup ${["aloe vera juice", "kombucha", "kefir", "coconut kefir"][Math.floor(Math.random() * 4)]}`,
+      `${(Math.random() * 1 + 0.25).toFixed(1)} teaspoon ${["fennel seeds", "caraway seeds", "dill seeds", "cumin seeds"][Math.floor(Math.random() * 4)]}`,
+      `${(Math.random() * 0.5 + 0.25).toFixed(1)} inch ${["fresh ginger", "mint leaves", "lemongrass"][Math.floor(Math.random() * 3)]}`,
     ],
     beauty: [
-      "1 cup strawberries",
-      "1/2 cup blueberries",
-      "1 tablespoon collagen powder",
+      `${Math.floor(Math.random() * 2 + 1)} cup ${["strawberries", "raspberries", "blackberries", "mixed berries"][Math.floor(Math.random() * 4)]}`,
+      `${(Math.random() * 0.75 + 0.25).toFixed(1)} cup ${["blueberries", "goji berries", "acai", "blackcurrants"][Math.floor(Math.random() * 4)]}`,
+      `${(Math.random() * 2 + 0.5).toFixed(1)} tablespoon ${["collagen peptides", "silicon powder", "biotin supplement", "vitamin E oil"][Math.floor(Math.random() * 4)]}`,
+      `${(Math.random() * 0.5 + 0.25).toFixed(1)} ${["avocado", "coconut cream", "shea butter", "mango butter"][Math.floor(Math.random() * 4)]}`,
     ],
   };
 
@@ -175,32 +230,118 @@ export function generateRecipeLocally(request: RecipeRequest): Recipe {
     styleIngredients[style as keyof typeof styleIngredients] || [];
   const allIngredients = [...baseIngredients, ...additionalIngredients];
 
-  // Generate instructions
-  const instructions = [
-    "Wash and prepare all fruits and vegetables",
-    `Add ${fruitList}${
-      vegetables && vegetables !== "none" ? `, ${vegetables}` : ""
-    } and coconut water to blender`,
-    "Add remaining ingredients and blend on high speed for 60-90 seconds until smooth",
-    "Add honey if desired for extra sweetness",
-    "Pour over ice and garnish with fresh mint",
+  // Generate instructions - VARIED
+  const instructionTemplates = [
+    [
+      "Wash and prepare all fruits and vegetables thoroughly",
+      `Add ${fruitList}${
+        vegetables && vegetables !== "none" ? `, ${vegetables}` : ""
+      } and liquids to blender`,
+      "Blend on high speed for 60-90 seconds until silky smooth",
+      "Taste and adjust sweetness as needed",
+      "Pour into a chilled glass and garnish creatively",
+    ],
+    [
+      "Start by soaking any seeds or nuts for 5 minutes",
+      `Combine ${fruitList} with your chosen liquid base`,
+      `${vegetables && vegetables !== "none" ? `Fold in the ${vegetables}` : "Add leafy greens if desired"}`,
+      "Process until completely smooth with no lumps",
+      "Serve immediately over fresh ice",
+    ],
+    [
+      "Prep all ingredients - wash, peel, and chop as needed",
+      `Layer ${fruitList} in the blender for better blending`,
+      `Add ${vegetables && vegetables !== "none" ? vegetables : "optional add-ins"} and blend`,
+      "Add sweetener to taste and blend briefly",
+      "Decorate with fresh herbs or sliced fruit",
+    ],
+    [
+      "Begin with liquids at room temperature for better blending",
+      `Add ${primaryFruit} first, then secondary fruits`,
+      `Incorporate ${vegetables && vegetables !== "none" ? vegetables : "any vegetables"}`,
+      "Blend until reaching desired consistency",
+      "Top with your favorite garnishes",
+    ],
   ];
 
-  // Generate nutritional benefits
-  const benefits = [
-    "Rich in vitamins and antioxidants",
-    "Natural energy boost from tropical fruits",
-    "Hydrating and refreshing",
-    getStyleBenefit(style),
+  const instructions = instructionTemplates[Math.floor(Math.random() * instructionTemplates.length)];
+
+  // Generate nutritional benefits - EXPANDED
+  const benefitOptions = [
+    [
+      "Rich in vitamins A, C, and E for immune support",
+      "Natural antioxidants from tropical fruits",
+      "Hydrating and electrolyte-balancing",
+      getStyleBenefit(style),
+    ],
+    [
+      "Excellent source of dietary fiber for digestion",
+      "Contains essential minerals like potassium and magnesium",
+      "Low in calories but high in nutrients",
+      getStyleBenefit(style),
+    ],
+    [
+      "Boosts natural energy without caffeine crash",
+      "Supports healthy metabolism and digestion",
+      "Provides lasting hydration with coconut water",
+      getStyleBenefit(style),
+    ],
+    [
+      "Packed with polyphenols and flavonoids",
+      "Supports cardiovascular health",
+      "Promotes healthy skin from within",
+      getStyleBenefit(style),
+    ],
+    [
+      "High in vitamin C for collagen production",
+      "Contains anti-inflammatory compounds",
+      "Natural detoxifiers and alkalizers",
+      getStyleBenefit(style),
+    ],
   ];
 
-  // Generate tips
-  const tips = [
-    "Use frozen fruits for a colder, thicker consistency",
-    "Add a pinch of sea salt to enhance flavors",
-    "Store in an airtight container for up to 24 hours",
-    "Perfect for post-workout recovery",
+  const benefits = benefitOptions[Math.floor(Math.random() * benefitOptions.length)];
+
+  // Generate tips - EXPANDED
+  const tipOptions = [
+    [
+      "Use frozen fruits for a colder, thicker consistency",
+      "Add a pinch of sea salt to enhance all flavors",
+      "Store in airtight container for up to 24 hours",
+      "Best consumed within 30 minutes of making",
+    ],
+    [
+      "For extra creaminess, add ripe avocado",
+      "Protein boost: add a scoop of vanilla protein powder",
+      "Pre-freeze banana chunks for ice cream texture",
+      "Add cinnamon or nutmeg for warming notes",
+    ],
+    [
+      "Organic produce recommended for best taste",
+      "Room temperature fruits blend more smoothly",
+      "Add ice last to prevent over-dilution",
+      "Try coconut cream for richer mouthfeel",
+    ],
+    [
+      "For more fiber, don't strain the mixture",
+      "Fresh herbs add complex flavor profiles",
+      "Citrus zest intensifies bright flavors",
+      "Vanilla extract complements tropical fruits",
+    ],
   ];
+
+  const tips = tipOptions[Math.floor(Math.random() * tipOptions.length)];
+
+  const emojiOptions = ["🥤", "🍹", "🧃", "🍓", "🥭", "🍍", "🥝", "🍑", "🫐", "🍊", "🍋", "🍌", "🌴", "🌺", "🫐", "🧉", "🍵", "🥛", "🍹", "🍶"];
+  const randomEmoji = emojiOptions[Math.floor(Math.random() * emojiOptions.length)];
+  
+  // Random prep time between 3-10 minutes
+  const prepTimes = ["3 minutes", "5 minutes", "7 minutes", "8 minutes", "10 minutes"];
+  const randomPrep = prepTimes[Math.floor(Math.random() * prepTimes.length)];
+  
+  // Random servings
+  const servingOptions = ["1 serving", "2 servings", "3 servings", "4 servings"];
+  const randomServings = servingOptions[Math.floor(Math.random() * servingOptions.length)];
 
   return {
     title: randomName,
@@ -208,9 +349,9 @@ export function generateRecipeLocally(request: RecipeRequest): Recipe {
     instructions,
     nutritionalBenefits: benefits,
     tips,
-    prepTime: "5 minutes",
-    servings: "2 servings",
-    emoji: "🥤",
+    prepTime: randomPrep,
+    servings: randomServings,
+    emoji: randomEmoji,
   };
 }
 

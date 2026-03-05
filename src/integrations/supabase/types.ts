@@ -14,7 +14,88 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      recipes: {
+        Row: {
+          id: string
+          user_id: string | null
+          title: string
+          ingredients: string[]
+          instructions: string
+          style: string | null
+          dietary_notes: string | null
+          nutritional_info: Json | null
+          ai_service: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          title: string
+          ingredients?: string[]
+          instructions: string
+          style?: string | null
+          dietary_notes?: string | null
+          nutritional_info?: Json | null
+          ai_service?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          title?: string
+          ingredients?: string[]
+          instructions?: string
+          style?: string | null
+          dietary_notes?: string | null
+          nutritional_info?: Json | null
+          ai_service?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      orders: {
+        Row: {
+          id: string
+          user_id: string | null
+          status: 'pending' | 'preparing' | 'shipped' | 'delivered' | 'cancelled'
+          juices: Json
+          total: number
+          delivery_address: string | null
+          estimated_delivery: string | null
+          delivered_date: string | null
+          rating: number | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          status?: 'pending' | 'preparing' | 'shipped' | 'delivered' | 'cancelled'
+          juices?: Json
+          total?: number
+          delivery_address?: string | null
+          estimated_delivery?: string | null
+          delivered_date?: string | null
+          rating?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          status?: 'pending' | 'preparing' | 'shipped' | 'delivered' | 'cancelled'
+          juices?: Json
+          total?: number
+          delivery_address?: string | null
+          estimated_delivery?: string | null
+          delivered_date?: string | null
+          rating?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never

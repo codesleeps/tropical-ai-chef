@@ -68,8 +68,8 @@ export const TROPICAL_FRUITS = {
   guava: { emoji: '🍃', benefits: ['Vitamin C', 'Fiber', 'Lycopene'], sweetness: 'medium' },
   kiwi: { emoji: '🥝', benefits: ['Vitamin C', 'Vitamin K', 'Fiber'], sweetness: 'medium' },
   lychee: { emoji: '🌰', benefits: ['Vitamin C', 'Copper', 'Polyphenols'], sweetness: 'high' },
-  rambutan: { emoji: '🦔', benefits: ['Vitamin C', 'Iron', 'Fiber'], sweetness: 'high' },
-  mangosteen: { emoji: '💜', benefits: ['Xanthones', 'Vitamin C', 'Fiber'], sweetness: 'mild' },
+  banana: { emoji: '🍌', benefits: ['Potassium', 'Vitamin B6', 'Fiber'], sweetness: 'high' },
+  pear: { emoji: '🍐', benefits: ['Vitamin C', 'Fiber', 'Antioxidants'], sweetness: 'medium' },
 };
 
 // Juice styles and their characteristics

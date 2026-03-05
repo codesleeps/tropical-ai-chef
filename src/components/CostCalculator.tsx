@@ -18,15 +18,18 @@ import {
   TrendingUp,
   Save,
   RefreshCw,
+  Trash2,
+  Cloud,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useCostCalculations } from "@/hooks/useCostCalculations";
 
 export const CostCalculator = () => {
   const [dailyUsers, setDailyUsers] = useState(100);
   const [recipesPerUser, setRecipesPerUser] = useState(3);
   const [openaiCost, setOpenaiCost] = useState(0.006); // per recipe
   const [huggingfaceCost, setHuggingfaceCost] = useState(0.0015); // per recipe
-  const [savedCalculations, setSavedCalculations] = useState<any[]>([]);
+  const { calculations, loading, saveCalculation, deleteCalculation, fetchCalculations } = useCostCalculations();
 
   const monthlyUsers = dailyUsers * 30;
   const monthlyRecipes = monthlyUsers * recipesPerUser;
@@ -35,21 +38,24 @@ export const CostCalculator = () => {
   const huggingfaceMonthlyCost = monthlyRecipes * huggingfaceCost;
   const localMonthlyCost = 0;
 
-  // Handle saving calculation
-  const handleSaveCalculation = () => {
-    const calculation = {
-      id: Date.now(),
-      dailyUsers,
-      recipesPerUser,
-      monthlyRecipes,
-      openaiMonthlyCost,
-      huggingfaceMonthlyCost,
-      savedAt: new Date().toLocaleDateString(),
-    };
-    setSavedCalculations((prev) => [calculation, ...prev.slice(0, 4)]);
-    toast.success("Calculation saved! 💾", {
-      description: `${monthlyRecipes.toLocaleString()} recipes/month scenario saved`,
+  // Handle saving calculation to cloud
+  const handleSaveCalculation = async () => {
+    const scenarioName = `Custom (${dailyUsers} users/day)`;
+    await saveCalculation({
+      scenario_name: scenarioName,
+      daily_users: dailyUsers,
+      recipes_per_user: recipesPerUser,
+      monthly_recipes: monthlyRecipes,
+      openai_monthly_cost: openaiMonthlyCost,
+      huggingface_monthly_cost: huggingfaceMonthlyCost,
     });
+  };
+
+  // Load a saved calculation
+  const loadCalculation = (calc: typeof calculations[0]) => {
+    setDailyUsers(calc.daily_users);
+    setRecipesPerUser(calc.recipes_per_user);
+    toast.info(`Loaded "${calc.scenario_name}" scenario`);
   };
 
   // Handle preset scenarios
