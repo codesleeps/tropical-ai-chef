@@ -72,8 +72,8 @@ const TROPICAL_FRUITS = [
   { id: "papaya", name: "Papaya", emoji: "🧡", color: "bg-orange-100" },
   { id: "guava", name: "Guava", emoji: "🟢", color: "bg-green-100" },
   { id: "kiwi", name: "Kiwi", emoji: "🥝", color: "bg-green-100" },
-  { id: "lychee", name: "Lychee", emoji: "🔴", color: "bg-red-100" },
   { id: "banana", name: "Banana", emoji: "🍌", color: "bg-yellow-100" },
+  { id: "blueberries", name: "Blueberries", emoji: "🫐", color: "bg-blue-100" },
   { id: "pear", name: "Pear", emoji: "🍐", color: "bg-green-100" },
   { id: "coconut", name: "Coconut", emoji: "🥥", color: "bg-white" },
 ];

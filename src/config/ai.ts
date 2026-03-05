@@ -67,8 +67,8 @@ export const TROPICAL_FRUITS = {
   papaya: { emoji: '🧡', benefits: ['Papain', 'Vitamin C', 'Folate'], sweetness: 'medium' },
   guava: { emoji: '🍃', benefits: ['Vitamin C', 'Fiber', 'Lycopene'], sweetness: 'medium' },
   kiwi: { emoji: '🥝', benefits: ['Vitamin C', 'Vitamin K', 'Fiber'], sweetness: 'medium' },
-  lychee: { emoji: '🌰', benefits: ['Vitamin C', 'Copper', 'Polyphenols'], sweetness: 'high' },
   banana: { emoji: '🍌', benefits: ['Potassium', 'Vitamin B6', 'Fiber'], sweetness: 'high' },
+  blueberries: { emoji: '🫐', benefits: ['Vitamin K', 'Antioxidants', 'Fiber'], sweetness: 'medium' },
   pear: { emoji: '🍐', benefits: ['Vitamin C', 'Fiber', 'Antioxidants'], sweetness: 'medium' },
 };
 
