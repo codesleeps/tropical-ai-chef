@@ -16,6 +16,7 @@ import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import SEO, { StructuredData } from "@/components/SEO";
 import { generateRecipeStructuredData } from "@/utils/seo";
+import heroImage from "@/assets/tropical-hero.jpg";
 
 const Recipes = () => {
   const [currentRecipe, setCurrentRecipe] = useState("");
@@ -87,32 +88,21 @@ const Recipes = () => {
       <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
         {/* Hero Section */}
         <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-accent/30 via-background/90 to-primary/30" />
+          {/* Background Image */}
+          <div
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style={{ backgroundImage: `url(${heroImage})` }}
+          >
+            <div className="absolute inset-0 bg-black/60 bg-gradient-to-br from-accent/30 via-background/90 to-primary/30" />
+          </div>
           <div className="relative z-10 container mx-auto max-w-4xl text-center px-6">
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight relative">
-              <span className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent font-extrabold">
-                Create Amazing
-              </span>
-              <br />
-              <span className="bg-gradient-to-r from-accent via-primary to-secondary bg-clip-text text-transparent font-extrabold">
-                Tropical Recipes
-              </span>
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent drop-shadow-xl">
+              Create Amazing<br />Tropical Recipes
             </h1>
             <p className="text-xl md:text-2xl text-foreground/80 mb-8 max-w-3xl mx-auto leading-relaxed">
               Our advanced AI analyzes your preferences to craft the perfect
               tropical juice blend.
-              <br />
-              <span className="text-lg text-primary font-semibold">
-                ✨ Personalized • 🌿 Healthy • 🎯 Perfect for You
-              </span>
             </p>
-            <div className="flex justify-center gap-6 text-4xl mb-8">
-              <span className="animate-bounce delay-100">🥭</span>
-              <span className="animate-bounce delay-200">🍍</span>
-              <span className="animate-bounce delay-300">🥥</span>
-              <span className="animate-bounce delay-400">🥝</span>
-              <span className="animate-bounce delay-500">🫐</span>
-            </div>
           </div>
         </section>
 
