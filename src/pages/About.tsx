@@ -42,16 +42,11 @@ const About = () => {
             className="absolute inset-0 bg-cover bg-center bg-no-repeat"
             style={{ backgroundImage: `url(${heroImage})` }}
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-background/90 to-secondary/30" />
+            <div className="absolute inset-0 bg-black/60 bg-gradient-to-br from-primary/30 via-background/90 to-secondary/30" />
           </div>
           <div className="relative z-10 container mx-auto max-w-4xl text-center px-6">
-            <div className="flex justify-center mb-6">
-              <div className="flex items-center gap-4 text-6xl">🌴✨👥</div>
-            </div>
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-sunset bg-clip-text text-transparent leading-tight">
-              Fresh
-              <br />
-              Tropical Juices
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent drop-shadow-xl">
+              Come Join Us
             </h1>
             <p className="text-xl md:text-2xl text-foreground/80 mb-8 max-w-3xl mx-auto leading-relaxed">
               We're passionate about bringing you the freshest, most delicious

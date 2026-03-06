@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -9,89 +9,272 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Calendar, Clock, User, Search } from "lucide-react";
+import { Calendar, Clock, User, Search, ArrowRight } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import heroImage from "@/assets/tropical-hero.jpg";
 
 const Blog = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedCategory = searchParams.get("category");
 
   const blogPosts = [
+    // Superfruits Category
     {
       id: 1,
       title:
         "The Ultimate Guide to Dragon Fruit: Nature's Most Exotic Superfruit",
+      slug: "dragon-fruit-guide",
       excerpt:
         "Discover the incredible health benefits and unique flavor profile of dragon fruit, plus 5 amazing juice recipes to try today.",
       author: "Sophie Williams",
-      date: "2024-01-15",
+      date: "2025-01-15",
       readTime: "8 min read",
       category: "Superfruits",
       image: "🐉",
-      tags: ["Dragon Fruit", "Antioxidants", "Recipes"],
+      tags: ["Dragon Fruit", "Antioxidants", "Recipes", "Superfood"],
     },
     {
       id: 2,
-      title: "Morning Energy Boost: 7 Tropical Juice Recipes to Start Your Day",
+      title:
+        "Acai Berries: The Amazonian Superfruit Taking the World by Storm",
+      slug: "acai-berries",
       excerpt:
-        "Transform your mornings with these energizing tropical juice blends that provide sustained energy without the coffee crash.",
+        "Learn about the powerful antioxidants in acai and how this Brazilian berry can boost your immune system and energy levels.",
       author: "Maria Rodriguez",
-      date: "2024-01-12",
+      date: "2025-02-20",
       readTime: "6 min read",
-      category: "Recipes",
-      image: "⚡",
-      tags: ["Energy", "Morning", "Breakfast"],
+      category: "Superfruits",
+      image: "🫐",
+      tags: ["Acai", "Antioxidants", "Amazon", "Superfood"],
     },
     {
       id: 3,
       title:
-        "Detox vs. Cleanse: Understanding the Science Behind Juice Cleanses",
+        "Mangosteen: The Queen of Tropical Fruits",
+      slug: "mangosteen-queen",
       excerpt:
-        "Separate fact from fiction in the world of juice cleanses and learn how to detox your body naturally and safely.",
+        "Explore the anti-inflammatory properties of mangosteen and why it's considered one of the most nutritious tropical fruits.",
       author: "James Chen",
-      date: "2024-01-10",
-      readTime: "10 min read",
-      category: "Health",
-      image: "🌿",
-      tags: ["Detox", "Science", "Health"],
+      date: "2025-03-10",
+      readTime: "7 min read",
+      category: "Superfruits",
+      image: "🥭",
+      tags: ["Mangosteen", "Anti-inflammatory", "Vitamins"],
     },
+    // Recipes Category
     {
       id: 4,
-      title: "Sustainable Sourcing: How We Support Tropical Fruit Farmers",
+      title: "Morning Energy Boost: 7 Tropical Juice Recipes to Start Your Day",
+      slug: "morning-energy-boost",
       excerpt:
-        "Learn about our commitment to fair trade and sustainable farming practices that benefit both farmers and the environment.",
-      author: "Sophie Williams",
-      date: "2024-01-08",
-      readTime: "5 min read",
-      category: "Sustainability",
-      image: "🌱",
-      tags: ["Sustainability", "Fair Trade", "Farmers"],
+        "Transform your mornings with these energizing tropical juice blends that provide sustained energy without the coffee crash.",
+      author: "Maria Rodriguez",
+      date: "2025-01-12",
+      readTime: "6 min read",
+      category: "Recipes",
+      image: "⚡",
+      tags: ["Energy", "Morning", "Breakfast", "Recipes"],
     },
     {
       id: 5,
       title:
-        "AI-Powered Nutrition: How Technology is Revolutionizing Healthy Eating",
+        "Tropical Smoothie Bowl Recipes: Instagram-Worthy Breakfast Ideas",
+      slug: "tropical-smoothie-bowls",
       excerpt:
-        "Explore how artificial intelligence is making personalized nutrition more accessible and effective than ever before.",
-      author: "James Chen",
-      date: "2024-01-05",
-      readTime: "7 min read",
-      category: "Technology",
-      image: "🤖",
-      tags: ["AI", "Technology", "Nutrition"],
+        "Create beautiful and nutritious smoothie bowls at home with these easy tropical fruit combinations.",
+      author: "Sophie Williams",
+      date: "2025-02-05",
+      readTime: "5 min read",
+      category: "Recipes",
+      image: "🥣",
+      tags: ["Smoothie Bowl", "Breakfast", "Recipes", "Instagram"],
     },
     {
       id: 6,
+      title:
+        "Detox Cleanse Recipes: 3-Day Tropical Juice Reset",
+      slug: "detox-cleanse-recipes",
+      excerpt:
+        "A complete guide to doing a juice cleanse with tropical fruits to reset your system naturally.",
+      author: "James Chen",
+      date: "2025-03-01",
+      readTime: "10 min read",
+      category: "Recipes",
+      image: "🥤",
+      tags: ["Detox", "Cleanse", "Recipes", "Reset"],
+    },
+    // Health Category
+    {
+      id: 7,
+      title:
+        "Detox vs. Cleanse: Understanding the Science Behind Juice Cleanses",
+      slug: "detox-vs-cleanse",
+      excerpt:
+        "Separate fact from fiction in the world of juice cleanses and learn how to detox your body naturally and safely.",
+      author: "James Chen",
+      date: "2025-01-10",
+      readTime: "10 min read",
+      category: "Health",
+      image: "🌿",
+      tags: ["Detox", "Science", "Health", "Cleansing"],
+    },
+    {
+      id: 8,
+      title:
+        "Heart Health and Tropical Fruits: What the Latest Research Shows",
+      slug: "heart-health-tropical",
+      excerpt:
+        "Discover how tropical fruits can support cardiovascular health and lower risk of heart disease.",
+      author: "Dr. Emily Santos",
+      date: "2025-02-15",
+      readTime: "8 min read",
+      category: "Health",
+      image: "❤️",
+      tags: ["Heart Health", "Cardiovascular", "Research", "Vitamins"],
+    },
+    {
+      id: 9,
+      title:
+        "Boost Your Immune System with These Tropical Powerhouses",
+      slug: "immune-system-boost",
+      excerpt:
+        "Learn which tropical fruits are packed with vitamin C and immune-boosting nutrients.",
+      author: "Maria Rodriguez",
+      date: "2025-03-05",
+      readTime: "6 min read",
+      category: "Health",
+      image: "🛡️",
+      tags: ["Immune System", "Vitamin C", "Health", "Nutrition"],
+    },
+    // Sustainability Category
+    {
+      id: 10,
+      title: "Sustainable Sourcing: How We Support Tropical Fruit Farmers",
+      slug: "sustainable-sourcing",
+      excerpt:
+        "Learn about our commitment to fair trade and sustainable farming practices that benefit both farmers and the environment.",
+      author: "Sophie Williams",
+      date: "2025-01-08",
+      readTime: "5 min read",
+      category: "Sustainability",
+      image: "🌱",
+      tags: ["Sustainability", "Fair Trade", "Farmers", "Environment"],
+    },
+    {
+      id: 11,
+      title:
+        "The Future of Tropical Agriculture: Regenerative Farming Practices",
+      slug: "regenerative-farming",
+      excerpt:
+        "How regenerative agriculture is transforming tropical fruit farming and combating climate change.",
+      author: "Carlos Mendez",
+      date: "2025-02-28",
+      readTime: "7 min read",
+      category: "Sustainability",
+      image: "🌍",
+      tags: ["Regenerative", "Agriculture", "Climate", "Farming"],
+    },
+    {
+      id: 12,
+      title:
+        "Zero-Waste Tropical Juicing: Tips for an Eco-Friendly Kitchen",
+      slug: "zero-waste-juicing",
+      excerpt:
+        "Reduce food waste with these creative tips for using every part of tropical fruits in your kitchen.",
+      author: "Ana Costa",
+      date: "2025-03-12",
+      readTime: "4 min read",
+      category: "Sustainability",
+      image: "♻️",
+      tags: ["Zero Waste", "Eco-Friendly", "Tips", "Kitchen"],
+    },
+    // Technology Category
+    {
+      id: 13,
+      title:
+        "AI-Powered Nutrition: How Technology is Revolutionizing Healthy Eating",
+      slug: "ai-powered-nutrition",
+      excerpt:
+        "Explore how artificial intelligence is making personalized nutrition more accessible and effective than ever before.",
+      author: "James Chen",
+      date: "2025-01-05",
+      readTime: "7 min read",
+      category: "Technology",
+      image: "🤖",
+      tags: ["AI", "Technology", "Nutrition", "Personalization"],
+    },
+    {
+      id: 14,
+      title:
+        "Smart Kitchen Gadgets Every Health Enthusiast Needs in 2025",
+      slug: "smart-kitchen-gadgets",
+      excerpt:
+        "From AI-powered juicers to smart fridges, discover the latest technology for healthy living.",
+      author: "Tech Team",
+      date: "2025-02-10",
+      readTime: "6 min read",
+      category: "Technology",
+      image: "📱",
+      tags: ["Smart Gadgets", "Technology", "Kitchen", "Innovation"],
+    },
+    {
+      id: 15,
+      title:
+        "Blockchain Tracking: Ensuring Transparency in Your Juice",
+      slug: "blockchain-tracking",
+      excerpt:
+        "How we're using blockchain technology to trace tropical fruits from farm to glass.",
+      author: "Digital Team",
+      date: "2025-03-08",
+      readTime: "5 min read",
+      category: "Technology",
+      image: "🔗",
+      tags: ["Blockchain", "Transparency", "Tracking", "Supply Chain"],
+    },
+    // Beauty Category
+    {
+      id: 16,
       title: "Tropical Fruits for Skin Health: Beauty from the Inside Out",
+      slug: "skin-health-tropical",
       excerpt:
         "Discover which tropical fruits can help you achieve glowing, healthy skin naturally through proper nutrition.",
       author: "Maria Rodriguez",
-      date: "2024-01-03",
+      date: "2025-01-03",
       readTime: "6 min read",
       category: "Beauty",
       image: "✨",
-      tags: ["Skin Health", "Beauty", "Vitamins"],
+      tags: ["Skin Health", "Beauty", "Vitamins", "Natural"],
+    },
+    {
+      id: 17,
+      title:
+        "DIY Tropical Face Masks: Natural Beauty Treatments at Home",
+      slug: "diy-face-masks",
+      excerpt:
+        "Create effective face masks using tropical fruits for glowing, healthy skin.",
+      author: "Beauty Team",
+      date: "2025-02-22",
+      readTime: "5 min read",
+      category: "Beauty",
+      image: "🧴",
+      tags: ["DIY", "Face Mask", "Natural", "Home Remedies"],
+    },
+    {
+      id: 18,
+      title:
+        "Hair Health Secrets: Tropical Fruits for Stronger, Shinier Hair",
+      slug: "hair-health-secrets",
+      excerpt:
+        "Learn which tropical fruits promote hair growth and overall hair health from the inside out.",
+      author: "Sophie Williams",
+      date: "2025-03-15",
+      readTime: "4 min read",
+      category: "Beauty",
+      image: "💇‍♀️",
+      tags: ["Hair Health", "Beauty", "Nutrition", "Growth"],
     },
   ];
 
@@ -105,14 +288,32 @@ const Blog = () => {
     "Beauty",
   ];
 
-  const filteredPosts = blogPosts.filter(
-    (post) =>
-      post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.tags.some((tag) =>
-        tag.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-  );
+  const filteredPosts = useMemo(() => {
+    let posts = blogPosts;
+    
+    // Filter by category from URL if present
+    if (selectedCategory && selectedCategory !== "All") {
+      posts = posts.filter(post => post.category === selectedCategory);
+    }
+    
+    if (!searchTerm.trim()) return posts;
+    return posts.filter(
+      (post) =>
+        post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        post.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        post.tags.some((tag) =>
+          tag.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+    );
+  }, [searchTerm, selectedCategory]);
+
+  const handleCategoryClick = (category: string) => {
+    if (category === "All") {
+      setSearchParams({});
+    } else {
+      setSearchParams({ category });
+    }
+  };
 
   return (
     <>
@@ -125,16 +326,11 @@ const Blog = () => {
             className="absolute inset-0 bg-cover bg-center bg-no-repeat"
             style={{ backgroundImage: `url(${heroImage})` }}
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-secondary/30 via-background/90 to-accent/30" />
+            <div className="absolute inset-0 bg-black/60 bg-gradient-to-br from-secondary/30 via-background/90 to-accent/30" />
           </div>
           <div className="relative z-10 container mx-auto max-w-4xl text-center px-6">
-            <div className="flex justify-center mb-6">
-              <div className="flex items-center gap-4 text-6xl">📚✨🌿</div>
-            </div>
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-sunset bg-clip-text text-transparent leading-tight">
-              Tropical
-              <br />
-              Wellness Blog
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent drop-shadow-xl">
+              Benefits
             </h1>
             <p className="text-xl md:text-2xl text-foreground/80 mb-8 max-w-3xl mx-auto leading-relaxed">
               Expert insights, delicious recipes, and the latest research on
@@ -143,13 +339,27 @@ const Blog = () => {
 
             {/* Search Bar */}
             <div className="max-w-md mx-auto relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-foreground/50 w-4 h-4" />
-              <Input
-                placeholder="Search articles..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 transition-smooth focus:shadow-glow bg-card/80 backdrop-blur-sm"
-              />
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-foreground/50 w-4 h-4" />
+                  <Input
+                    placeholder="Search articles..."
+                    value={searchTerm}
+                    onChange={(e) => {
+                      setSearchTerm(e.target.value);
+                    }}
+                    className="pl-10 transition-smooth focus:shadow-glow bg-card/80 backdrop-blur-sm"
+                  />
+                </div>
+                <Button 
+                  onClick={() => {
+                    // Search is automatic via onChange, this button is for accessibility
+                  }}
+                  className="gradient-tropical"
+                >
+                  <Search className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
           </div>
         </section>
@@ -169,8 +379,9 @@ const Blog = () => {
               {categories.map((category) => (
                 <Badge
                   key={category}
-                  variant="outline"
+                  variant={selectedCategory === category ? "default" : "outline"}
                   className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-smooth"
+                  onClick={() => handleCategoryClick(category)}
                 >
                   {category}
                 </Badge>
@@ -198,7 +409,13 @@ const Blog = () => {
                 >
                   <CardHeader>
                     <div className="flex items-center justify-between mb-3">
-                      <Badge variant="secondary">{post.category}</Badge>
+                      <Badge 
+                        variant="secondary" 
+                        className="cursor-pointer hover:bg-secondary/80"
+                        onClick={() => handleCategoryClick(post.category)}
+                      >
+                        {post.category}
+                      </Badge>
                       <div className="text-3xl">{post.image}</div>
                     </div>
                     <CardTitle className="text-lg leading-tight hover:text-primary transition-smooth">
@@ -225,11 +442,14 @@ const Blog = () => {
                         {post.readTime}
                       </div>
                       <Button
+                        asChild
                         size="sm"
                         variant="ghost"
                         className="text-primary hover:text-primary-foreground hover:bg-primary"
                       >
-                        Read More
+                        <Link to={`/blog/${post.slug}`}>
+                          Read More <ArrowRight className="w-4 h-4 ml-1" />
+                        </Link>
                       </Button>
                     </div>
                     <div className="flex flex-wrap gap-1 mt-3">
