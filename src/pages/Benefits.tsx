@@ -10,6 +10,7 @@ import { Heart, Zap, Shield, Leaf, Brain, Sparkles } from "lucide-react";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import SEO, { StructuredData } from "@/components/SEO";
+import heroImage from "@/assets/tropical-hero.jpg";
 
 const Benefits = () => {
   const benefits = [
@@ -140,7 +141,13 @@ const Benefits = () => {
       <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
         {/* Health Benefits Introduction Section */}
         <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-accent/30 via-background/90 to-primary/30" />
+          {/* Background Image */}
+          <div
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style={{ backgroundImage: `url(${heroImage})` }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-accent/30 via-background/90 to-primary/30" />
+          </div>
           <div className="relative z-10 container mx-auto max-w-4xl text-center px-6">
             <div className="flex justify-center mb-6">
               <div className="flex items-center gap-4 text-6xl">🥭🍍🥝🐉💚</div>

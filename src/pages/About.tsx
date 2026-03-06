@@ -10,6 +10,7 @@ import { Leaf, Heart, Zap, Shield, Star, Users } from "lucide-react";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { useState, useEffect } from "react";
+import heroImage from "@/assets/tropical-hero.jpg";
 import {
   PageTransition,
   AnimatedSection,
@@ -36,13 +37,19 @@ const About = () => {
       <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
         {/* Company Introduction Section */}
         <AnimatedSection className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-background/90 to-secondary/30" />
+          {/* Background Image */}
+          <div
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style={{ backgroundImage: `url(${heroImage})` }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-background/90 to-secondary/30" />
+          </div>
           <div className="relative z-10 container mx-auto max-w-4xl text-center px-6">
             <div className="flex justify-center mb-6">
               <div className="flex items-center gap-4 text-6xl">🌴✨👥</div>
             </div>
             <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-sunset bg-clip-text text-transparent leading-tight">
-              About Fresh
+              Fresh
               <br />
               Tropical Juices
             </h1>
