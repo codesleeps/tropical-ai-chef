@@ -276,6 +276,175 @@ const Blog = () => {
       image: "💇‍♀️",
       tags: ["Hair Health", "Beauty", "Nutrition", "Growth"],
     },
+    // Additional posts with pineapple, mango, coconut, bananas, pears, blueberries
+    {
+      id: 19,
+      title:
+        "Pineapple: The Ultimate Tropical Powerhouse",
+      slug: "pineapple-powerhouse",
+      excerpt:
+        "Discover the amazing health benefits of pineapple, from bromelain to vitamin C and beyond.",
+      author: "Maria Rodriguez",
+      date: "2025-03-20",
+      readTime: "6 min read",
+      category: "Superfruits",
+      image: "🍍",
+      tags: ["Pineapple", "Bromelain", "Vitamin C", "Digestion"],
+    },
+    {
+      id: 20,
+      title:
+        "Mango Mania: 10 Delicious Ways to Enjoy This Tropical Gem",
+      slug: "mango-mania",
+      excerpt:
+        "From smoothies to salads, discover creative ways to use mango in your daily diet.",
+      author: "Sophie Williams",
+      date: "2025-03-22",
+      readTime: "5 min read",
+      category: "Recipes",
+      image: "🥭",
+      tags: ["Mango", "Recipes", "Summer", "Tropical"],
+    },
+    {
+      id: 21,
+      title:
+        "Coconut: More Than Just Water - The Complete Guide",
+      slug: "coconut-complete-guide",
+      excerpt:
+        "Explore the many forms of coconut and their unique health benefits.",
+      author: "James Chen",
+      date: "2025-03-25",
+      readTime: "7 min read",
+      category: "Superfruits",
+      image: "🥥",
+      tags: ["Coconut", "Water", "Milk", "Oil"],
+    },
+    {
+      id: 22,
+      title:
+        "Bananas: Your Perfect Post-Workout Recovery Fuel",
+      slug: "banana-recovery",
+      excerpt:
+        "Learn why bananas are the ideal post-workout snack and how to use them in smoothies.",
+      author: "Dr. Emily Santos",
+      date: "2025-03-28",
+      readTime: "4 min read",
+      category: "Health",
+      image: "🍌",
+      tags: ["Banana", "Recovery", "Potassium", "Sports"],
+    },
+    {
+      id: 23,
+      title:
+        "Pears: The Underrated Digestive Health Hero",
+      slug: "pear-digestive-health",
+      excerpt:
+        "Why pears should be your go-to fruit for digestive health and fiber.",
+      author: "James Chen",
+      date: "2025-04-01",
+      readTime: "5 min read",
+      category: "Health",
+      image: "🍐",
+      tags: ["Pear", "Fiber", "Digestion", "Health"],
+    },
+    {
+      id: 24,
+      title:
+        "Blueberries: The Antioxidant King in Your Smoothie",
+      slug: "blueberry-antioxidant",
+      excerpt:
+        "Discover the powerful antioxidants in blueberries and how to use them in tropical recipes.",
+      author: "Maria Rodriguez",
+      date: "2025-04-05",
+      readTime: "6 min read",
+      category: "Superfruits",
+      image: "🫐",
+      tags: ["Blueberry", "Antioxidants", "Brain Health", "Smoothie"],
+    },
+    {
+      id: 25,
+      title:
+        "Tropical Fruit Salad Recipes for Every Season",
+      slug: "tropical-fruit-salad",
+      excerpt:
+        "Creative and refreshing tropical fruit salad combinations for any time of year.",
+      author: "Sophie Williams",
+      date: "2025-04-10",
+      readTime: "5 min read",
+      category: "Recipes",
+      image: "🥗",
+      tags: ["Fruit Salad", "Recipes", "Summer", "Fresh"],
+    },
+    {
+      id: 26,
+      title:
+        "Coconut Milk vs Almond Milk: Which is Better?",
+      slug: "coconut-milk-vs-almond",
+      excerpt:
+        "A comprehensive comparison of coconut milk and almond milk for smoothies and cooking.",
+      author: "James Chen",
+      date: "2025-04-15",
+      readTime: "6 min read",
+      category: "Health",
+      image: "🥛",
+      tags: ["Coconut Milk", "Almond Milk", "Comparison", "Nutrition"],
+    },
+    {
+      id: 27,
+      title:
+        "Banana Bread Smoothie: Breakfast of Champions",
+      slug: "banana-bread-smoothie",
+      excerpt:
+        "All the flavors of banana bread in a healthy, portable smoothie form.",
+      author: "Maria Rodriguez",
+      date: "2025-04-20",
+      readTime: "4 min read",
+      category: "Recipes",
+      image: "🍞",
+      tags: ["Banana", "Breakfast", "Smoothie", "Recipes"],
+    },
+    {
+      id: 28,
+      title:
+        "Pear and Ginger: A Warming Winter Combination",
+      slug: "pear-ginger-winter",
+      excerpt:
+        "Cozy pear and ginger recipes perfect for cold weather wellness.",
+      author: "Dr. Emily Santos",
+      date: "2025-04-25",
+      readTime: "5 min read",
+      category: "Recipes",
+      image: "🫚",
+      tags: ["Pear", "Ginger", "Winter", "Warming"],
+    },
+    {
+      id: 29,
+      title:
+        "Blueberry Mango Tango: Tropical Berry Fusion",
+      slug: "blueberry-mango-tango",
+      excerpt:
+        "A delicious combination of berries and tropical fruits in one amazing smoothie.",
+      author: "Sophie Williams",
+      date: "2025-04-28",
+      readTime: "3 min read",
+      category: "Recipes",
+      image: "💜",
+      tags: ["Blueberry", "Mango", "Smoothie", "Fusion"],
+    },
+    {
+      id: 30,
+      title:
+        "The Perfect Tropical Smoothie Base Formula",
+      slug: "smoothie-base-formula",
+      excerpt:
+        "Learn the universal formula for creating perfect tropical smoothies every time.",
+      author: "James Chen",
+      date: "2025-05-01",
+      readTime: "7 min read",
+      category: "Recipes",
+      image: "📐",
+      tags: ["Smoothie", "Formula", "Tutorial", "Base"],
+    },
   ];
 
   const categories = [
