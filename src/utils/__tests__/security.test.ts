@@ -160,23 +160,24 @@ describe("Security Utilities", () => {
     });
 
     it("resets after time window", () => {
-      vi.useFakeTimers();
+      const startTime = 1600000000000;
+      vi.setSystemTime(startTime);
 
       const limit = 1;
       const windowMs = 1000;
 
       // Use up the limit
-      RateLimiter.checkLimit("test-key", limit, windowMs);
+      RateLimiter.checkLimit("test-key-reset", limit, windowMs);
 
       // Should be blocked immediately
-      let result = RateLimiter.checkLimit("test-key", limit, windowMs);
+      let result = RateLimiter.checkLimit("test-key-reset", limit, windowMs);
       expect(result.allowed).toBe(false);
 
-      // Fast forward past the window
-      vi.advanceTimersByTime(1001);
+      // Advance system time past the window
+      vi.setSystemTime(startTime + 1001);
 
       // Should be allowed again
-      result = RateLimiter.checkLimit("test-key", limit, windowMs);
+      result = RateLimiter.checkLimit("test-key-reset", limit, windowMs);
       expect(result.allowed).toBe(true);
 
       vi.useRealTimers();

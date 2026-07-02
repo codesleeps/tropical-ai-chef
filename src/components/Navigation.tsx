@@ -181,7 +181,7 @@ export const Navigation = () => {
           {/* Mobile Menu */}
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" aria-label="Open menu">
                 <Menu className="w-5 h-5" />
               </Button>
             </SheetTrigger>

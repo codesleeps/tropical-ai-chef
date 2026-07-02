@@ -13,6 +13,24 @@ export interface SavedCalculation {
   created_at: string;
 }
 
+const safeGetItem = (key: string): string | null => {
+  try {
+    return typeof localStorage !== "undefined" ? localStorage.getItem(key) : null;
+  } catch {
+    return null;
+  }
+};
+
+const safeSetItem = (key: string, value: string): void => {
+  try {
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem(key, value);
+    }
+  } catch (e) {
+    console.warn("Storage write failed:", e);
+  }
+};
+
 export function useCostCalculations() {
   const [calculations, setCalculations] = useState<SavedCalculation[]>([]);
   const [loading, setLoading] = useState(false);
@@ -30,7 +48,7 @@ export function useCostCalculations() {
       setCalculations(data ?? []);
     } catch {
       // If table doesn't exist, use localStorage fallback
-      const stored = localStorage.getItem("cost_calculations");
+      const stored = safeGetItem("cost_calculations");
       if (stored) {
         setCalculations(JSON.parse(stored));
       }
@@ -60,7 +78,7 @@ export function useCostCalculations() {
       return data;
     } catch {
       // Fallback to localStorage
-      const stored = localStorage.getItem("cost_calculations");
+      const stored = safeGetItem("cost_calculations");
       const existing: SavedCalculation[] = stored ? JSON.parse(stored) : [];
       const newCalc: SavedCalculation = {
         ...scenario,
@@ -68,7 +86,7 @@ export function useCostCalculations() {
         created_at: new Date().toISOString(),
       };
       const updated = [newCalc, ...existing].slice(0, 10);
-      localStorage.setItem("cost_calculations", JSON.stringify(updated));
+      safeSetItem("cost_calculations", JSON.stringify(updated));
       setCalculations(updated);
       toast.success("Calculation saved locally! 💾");
       return newCalc;

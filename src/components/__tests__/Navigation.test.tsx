@@ -72,7 +72,7 @@ describe("Navigation Component", () => {
     render(<Navigation />);
 
     // Mobile menu button should be present
-    const mobileMenuTrigger = screen.getByRole("button");
+    const mobileMenuTrigger = screen.getByRole("button", { name: /open menu/i });
     expect(mobileMenuTrigger).toBeInTheDocument();
   });
 
@@ -81,7 +81,7 @@ describe("Navigation Component", () => {
     render(<Navigation />);
 
     // Find and click the mobile menu trigger
-    const menuTrigger = screen.getByRole("button");
+    const menuTrigger = screen.getByRole("button", { name: /open menu/i });
     await user.click(menuTrigger);
 
     // Mobile menu should now be visible (though testing sheet visibility might be complex)

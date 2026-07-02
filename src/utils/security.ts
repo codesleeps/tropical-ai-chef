@@ -84,8 +84,8 @@ export class InputValidator {
 
   static isValidURL(url: string): boolean {
     try {
-      new URL(url);
-      return true;
+      const parsed = new URL(url);
+      return parsed.protocol === "http:" || parsed.protocol === "https:";
     } catch {
       return false;
     }
@@ -107,8 +107,8 @@ export class InputValidator {
       errors.push("Input too long (max 1000 characters)");
     }
 
-    // Check for potential script injection
-    if (/script|javascript|onclick|onerror/i.test(sanitized)) {
+    // Check for potential script injection (active scripting schemes or event attributes)
+    if (/javascript:|onclick\s*=|onerror\s*=/i.test(sanitized)) {
       errors.push("Invalid characters detected");
     }
 
