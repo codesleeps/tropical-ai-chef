@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -26,6 +26,7 @@ import {
   RefreshCw,
   Zap,
   Shield,
+  Settings,
 } from "lucide-react";
 import { RecipeGenerationLoader } from "@/components/LoadingStates";
 import { useErrorHandler } from "@/hooks/use-error-handler";
@@ -37,6 +38,7 @@ import { toast } from "sonner";
 import {
   generateRecipeWithOpenAI,
   generateRecipeLocally,
+  generateRecipeWithCustomProvider,
   type RecipeRequest,
   type Recipe,
 } from "@/utils/aiRecipeGenerator";
@@ -52,7 +54,7 @@ interface RecipeGeneratorProps {
   onRecipeGenerated: (recipe: string) => void;
 }
 
-type GenerationService = "local" | "ollama" | "openai";
+type GenerationService = "local" | "ollama" | "openai" | "custom";
 
 const TROPICAL_FRUITS = [
   { id: "mango", name: "Mango", emoji: "🥭", color: "bg-orange-100" },
@@ -104,6 +106,28 @@ const VEGETABLES = [
   { id: "parsley", name: "Parsley", emoji: "🌿", color: "bg-green-100" },
 ];
 
+const safeLocalStorage = {
+  getItem: (key: string): string | null => {
+    try {
+      if (typeof window !== "undefined" && window.localStorage) {
+        return window.localStorage.getItem(key);
+      }
+    } catch (e) {
+      console.warn("localStorage not available:", e);
+    }
+    return null;
+  },
+  setItem: (key: string, value: string): void => {
+    try {
+      if (typeof window !== "undefined" && window.localStorage) {
+        window.localStorage.setItem(key, value);
+      }
+    } catch (e) {
+      console.warn("localStorage not available:", e);
+    }
+  }
+};
+
 export const RecipeGenerator = ({
   onRecipeGenerated,
 }: RecipeGeneratorProps) => {
@@ -120,13 +144,34 @@ export const RecipeGenerator = ({
   const [isGenerating, setIsGenerating] = useState(false);
   const [availableServices, setAvailableServices] = useState<
     GenerationService[]
-  >(["local"]);
+  >(["local", "custom"]);
   const [selectedService, setSelectedService] =
     useState<GenerationService>("local");
   const [ollamaModels, setOllamaModels] = useState<string[]>([]);
   const [selectedModel, setSelectedModel] = useState<string>("");
+  const [customBaseUrl, setCustomBaseUrl] = useState<string>(
+    () => safeLocalStorage.getItem("custom_ai_base_url") || env.customAiBaseUrl || "https://api.deepseek.com/v1"
+  );
+  const [customApiKey, setCustomApiKey] = useState<string>(
+    () => safeLocalStorage.getItem("custom_ai_key") || env.customAiApiKey || ""
+  );
+  const [customModel, setCustomModel] = useState<string>(
+    () => safeLocalStorage.getItem("custom_ai_model") || env.customAiModel || "deepseek-chat"
+  );
   const [retryCount, setRetryCount] = useState(0);
   const [lastError, setLastError] = useState<string | null>(null);
+
+  useEffect(() => {
+    safeLocalStorage.setItem("custom_ai_base_url", customBaseUrl);
+  }, [customBaseUrl]);
+
+  useEffect(() => {
+    safeLocalStorage.setItem("custom_ai_key", customApiKey);
+  }, [customApiKey]);
+
+  useEffect(() => {
+    safeLocalStorage.setItem("custom_ai_model", customModel);
+  }, [customModel]);
 
   const { handleError, handleAsyncError, handleApiError } = useErrorHandler();
   const {
@@ -148,7 +193,7 @@ export const RecipeGenerator = ({
 
   // Check available services on component mount
   const checkAvailableServices = useCallback(async () => {
-    const services: GenerationService[] = ["local"]; // Always available
+    const services: GenerationService[] = ["local", "custom"]; // Always available
 
     // Check OpenAI availability
     if (hasOpenAIKey()) {
@@ -177,6 +222,8 @@ export const RecipeGenerator = ({
       setSelectedService("ollama");
     } else if (services.includes("openai")) {
       setSelectedService("openai");
+    } else if (services.includes("custom") && safeLocalStorage.getItem("custom_ai_key")) {
+      setSelectedService("custom");
     } else {
       setSelectedService("local");
     }
@@ -235,6 +282,19 @@ export const RecipeGenerator = ({
             env.openaiApiKey!
           );
 
+        case "custom":
+          if (!customApiKey || !customBaseUrl) {
+            throw new Error("Custom AI configuration is incomplete. Base URL and API Key are required.");
+          }
+          return await generateRecipeWithCustomProvider(
+            cleanRequest,
+            {
+              baseUrl: customBaseUrl,
+              apiKey: customApiKey,
+              model: customModel,
+            }
+          );
+
         case "ollama":
           if (!selectedModel) {
             throw new Error("No Ollama model selected");
@@ -281,6 +341,19 @@ export const RecipeGenerator = ({
                 return await generateRecipeWithOpenAI(
                   cleanRequest,
                   env.openaiApiKey!
+                );
+              }
+              break;
+
+            case "custom":
+              if (customApiKey && customBaseUrl) {
+                return await generateRecipeWithCustomProvider(
+                  cleanRequest,
+                  {
+                    baseUrl: customBaseUrl,
+                    apiKey: customApiKey,
+                    model: customModel,
+                  }
                 );
               }
               break;
@@ -419,6 +492,8 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
         return `Ollama ${selectedModel ? `(${selectedModel})` : ""}`;
       case "local":
         return "Local AI";
+      case "custom":
+        return `Custom API (${customModel || "OpenAI-compatible"})`;
       default:
         return service;
     }
@@ -432,6 +507,8 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
         return "Local AI models for privacy and speed";
       case "local":
         return "Built-in recipe logic (always available)";
+      case "custom":
+        return "Use DeepSeek, Moonshot/Kimi, MiniMax, or any OpenAI-compatible API";
       default:
         return "";
     }
@@ -440,7 +517,7 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
   return (
     <Card className="w-full max-w-4xl mx-auto shadow-tropical">
       <CardHeader className="text-center">
-        <CardTitle className="text-3xl font-bold bg-gradient-fresh bg-clip-text text-transparent flex items-center gap-2 justify-center">
+        <CardTitle className="text-3xl font-bold gradient-fresh bg-clip-text text-transparent flex items-center gap-2 justify-center">
           <ChefHat className="w-8 h-8" />
           AI Recipe Generator
         </CardTitle>
@@ -507,6 +584,7 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
                     <Sparkles className="w-3 h-3 mr-1" />
                   )}
                   {service === "local" && <ChefHat className="w-3 h-3 mr-1" />}
+                  {service === "custom" && <Settings className="w-3 h-3 mr-1" />}
                   {getServiceDisplayName(service)}
                 </Badge>
               ))}
@@ -552,6 +630,94 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
                 </Select>
               </div>
             </div>
+          )}
+
+          {/* Custom API Configuration */}
+          {selectedService === "custom" && (
+            <Card className="max-w-md mx-auto border-dashed border-2 border-primary/40 bg-accent/10 shadow-sm">
+              <CardHeader className="pb-3 text-center">
+                <CardTitle className="text-lg flex items-center justify-center gap-2 font-semibold">
+                  <Settings className="w-5 h-5 text-primary animate-spin-slow" />
+                  Custom AI Settings
+                </CardTitle>
+                <CardDescription>
+                  Configure any OpenAI-compatible API (DeepSeek, Kimi, MiniMax, etc.)
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="customBaseUrl" className="text-sm font-medium">API Base URL</Label>
+                  <Input
+                    id="customBaseUrl"
+                    placeholder="https://api.deepseek.com/v1"
+                    value={customBaseUrl}
+                    onChange={(e) => setCustomBaseUrl(e.target.value)}
+                    className="h-9"
+                  />
+                  <div className="flex flex-wrap gap-1.5 mt-1.5">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="text-xs h-7 px-2 hover:bg-primary/10 hover:text-primary transition-colors"
+                      onClick={() => {
+                        setCustomBaseUrl("https://api.deepseek.com/v1");
+                        setCustomModel("deepseek-chat");
+                      }}
+                    >
+                      DeepSeek
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="text-xs h-7 px-2 hover:bg-primary/10 hover:text-primary transition-colors"
+                      onClick={() => {
+                        setCustomBaseUrl("https://api.moonshot.cn/v1");
+                        setCustomModel("moonshot-v1-8k");
+                      }}
+                    >
+                      Kimi
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="text-xs h-7 px-2 hover:bg-primary/10 hover:text-primary transition-colors"
+                      onClick={() => {
+                        setCustomBaseUrl("https://api.minimax.chat/v1");
+                        setCustomModel("abab6.5-chat");
+                      }}
+                    >
+                      MiniMax
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="customApiKey" className="text-sm font-medium">API Key</Label>
+                  <Input
+                    id="customApiKey"
+                    type="password"
+                    placeholder={customApiKey ? "••••••••••••••••" : "Enter API Key"}
+                    value={customApiKey}
+                    onChange={(e) => setCustomApiKey(e.target.value)}
+                    className="h-9"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="customModel" className="text-sm font-medium">Model Name</Label>
+                  <Input
+                    id="customModel"
+                    placeholder="deepseek-chat"
+                    value={customModel}
+                    onChange={(e) => setCustomModel(e.target.value)}
+                    className="h-9"
+                  />
+                </div>
+              </CardContent>
+            </Card>
           )}
 
           {/* Ingredients */}
@@ -646,7 +812,7 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
                     });
                   }}
                 >
-                  <SelectTrigger className="h-12">
+                  <SelectTrigger id="style" className="h-12" aria-label="Juice Style">
                     <SelectValue placeholder="🥤 Select your style" />
                   </SelectTrigger>
                   <SelectContent>

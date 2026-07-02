@@ -100,11 +100,11 @@ const NotFound = () => {
         <div className="w-full max-w-4xl text-center space-y-8">
           {/* 404 Hero */}
           <div className="space-y-6">
-            <div className="text-9xl md:text-[12rem] font-bold bg-gradient-tropical bg-clip-text text-transparent opacity-20">
+            <div className="text-9xl md:text-[12rem] font-bold gradient-tropical bg-clip-text text-transparent opacity-20">
               404
             </div>
             <div className="space-y-4">
-              <h1 className="text-4xl md:text-6xl font-bold bg-gradient-sunset bg-clip-text text-transparent">
+              <h1 className="text-4xl md:text-6xl font-bold gradient-sunset bg-clip-text text-transparent">
                 Oops! Page Not Found
               </h1>
               <p className="text-xl md:text-2xl text-foreground/70 max-w-2xl mx-auto">

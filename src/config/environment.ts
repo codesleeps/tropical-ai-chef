@@ -10,6 +10,9 @@ interface EnvironmentConfig {
   // API Keys (Optional)
   openaiApiKey?: string;
   huggingfaceApiKey?: string;
+  customAiBaseUrl?: string;
+  customAiApiKey?: string;
+  customAiModel?: string;
 
   // Feature Flags
   enableAnalytics: boolean;
@@ -60,6 +63,9 @@ export const env: EnvironmentConfig = {
   // API Keys (Optional)
   openaiApiKey: getEnvVar("VITE_OPENAI_API_KEY"),
   huggingfaceApiKey: getEnvVar("VITE_HUGGINGFACE_API_KEY"),
+  customAiBaseUrl: getEnvVar("VITE_CUSTOM_AI_BASE_URL"),
+  customAiApiKey: getEnvVar("VITE_CUSTOM_AI_API_KEY"),
+  customAiModel: getEnvVar("VITE_CUSTOM_AI_MODEL"),
 
   // Feature Flags
   enableAnalytics: getBooleanEnvVar("VITE_ENABLE_ANALYTICS", false),
@@ -87,6 +93,8 @@ export const hasOpenAIKey = () =>
   !!env.openaiApiKey && env.openaiApiKey.length > 0;
 export const hasHuggingFaceKey = () =>
   !!env.huggingfaceApiKey && env.huggingfaceApiKey.length > 0;
+export const hasCustomAiConfig = () =>
+  !!env.customAiBaseUrl && env.customAiBaseUrl.length > 0;
 
 // Feature flags
 export const shouldEnableAnalytics = () =>
@@ -111,6 +119,7 @@ export const logEnvironmentInfo = () => {
       appVersion: env.appVersion,
       hasOpenAIKey: hasOpenAIKey(),
       hasHuggingFaceKey: hasHuggingFaceKey(),
+      hasCustomAiConfig: hasCustomAiConfig(),
       enableAnalytics: env.enableAnalytics,
       enableErrorTracking: env.enableErrorTracking,
       baseUrl: env.baseUrl,

@@ -11,6 +11,7 @@ import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import SEO, { StructuredData } from "@/components/SEO";
 import heroImage from "@/assets/tropical-hero.jpg";
+import { AnimatedFruitIcon } from "@/components/AnimatedFruitIcon";
 
 const Benefits = () => {
   const benefits = [
@@ -149,6 +150,7 @@ const Benefits = () => {
             <div className="absolute inset-0 bg-black/60 bg-gradient-to-br from-accent/30 via-background/90 to-primary/30" />
           </div>
           <div className="relative z-10 container mx-auto max-w-4xl text-center px-6">
+            <AnimatedFruitIcon />
             <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent drop-shadow-xl">
               Our Juices
             </h1>
@@ -214,7 +216,7 @@ const Benefits = () => {
         <section className="py-16 px-6 bg-muted/30">
           <div className="container mx-auto max-w-4xl">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-2 bg-gradient-fresh bg-clip-text text-transparent">
+              <h2 className="text-3xl font-bold mb-2 gradient-fresh bg-clip-text text-transparent">
                 Nutrition
               </h2>
               <p className="text-sm text-muted-foreground">

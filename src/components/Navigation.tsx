@@ -110,7 +110,7 @@ export const Navigation = () => {
               <ChefHat className="w-6 h-6 text-primary" />
               <Leaf className="w-5 h-5 text-accent" />
             </div>
-            <span className="font-bold text-xl bg-gradient-tropical bg-clip-text text-transparent">
+            <span className="font-bold text-xl gradient-tropical bg-clip-text text-transparent">
               Tropical AI Chef
             </span>
           </Link>

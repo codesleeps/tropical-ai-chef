@@ -17,6 +17,15 @@ export const AI_CONFIG = {
     MAX_LENGTH: 500,
     TEMPERATURE: 0.8,
   },
+
+  // Custom AI Configuration
+  CUSTOM: {
+    BASE_URL: '',
+    API_KEY: '',
+    MODEL: 'deepseek-chat',
+    MAX_TOKENS: 800,
+    TEMPERATURE: 0.8,
+  },
   
   // Local AI Configuration
   LOCAL: {

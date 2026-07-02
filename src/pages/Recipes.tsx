@@ -17,6 +17,40 @@ import { Footer } from "@/components/Footer";
 import SEO, { StructuredData } from "@/components/SEO";
 import { generateRecipeStructuredData } from "@/utils/seo";
 import heroImage from "@/assets/tropical-hero.jpg";
+import { AnimatedFruitIcon } from "@/components/AnimatedFruitIcon";
+
+const generateFeaturedRecipeMarkdown = (recipe: { name: string; fruits: string[]; style: string; time: string }) => {
+  const fruitList = recipe.fruits.join(" and ");
+  const baseIngredients = recipe.fruits.map(f => `- 1.5 cups fresh ${f}, chopped`).join("\n");
+  
+  return `# ${recipe.name} 🥤
+
+## Ingredients:
+${baseIngredients}
+- 1 cup coconut water or base liquid
+- 1 tablespoon honey or agave nectar (optional)
+- Ice cubes
+- Fresh mint leaves for garnish
+
+## Instructions:
+1. Wash and prepare all tropical fruits: ${recipe.fruits.join(", ")}.
+2. Add the chopped ingredients and the liquid base to your blender.
+3. Add sweetener if desired and blend on high speed for 60 seconds.
+4. Process until smooth and creamy with no large fruit chunks.
+5. Pour into a tall chilled glass and garnish with fresh mint.
+
+## Nutritional Benefits:
+- Hydrating and refreshing blend packed with raw vitamins.
+- Rich in dietary fiber and essential antioxidants from fresh ${fruitList}.
+- Low-calorie hydration with natural energy.
+
+## Tips:
+- Best consumed within 15 minutes of blending for maximum nutritional absorption.
+- Pre-freeze your fruit chunks for an extra-cold smoothie texture.
+
+## Prep Time: ${recipe.time}
+## Servings: 2 servings`;
+};
 
 const Recipes = () => {
   const [currentRecipe, setCurrentRecipe] = useState("");
@@ -62,7 +96,7 @@ const Recipes = () => {
       time: "3 mins",
       rating: 4.9,
       reviews: 215,
-      description: "Sweet and tangy tropical refresher perfect for hot days",
+      description: "Refreshing hydration with a cool mint finish",
     },
     {
       name: "Mango Banana Bliss",
@@ -107,7 +141,7 @@ const Recipes = () => {
       time: "3 mins",
       rating: 4.8,
       reviews: 167,
-      description: "Refreshing and hydrating summer cooler",
+      description: "Refreshing hydration with a cool mint finish",
     },
     {
       name: "Banana Oat Breakfast",
@@ -175,23 +209,46 @@ const Recipes = () => {
   ];
 
   const renderStars = (rating: number) => {
-    return Array.from({ length: 5 }, (_, i) => (
-      <span
-        key={i}
-        className={`text-sm ${
-          i < Math.floor(rating) ? "text-yellow-400" : "text-gray-300"
-        }`}
-      >
-        ⭐
-      </span>
-    ));
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 !== 0;
+
+    for (let i = 0; i < fullStars; i++) {
+      stars.push(
+        <span key={`full-${i}`} className="text-yellow-400">
+          ★
+        </span>
+      );
+    }
+
+    if (hasHalfStar) {
+      stars.push(
+        <span key="half" className="text-yellow-400">
+          ½
+        </span>
+      );
+    }
+
+    return stars;
+  };
+
+  const handleFeaturedRecipeClick = (recipe: typeof featuredRecipes[0]) => {
+    const md = generateFeaturedRecipeMarkdown(recipe);
+    setCurrentRecipe(md);
+    // Use setTimeout to ensure the DOM section renders before scrolling
+    setTimeout(() => {
+      const displayElement = document.getElementById("recipe-display-section");
+      if (displayElement) {
+        displayElement.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 100);
   };
 
   return (
     <>
       {/* Page-specific SEO */}
       <SEO
-        title="AI Recipe Generator - Create Custom Tropical Juice Recipes"
+        title="AI Juice & Smoothie Recipe Generator"
         description="Generate personalized tropical juice recipes using AI. Choose from exotic fruits, vegetables, and dietary preferences for perfect healthy drinks."
         keywords={[
           "recipe generator",
@@ -213,6 +270,7 @@ const Recipes = () => {
             <div className="absolute inset-0 bg-black/60 bg-gradient-to-br from-accent/30 via-background/90 to-primary/30" />
           </div>
           <div className="relative z-10 container mx-auto max-w-4xl text-center px-6">
+            <AnimatedFruitIcon />
             <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent drop-shadow-xl">
               Create Amazing<br />Tropical Recipes
             </h1>
@@ -228,42 +286,17 @@ const Recipes = () => {
           <div className="container mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-4xl md:text-5xl font-bold mb-6 relative">
-                <span className="bg-gradient-to-r from-secondary via-primary to-accent bg-clip-text text-transparent">
-                   Create Your Recipe
-                </span>
+                Custom Recipe Creator
               </h2>
-              <p className="text-lg text-foreground/70 max-w-2xl mx-auto mb-8">
-                Select your favorite tropical fruits and let our AI create the
-                perfect recipe just for you!
-              </p>
             </div>
             <RecipeGenerator onRecipeGenerated={handleRecipeGenerated} />
           </div>
         </section>
 
-        {/* Current Recipe Display */}
+        {/* Recipe Display */}
         {currentRecipe && (
-          <section className="px-6 pb-16">
+          <section id="recipe-display-section" className="px-6 pb-12 transition-all duration-500">
             <div className="container mx-auto">
-              <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold mb-4 text-secondary">
-                  Your Custom Recipe
-                </h2>
-                <div className="flex justify-center gap-4">
-                  <Button variant="outline" className="flex items-center gap-2">
-                    <Save className="w-4 h-4" />
-                    Save Recipe
-                  </Button>
-                  <Button variant="outline" className="flex items-center gap-2">
-                    <Share2 className="w-4 h-4" />
-                    Share
-                  </Button>
-                  <Button className="gradient-tropical text-foreground flex items-center gap-2">
-                    <Heart className="w-4 h-4" />
-                    Add to Favorites
-                  </Button>
-                </div>
-              </div>
               <RecipeDisplay recipe={currentRecipe} />
             </div>
           </section>
@@ -273,7 +306,7 @@ const Recipes = () => {
         <section className="px-6 pb-16 bg-muted/30">
           <div className="container mx-auto max-w-6xl">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4 bg-gradient-fresh bg-clip-text text-transparent">
+              <h2 className="text-3xl font-bold mb-4 gradient-fresh bg-clip-text text-transparent">
                 Featured Recipes
               </h2>
               <p className="text-foreground/70">
@@ -287,6 +320,7 @@ const Recipes = () => {
                 <Card
                   key={index}
                   className="shadow-tropical border-0 hover:scale-105 transition-bounce cursor-pointer"
+                  onClick={() => handleFeaturedRecipeClick(recipe)}
                 >
                   <CardHeader>
                     <div className="flex justify-between items-start mb-3">
@@ -323,7 +357,13 @@ const Recipes = () => {
                         </div>
                       </div>
 
-                      <Button className="w-full gradient-tropical text-foreground">
+                      <Button 
+                        className="w-full gradient-tropical text-foreground"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleFeaturedRecipeClick(recipe);
+                        }}
+                      >
                         Try This Recipe
                       </Button>
                     </div>
@@ -379,7 +419,7 @@ const Recipes = () => {
         <section className="px-6 pb-16 bg-muted/30">
           <div className="container mx-auto">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4 bg-gradient-fresh bg-clip-text text-transparent flex items-center justify-center gap-2">
+              <h2 className="text-3xl font-bold mb-4 gradient-fresh bg-clip-text text-transparent flex items-center justify-center gap-2">
                 <Calculator className="w-6 h-6" />
                 AI Service Cost Calculator
               </h2>

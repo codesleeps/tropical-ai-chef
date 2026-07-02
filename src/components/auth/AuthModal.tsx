@@ -91,7 +91,7 @@ export const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-center text-2xl font-bold bg-gradient-tropical bg-clip-text text-transparent">
+          <DialogTitle className="text-center text-2xl font-bold gradient-tropical bg-clip-text text-transparent">
             <Sparkles className="w-6 h-6 inline mr-2" />
             Join Tropical AI Chef
           </DialogTitle>

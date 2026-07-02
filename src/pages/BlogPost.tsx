@@ -829,7 +829,7 @@ const BlogPost = () => {
             <Badge variant="secondary" className="mb-4">
               {post.category}
             </Badge>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-sunset bg-clip-text text-transparent">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 gradient-sunset bg-clip-text text-transparent">
               {post.title}
             </h1>
             <div className="flex items-center justify-center gap-6 text-foreground/70">

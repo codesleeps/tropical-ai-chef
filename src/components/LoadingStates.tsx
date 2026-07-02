@@ -73,7 +73,7 @@ export const RecipeGenerationLoader = ({
         <ChefHat className="w-6 h-6 text-primary animate-pulse" />
         <Sparkles className="w-5 h-5 text-secondary animate-bounce" />
       </div>
-      <p className="text-lg font-semibold bg-gradient-fresh bg-clip-text text-transparent">
+      <p className="text-lg font-semibold gradient-fresh bg-clip-text text-transparent">
         {aiService} is crafting your perfect recipe...
       </p>
       <p className="text-sm text-muted-foreground">

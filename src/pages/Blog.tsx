@@ -10,12 +10,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar, Clock, User, Search, ArrowRight } from "lucide-react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import heroImage from "@/assets/tropical-hero.jpg";
+import { AnimatedFruitIcon } from "@/components/AnimatedFruitIcon";
 
 const Blog = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedCategory = searchParams.get("category");
@@ -498,6 +500,7 @@ const Blog = () => {
             <div className="absolute inset-0 bg-black/60 bg-gradient-to-br from-secondary/30 via-background/90 to-accent/30" />
           </div>
           <div className="relative z-10 container mx-auto max-w-4xl text-center px-6">
+            <AnimatedFruitIcon />
             <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent drop-shadow-xl">
               Benefits
             </h1>
@@ -575,13 +578,17 @@ const Blog = () => {
                 <Card
                   key={post.id}
                   className="shadow-tropical border-0 hover:scale-105 transition-bounce cursor-pointer"
+                  onClick={() => navigate(`/blog/${post.slug}`)}
                 >
                   <CardHeader>
                     <div className="flex items-center justify-between mb-3">
                       <Badge 
                         variant="secondary" 
                         className="cursor-pointer hover:bg-secondary/80"
-                        onClick={() => handleCategoryClick(post.category)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCategoryClick(post.category);
+                        }}
                       >
                         {post.category}
                       </Badge>
@@ -615,6 +622,7 @@ const Blog = () => {
                         size="sm"
                         variant="ghost"
                         className="text-primary hover:text-primary-foreground hover:bg-primary"
+                        onClick={(e) => e.stopPropagation()} // Prevent double triggers
                       >
                         <Link to={`/blog/${post.slug}`}>
                           Read More <ArrowRight className="w-4 h-4 ml-1" />
@@ -639,7 +647,7 @@ const Blog = () => {
         <section className="py-16 px-6 bg-muted/30">
           <div className="container mx-auto max-w-2xl text-center">
             <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold mb-2 bg-gradient-fresh bg-clip-text text-transparent">
+              <h2 className="text-3xl font-bold mb-2 gradient-fresh bg-clip-text text-transparent">
                 Newsletter
               </h2>
               <p className="text-foreground/70 mb-4">

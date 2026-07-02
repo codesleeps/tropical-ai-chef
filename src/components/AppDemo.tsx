@@ -53,7 +53,7 @@ export const AppDemo = () => {
   return (
     <Card className="w-full max-w-4xl mx-auto shadow-tropical bg-gradient-to-br from-card to-muted/20">
       <CardHeader className="text-center">
-        <CardTitle className="text-3xl font-bold bg-gradient-fresh bg-clip-text text-transparent flex items-center gap-2 justify-center">
+        <CardTitle className="text-3xl font-bold gradient-fresh bg-clip-text text-transparent flex items-center gap-2 justify-center">
           <Star className="w-8 h-8 text-yellow-500" />
           App Features Demo
         </CardTitle>

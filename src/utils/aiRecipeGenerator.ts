@@ -69,9 +69,81 @@ export async function generateRecipeWithOpenAI(
     const data = await response.json();
     const recipeText = data.choices[0].message.content;
 
-    return parseRecipeFromText(recipeText);
+    const recipe = parseRecipeFromText(recipeText);
+    return {
+      ...recipe,
+      model: "gpt-3.5-turbo",
+    };
   } catch (error) {
     console.error("OpenAI API error:", error);
+    throw error;
+  }
+}
+
+export interface CustomAiConfig {
+  baseUrl: string;
+  apiKey: string;
+  model: string;
+}
+
+// Option 4: Custom OpenAI-compatible API (DeepSeek, Kimi, MiniMax, etc.)
+export async function generateRecipeWithCustomProvider(
+  request: RecipeRequest,
+  config: CustomAiConfig
+): Promise<Recipe> {
+  const { baseUrl, apiKey, model } = config;
+  try {
+    const prompt = createPrompt(request);
+
+    let url = baseUrl.trim();
+    if (url.endsWith("/")) {
+      url = url.slice(0, -1);
+    }
+    if (!url.endsWith("/chat/completions")) {
+      url = `${url}/chat/completions`;
+    }
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: model || "custom-model",
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are a professional tropical juice recipe creator. Create detailed, healthy, and delicious recipes with exact formatting as requested.",
+          },
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        max_tokens: 800,
+        temperature: 0.8,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Custom AI API request failed with status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const recipeText = data.choices?.[0]?.message?.content;
+    if (!recipeText) {
+      throw new Error("Invalid response format from Custom AI provider");
+    }
+
+    const recipe = parseRecipeFromText(recipeText);
+    return {
+      ...recipe,
+      model: model || "custom-model",
+    };
+  } catch (error) {
+    console.error("Custom AI API error:", error);
     throw error;
   }
 }

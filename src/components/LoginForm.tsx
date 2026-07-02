@@ -42,7 +42,7 @@ export const LoginForm = ({ onLoginSuccess }: LoginFormProps) => {
   return (
     <Card className="w-full max-w-md mx-auto shadow-tropical">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl font-bold bg-gradient-tropical bg-clip-text text-transparent">
+        <CardTitle className="text-2xl font-bold gradient-tropical bg-clip-text text-transparent">
           Welcome Back
         </CardTitle>
         <CardDescription>

@@ -95,7 +95,7 @@ export const CostCalculator = () => {
   return (
     <Card className="w-full max-w-4xl mx-auto shadow-tropical">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl font-bold bg-gradient-fresh bg-clip-text text-transparent flex items-center gap-2">
+        <CardTitle className="text-2xl font-bold gradient-fresh bg-clip-text text-transparent flex items-center gap-2">
           <Calculator className="w-6 h-6" />
           AI Service Cost Calculator
         </CardTitle>
