@@ -9,6 +9,7 @@ interface EnvironmentConfig {
 
   // API Keys (Optional)
   openaiApiKey?: string;
+  geminiApiKey?: string;
   huggingfaceApiKey?: string;
   customAiBaseUrl?: string;
   customAiApiKey?: string;
@@ -62,6 +63,7 @@ export const env: EnvironmentConfig = {
 
   // API Keys (Optional)
   openaiApiKey: getEnvVar("VITE_OPENAI_API_KEY"),
+  geminiApiKey: getEnvVar("VITE_GEMINI_API_KEY"),
   huggingfaceApiKey: getEnvVar("VITE_HUGGINGFACE_API_KEY"),
   customAiBaseUrl: getEnvVar("VITE_CUSTOM_AI_BASE_URL"),
   customAiApiKey: getEnvVar("VITE_CUSTOM_AI_API_KEY"),
@@ -91,6 +93,8 @@ export const isTest = () => env.environment === "test";
 // API Key validation
 export const hasOpenAIKey = () =>
   !!env.openaiApiKey && env.openaiApiKey.length > 0;
+export const hasGeminiKey = () =>
+  !!env.geminiApiKey && env.geminiApiKey.length > 0;
 export const hasHuggingFaceKey = () =>
   !!env.huggingfaceApiKey && env.huggingfaceApiKey.length > 0;
 export const hasCustomAiConfig = () =>
@@ -118,6 +122,7 @@ export const logEnvironmentInfo = () => {
       appName: env.appName,
       appVersion: env.appVersion,
       hasOpenAIKey: hasOpenAIKey(),
+      hasGeminiKey: hasGeminiKey(),
       hasHuggingFaceKey: hasHuggingFaceKey(),
       hasCustomAiConfig: hasCustomAiConfig(),
       enableAnalytics: env.enableAnalytics,

@@ -39,6 +39,7 @@ import {
   generateRecipeWithOpenAI,
   generateRecipeLocally,
   generateRecipeWithCustomProvider,
+  generateRecipeWithGemini,
   type RecipeRequest,
   type Recipe,
 } from "@/utils/aiRecipeGenerator";
@@ -48,13 +49,15 @@ import {
   getAvailableModels,
   OLLAMA_MODELS,
 } from "@/utils/ollamaRecipeGenerator";
-import { env, hasOpenAIKey } from "@/config/environment";
+import { env, hasOpenAIKey, hasGeminiKey } from "@/config/environment";
+import { ThreeBlender } from "@/components/ThreeBlender";
+import { Mic } from "lucide-react";
 
 interface RecipeGeneratorProps {
   onRecipeGenerated: (recipe: string) => void;
 }
 
-type GenerationService = "local" | "ollama" | "openai" | "custom";
+type GenerationService = "local" | "ollama" | "openai" | "gemini" | "custom";
 
 const TROPICAL_FRUITS = [
   { id: "mango", name: "Mango", emoji: "🥭", color: "bg-orange-100" },
@@ -142,6 +145,8 @@ export const RecipeGenerator = ({
   const [selectedVegetables, setSelectedVegetables] = useState<string[]>([]);
 
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isBlending, setIsBlending] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const [availableServices, setAvailableServices] = useState<
     GenerationService[]
   >(["local", "custom"]);
@@ -200,6 +205,11 @@ export const RecipeGenerator = ({
       services.push("openai");
     }
 
+    // Check Gemini availability
+    if (hasGeminiKey()) {
+      services.push("gemini");
+    }
+
     // Check Ollama availability
     try {
       const isOllamaAvailable = await checkOllamaAvailability();
@@ -218,10 +228,12 @@ export const RecipeGenerator = ({
     setAvailableServices(services);
 
     // Set default service preference
-    if (services.includes("ollama")) {
-      setSelectedService("ollama");
+    if (services.includes("gemini")) {
+      setSelectedService("gemini");
     } else if (services.includes("openai")) {
       setSelectedService("openai");
+    } else if (services.includes("ollama")) {
+      setSelectedService("ollama");
     } else if (services.includes("custom") && safeLocalStorage.getItem("custom_ai_key")) {
       setSelectedService("custom");
     } else {
@@ -233,6 +245,88 @@ export const RecipeGenerator = ({
   useState(() => {
     checkAvailableServices();
   });
+
+  const handleVoiceCommand = () => {
+    const SpeechRecognition =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      toast.error("Voice search is not supported in this browser. Please try Chrome or Safari! 🎙️");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.lang = "en-US";
+    recognition.interimResults = false;
+
+    recognition.onstart = () => {
+      setIsListening(true);
+      toast.info("Listening... Tell me your tropical preferences! 🎙️", { id: "voice-listen" });
+    };
+
+    recognition.onerror = () => {
+      setIsListening(false);
+      toast.error("Voice recognition failed. Please try again! 🎙️", { id: "voice-listen" });
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      toast.success(`Transcribed: "${transcript}" 🍍`, { id: "voice-listen" });
+
+      // Automatically search for fruit names in transcription and select them!
+      const foundFruits: string[] = [];
+      TROPICAL_FRUITS.forEach((f) => {
+        if (transcript.toLowerCase().includes(f.name.toLowerCase()) || 
+            transcript.toLowerCase().includes(f.id.toLowerCase())) {
+          foundFruits.push(f.name);
+        }
+      });
+
+      if (foundFruits.length > 0) {
+        setSelectedFruits((prev) => {
+          const combined = Array.from(new Set([...prev, ...foundFruits])).slice(0, 5);
+          return combined;
+        });
+        setFormData((prev) => ({
+          ...prev,
+          fruit: foundFruits[0]
+        }));
+      }
+
+      // Automatically select style if mentioned
+      const styles = ["smoothie", "juice", "detox", "energy", "immunity", "digestive", "beauty", "recovery", "hydrating"];
+      const foundStyle = styles.find((s) => transcript.toLowerCase().includes(s));
+      if (foundStyle) {
+        let styleDisplay = "Smoothie";
+        if (foundStyle === "juice") styleDisplay = "Fresh Juice";
+        else if (foundStyle === "detox") styleDisplay = "Detox";
+        else if (foundStyle === "energy") styleDisplay = "Energy Boost";
+        else if (foundStyle === "immunity") styleDisplay = "Immunity";
+        else if (foundStyle === "digestive") styleDisplay = "Digestive";
+        else if (foundStyle === "beauty") styleDisplay = "Beauty";
+        else if (foundStyle === "recovery") styleDisplay = "Recovery";
+        else if (foundStyle === "hydrating") styleDisplay = "Hydrating";
+
+        setFormData((prev) => ({ ...prev, style: styleDisplay }));
+      }
+
+      // Add everything else to dietary restrictions / preferences!
+      setFormData((prev) => {
+        const existing = prev.dietaryRestrictions ? prev.dietaryRestrictions + ", " : "";
+        return {
+          ...prev,
+          dietaryRestrictions: existing + transcript
+        };
+      });
+    };
+
+    recognition.start();
+  };
 
   const validateForm = (): boolean => {
     if (selectedFruits.length === 0 || !formData.style) {
@@ -280,6 +374,15 @@ export const RecipeGenerator = ({
           return await generateRecipeWithOpenAI(
             cleanRequest,
             env.openaiApiKey!
+          );
+
+        case "gemini":
+          if (!hasGeminiKey()) {
+            throw new Error("Gemini API key not configured");
+          }
+          return await generateRecipeWithGemini(
+            cleanRequest,
+            env.geminiApiKey!
           );
 
         case "custom":
@@ -345,6 +448,15 @@ export const RecipeGenerator = ({
               }
               break;
 
+            case "gemini":
+              if (hasGeminiKey()) {
+                return await generateRecipeWithGemini(
+                  cleanRequest,
+                  env.geminiApiKey!
+                );
+              }
+              break;
+
             case "custom":
               if (customApiKey && customBaseUrl) {
                 return await generateRecipeWithCustomProvider(
@@ -397,18 +509,10 @@ ${recipe.model ? `*Generated with ${recipe.model}*` : ""}
 ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
   };
 
-  const handleGenerateRecipe = async () => {
-    if (!validateForm()) return;
-
-    // Security: Check rate limiting before proceeding
-    if (!checkRateLimit("recipe_generation")) {
-      return;
-    }
+  const onThreeBlendingComplete = async () => {
+    setIsBlending(false);
 
     await handleSecureSubmit(async () => {
-      setIsGenerating(true);
-      setLastError(null);
-
       const result = await handleAsyncError(
         async () => {
           // Track recipe generation attempt
@@ -474,6 +578,19 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
     });
   };
 
+  const handleGenerateRecipe = async () => {
+    if (!validateForm()) return;
+
+    // Security: Check rate limiting before proceeding
+    if (!checkRateLimit("recipe_generation")) {
+      return;
+    }
+
+    setIsBlending(true);
+    setIsGenerating(true);
+    setLastError(null);
+  };
+
   const handleRetryGeneration = () => {
     if (retryCount < 3) {
       handleGenerateRecipe();
@@ -488,6 +605,8 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
     switch (service) {
       case "openai":
         return "OpenAI GPT";
+      case "gemini":
+        return "Google Gemini 1.5 Flash";
       case "ollama":
         return `Ollama ${selectedModel ? `(${selectedModel})` : ""}`;
       case "local":
@@ -503,6 +622,8 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
     switch (service) {
       case "openai":
         return "Premium AI with highest quality results";
+      case "gemini":
+        return "Google's ultra-fast multimodal AI model";
       case "ollama":
         return "Local AI models for privacy and speed";
       case "local":
@@ -548,8 +669,10 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
           </Alert>
         )}
 
-        {/* Form Fields */}
-        <div className="space-y-8">
+        {/* Form Fields & 3D Blender Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Left Column: Form Fields */}
+          <div className="lg:col-span-7 space-y-8">
           {/* AI Service Selection */}
           <div className="space-y-4">
             <div className="text-center">
@@ -924,9 +1047,23 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="dietary" className="text-base font-medium">
-                  Dietary Restrictions & Preferences
-                </Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="dietary" className="text-base font-medium">
+                    Dietary Restrictions & Preferences
+                  </Label>
+                  <Button
+                    type="button"
+                    variant={isListening ? "destructive" : "outline"}
+                    size="sm"
+                    className={`h-8 px-2.5 rounded-full flex items-center gap-1.5 transition-all ${
+                      isListening ? "animate-pulse" : ""
+                    }`}
+                    onClick={handleVoiceCommand}
+                  >
+                    <Mic className="w-3.5 h-3.5" />
+                    <span className="text-xs">{isListening ? "Listening..." : "Speak"}</span>
+                  </Button>
+                </div>
                 <Textarea
                   id="dietary"
                   placeholder="💡 e.g., vegan, gluten-free, low sugar, keto-friendly, high protein..."
@@ -957,6 +1094,36 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
                 )}
               </div>
             </div>
+          </div>
+          </div>
+
+          {/* Right Column: 3D Blender */}
+          <div className="lg:col-span-5 lg:sticky lg:top-6 space-y-4 bg-card/60 p-6 rounded-2xl border shadow-sm backdrop-blur-sm">
+            <div className="text-center lg:text-left">
+              <h3 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                3D Tropical Blender 🌪️
+              </h3>
+              <p className="text-xs text-muted-foreground mb-3">
+                Watch fruits bounce and blend in 3D as you select them
+              </p>
+            </div>
+            <ThreeBlender
+              selectedFruits={selectedFruits}
+              selectedVegetables={selectedVegetables}
+              isBlending={isBlending}
+              onBlendingComplete={onThreeBlendingComplete}
+            />
+            {(selectedFruits.length > 0 || selectedVegetables.length > 0) && (
+              <div className="text-xs text-center text-muted-foreground mt-2 flex flex-wrap gap-1 justify-center bg-muted/40 p-2.5 rounded-xl border border-muted-foreground/10">
+                <span className="font-semibold w-full mb-1">Blender contents:</span>
+                {selectedFruits.map(f => (
+                  <span key={f} className="px-2 py-0.5 rounded bg-primary/10 text-primary font-medium text-[10px]">{f}</span>
+                ))}
+                {selectedVegetables.map(v => (
+                  <span key={v} className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 font-medium text-[10px]">{v}</span>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

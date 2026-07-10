@@ -599,3 +599,201 @@ function getStyleBenefit(style: string): string {
 
   return benefits[style as keyof typeof benefits] || "Delicious and nutritious";
 }
+
+// Option 5: Google Gemini API (requires Gemini API key)
+export async function generateRecipeWithGemini(
+  request: RecipeRequest,
+  apiKey: string
+): Promise<Recipe> {
+  try {
+    const prompt = createPrompt(request);
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: "user",
+              parts: [{ text: prompt }]
+            }
+          ],
+          generationConfig: {
+            temperature: 0.8,
+            maxOutputTokens: 1000,
+          }
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Gemini API request failed with status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const recipeText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!recipeText) {
+      throw new Error("Invalid response format from Gemini API");
+    }
+
+    const recipe = parseRecipeFromText(recipeText);
+    return {
+      ...recipe,
+      model: "gemini-1.5-flash",
+    };
+  } catch (error) {
+    console.error("Gemini API error:", error);
+    throw error;
+  }
+}
+
+// Chatbot assistant function
+export async function chatWithCoco(
+  messages: { role: string; content: string }[],
+  service: string,
+  apiKeys: { gemini?: string; openai?: string; customBaseUrl?: string; customApiKey?: string; customModel?: string }
+): Promise<string> {
+  const systemPrompt = `You are Coco, the friendly Tropical AI Chef. You help users design delicious tropical juices, smoothies, refreshers, and healthy boosters. 
+Use tropical emojis (🥥, 🍍, 🥭, 🍹, 🌴, 🍋) frequently, keep your tone sunny, warm, and helpful.
+Answer general healthy fruit nutrition questions, suggest combinations, and walk them through recipes.
+CRITICAL: If the user explicitly asks for a recipe, you MUST generate a complete recipe and format it exactly inside your message as a markdown block starting with "# [Recipe Name] 🥤" followed by "## Ingredients:", "## Instructions:", "## Nutritional Benefits:", "## Tips:", "## Prep Time:", and "## Servings:" so our application can automatically render it as a premium recipe card!`;
+
+  if (service === "gemini" && apiKeys.gemini) {
+    try {
+      // Map roles to gemini (user -> user, assistant/model -> model)
+      const contents = messages.map(msg => ({
+        role: msg.role === "assistant" ? "model" : "user",
+        parts: [{ text: msg.content }]
+      }));
+
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKeys.gemini}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            contents,
+            systemInstruction: {
+              parts: [{ text: systemPrompt }]
+            },
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 800,
+            }
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Gemini Chat request failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data.candidates?.[0]?.content?.parts?.[0]?.text || "I'm sorry, I couldn't process that. 🥥";
+    } catch (e) {
+      console.error("Gemini Chat error, falling back", e);
+    }
+  }
+
+  // Fallback to OpenAI if configured
+  if (service === "openai" && apiKeys.openai) {
+    try {
+      const formattedMessages = [
+        { role: "system", content: systemPrompt },
+        ...messages.map(m => ({ role: m.role === "model" ? "assistant" : m.role, content: m.content }))
+      ];
+
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKeys.openai}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: formattedMessages,
+          max_tokens: 800,
+          temperature: 0.7,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return data.choices?.[0]?.message?.content || "I'm sorry, I couldn't process that. 🥥";
+      }
+    } catch (e) {
+      console.error("OpenAI Chat error", e);
+    }
+  }
+
+  // Fallback to Custom Provider (e.g. DeepSeek) if configured
+  if (service === "custom" && apiKeys.customApiKey && apiKeys.customBaseUrl) {
+    try {
+      const formattedMessages = [
+        { role: "system", content: systemPrompt },
+        ...messages.map(m => ({ role: m.role === "model" ? "assistant" : m.role, content: m.content }))
+      ];
+
+      let url = apiKeys.customBaseUrl.trim();
+      if (url.endsWith("/")) url = url.slice(0, -1);
+      if (!url.endsWith("/chat/completions")) url = `${url}/chat/completions`;
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKeys.customApiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: apiKeys.customModel || "custom-model",
+          messages: formattedMessages,
+          max_tokens: 800,
+          temperature: 0.7,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return data.choices?.[0]?.message?.content || "I'm sorry, I couldn't process that. 🥥";
+      }
+    } catch (e) {
+      console.error("Custom Chat error", e);
+    }
+  }
+
+  // Local/Offline mock fallback response
+  const lastUserMessage = messages[messages.length - 1]?.content.toLowerCase() || "";
+  let responseText = "Hello! 🌴 I am Coco, your local Tropical AI Chef. ";
+
+  if (lastUserMessage.includes("recipe") || lastUserMessage.includes("juice") || lastUserMessage.includes("smoothie") || lastUserMessage.includes("blend")) {
+    const localRecipe = generateRecipeLocally({
+      fruit: "Mango",
+      fruits: ["Mango", "Pineapple"],
+      style: "Smoothie",
+      vegetables: "Ginger",
+      dietaryRestrictions: "none"
+    });
+    responseText += `Here is a custom local recipe I whipped up for you! 🥭🍍\n\n` + 
+      `# ${localRecipe.title} 🥤\n\n` + 
+      `## Ingredients:\n${localRecipe.ingredients.map(i => `- ${i}`).join("\n")}\n\n` +
+      `## Instructions:\n${localRecipe.instructions.map((ins, idx) => `${idx + 1}. ${ins}`).join("\n")}\n\n` +
+      `## Nutritional Benefits:\n${localRecipe.nutritionalBenefits.map(b => `- ${b}`).join("\n")}\n\n` +
+      `## Tips:\n${localRecipe.tips.map(t => `- ${t}`).join("\n")}\n\n` +
+      `## Prep Time: ${localRecipe.prepTime}\n` +
+      `## Servings: ${localRecipe.servings}`;
+  } else if (lastUserMessage.includes("benefit") || lastUserMessage.includes("health") || lastUserMessage.includes("nutrition")) {
+    responseText += "Tropical fruits like Mangoes are rich in Vitamin C, Pineapples contain bromelain which helps digestion, and Dragon Fruits are high in fiber and prebiotics. Eating them fresh boosts your immunity and keeps you hydrated! 🥭🍍🌴";
+  } else if (lastUserMessage.includes("hello") || lastUserMessage.includes("hi")) {
+    responseText += "Aloha! How can I help you blend something delicious today? You can ask me to write a recipe (e.g., 'give me a green mango smoothie') or ask about fruit benefits! 🥥🍹";
+  } else {
+    responseText += "I love anything tropical! Tell me what ingredients you have (like mangoes, pineapple, spinach, or ginger) and I can suggest a delicious smoothie, fresh juice, or detox blend for you! 🥥🍍";
+  }
+
+  return responseText;
+}

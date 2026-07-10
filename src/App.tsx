@@ -27,6 +27,7 @@ import {
 } from "@/utils/seo";
 import { initializeSecurity } from "@/utils/security";
 import ConsentBanner from "@/components/ConsentBanner";
+import { TropicalChatbot } from "@/components/TropicalChatbot";
 import {
   usePerformanceMonitoring,
   preloadCriticalResources,
@@ -139,6 +140,7 @@ const App = () => {
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              <TropicalChatbot />
             </BrowserRouter>
           </TooltipProvider>
         </QueryClientProvider>
