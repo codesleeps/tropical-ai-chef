@@ -1,13 +1,171 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Clock, Users, Heart, Download, Sparkles, CheckCircle2, Bookmark } from "lucide-react";
 import { toast } from "sonner";
+import * as THREE from "three";
 
 interface RecipeDisplayProps {
   recipe: string;
 }
+
+interface ThreeDProgressDialProps {
+  score: number;
+  label: string;
+  emoji: string;
+  color: string;
+  glowColor: string;
+}
+
+const ThreeDProgressDial = ({ score, label, emoji, color, glowColor }: ThreeDProgressDialProps) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const width = 100;
+    const height = 100;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
+    camera.position.z = 4.5;
+
+    const renderer = new THREE.WebGLRenderer({ 
+      antialias: true, 
+      alpha: true,
+      preserveDrawingBuffer: true
+    });
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    containerRef.current.appendChild(renderer.domElement);
+    rendererRef.current = renderer;
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
+
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    dirLight.position.set(2, 3, 4);
+    scene.add(dirLight);
+
+    const pointLight = new THREE.PointLight(new THREE.Color(glowColor), 1.5, 10);
+    pointLight.position.set(0, 0, 2);
+    scene.add(pointLight);
+
+    const dialGroup = new THREE.Group();
+    scene.add(dialGroup);
+
+    // Background track torus
+    const bgGeometry = new THREE.TorusGeometry(1.3, 0.15, 16, 100);
+    const bgMaterial = new THREE.MeshStandardMaterial({
+      color: 0x3a3a3c,
+      roughness: 0.8,
+      metalness: 0.1,
+      transparent: true,
+      opacity: 0.15
+    });
+    const bgMesh = new THREE.Mesh(bgGeometry, bgMaterial);
+    dialGroup.add(bgMesh);
+
+    // Progress torus geometry
+    const targetArc = (score / 100) * Math.PI * 2;
+    const activeColor = new THREE.Color(color);
+    const progressMaterial = new THREE.MeshStandardMaterial({
+      color: activeColor,
+      roughness: 0.2,
+      metalness: 0.8,
+      emissive: new THREE.Color(glowColor),
+      emissiveIntensity: 0.35,
+    });
+
+    let progressMesh: THREE.Mesh | null = null;
+    let currentArc = 0;
+
+    let isHovered = false;
+    const onMouseEnter = () => { isHovered = true; };
+    const onMouseLeave = () => { isHovered = false; };
+    
+    const container = containerRef.current;
+    container.addEventListener("mouseenter", onMouseEnter);
+    container.addEventListener("mouseleave", onMouseLeave);
+
+    let animationFrameId: number;
+    const clock = new THREE.Clock();
+
+    const animate = () => {
+      animationFrameId = requestAnimationFrame(animate);
+
+      if (currentArc < targetArc) {
+        currentArc = Math.min(targetArc, currentArc + (targetArc - currentArc) * 0.08 + 0.005);
+        
+        if (progressMesh) {
+          dialGroup.remove(progressMesh);
+          progressMesh.geometry.dispose();
+        }
+        
+        const progressGeometry = new THREE.TorusGeometry(1.3, 0.18, 16, 100, currentArc);
+        progressMesh = new THREE.Mesh(progressGeometry, progressMaterial);
+        progressMesh.rotation.set(0, 0, Math.PI / 2);
+        progressMesh.scale.set(1, -1, 1); // Clockwise rotation
+        dialGroup.add(progressMesh);
+      }
+
+      const elapsedTime = clock.getElapsedTime();
+      if (isHovered) {
+        dialGroup.rotation.y = Math.sin(elapsedTime * 4) * 0.2;
+        dialGroup.rotation.x = Math.cos(elapsedTime * 4) * 0.2;
+        progressMaterial.emissiveIntensity = 0.65 + Math.sin(elapsedTime * 8) * 0.15;
+      } else {
+        dialGroup.rotation.y += (0 - dialGroup.rotation.y) * 0.1;
+        dialGroup.rotation.x += (0 - dialGroup.rotation.x) * 0.1;
+        progressMaterial.emissiveIntensity = 0.35;
+      }
+
+      renderer.render(scene, camera);
+    };
+
+    animate();
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      container.removeEventListener("mouseenter", onMouseEnter);
+      container.removeEventListener("mouseleave", onMouseLeave);
+      
+      bgGeometry.dispose();
+      bgMaterial.dispose();
+      if (progressMesh) {
+        progressMesh.geometry.dispose();
+      }
+      progressMaterial.dispose();
+      
+      if (containerRef.current && renderer.domElement.parentNode === containerRef.current) {
+        containerRef.current.removeChild(renderer.domElement);
+      }
+      renderer.dispose();
+    };
+  }, [score, color, glowColor]);
+
+  return (
+    <div className="flex flex-col items-center select-none group relative">
+      <div 
+        ref={containerRef} 
+        className="w-[100px] h-[100px] relative cursor-pointer"
+        data-3d-dial-score={score}
+        data-3d-dial-label={label}
+      />
+      <div className="absolute top-[34px] flex flex-col items-center justify-center pointer-events-none">
+        <span className="text-lg font-black text-foreground tracking-tight group-hover:scale-110 transition-transform">{score}%</span>
+      </div>
+      <div className="text-center mt-1.5 space-y-0.5">
+        <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center justify-center gap-1">
+          <span>{emoji}</span>
+          <span>{label}</span>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export const RecipeDisplay = ({ recipe }: RecipeDisplayProps) => {
   const [isSaved, setIsSaved] = useState(false);
@@ -114,48 +272,42 @@ export const RecipeDisplay = ({ recipe }: RecipeDisplayProps) => {
     } else if (lowerRecipe.includes("mint") || lowerRecipe.includes("cucumber")) {
       detox = 85;
     }
-
     return { hydration, immunity, energy, detox };
   };
 
   const scores = calculateScores();
 
-  // --- PNG RECIPE CARD EXPORT ---
   const handleExportRecipe = () => {
     const canvas = document.createElement("canvas");
     canvas.width = 600;
-    canvas.height = 800;
+    canvas.height = 850;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Background Gradient
-    const grad = ctx.createLinearGradient(0, 0, 0, 800);
-    grad.addColorStop(0, "#ffa07a"); // light salmon
-    grad.addColorStop(0.5, "#ff7f50"); // coral
-    grad.addColorStop(1, "#ff4500"); // orangered
+    const grad = ctx.createLinearGradient(0, 0, 0, 850);
+    grad.addColorStop(0, "#ffa07a");
+    grad.addColorStop(0.5, "#ff7f50");
+    grad.addColorStop(1, "#ff4500");
     ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, 600, 800);
+    ctx.fillRect(0, 0, 600, 850);
 
-    // Outer Border
     ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
     ctx.lineWidth = 15;
-    ctx.strokeRect(20, 20, 560, 760);
+    ctx.strokeRect(20, 20, 560, 810);
 
-    // Inner Card container
-    ctx.fillStyle = "rgba(255, 255, 255, 0.94)";
+    ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
     if (ctx.roundRect) {
       ctx.beginPath();
-      ctx.roundRect(40, 40, 520, 720, 16);
+      ctx.roundRect(40, 40, 520, 770, 16);
       ctx.fill();
     } else {
-      ctx.fillRect(40, 40, 520, 720);
+      ctx.fillRect(40, 40, 520, 770);
     }
 
-    // Title / Header
     ctx.fillStyle = "#ff5a36";
     ctx.font = "bold 24px sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText("🌴 TROPICAL AI CHEF 🌴", 300, 95);
+    ctx.fillText("🌴 TROPICAL AI CHEF 🌴", 300, 90);
 
     ctx.fillStyle = "#1c1c1e";
     ctx.font = "bold 22px sans-serif";
@@ -163,62 +315,83 @@ export const RecipeDisplay = ({ recipe }: RecipeDisplayProps) => {
     if (textTitle.length > 25) {
       ctx.font = "bold 17px sans-serif";
     }
-    ctx.fillText(textTitle, 300, 135);
+    ctx.fillText(textTitle, 300, 130);
 
-    // Badges line
     ctx.fillStyle = "#8e8e93";
     ctx.font = "14px sans-serif";
-    ctx.fillText(`⏱️ Prep: ${prepTime}    •    👥 Servings: ${servings}`, 300, 165);
+    ctx.fillText(`⏱️ Prep: ${prepTime}    •    👥 Servings: ${servings}`, 300, 158);
 
-    // Horizontal Rule
     ctx.strokeStyle = "#e5e5ea";
     ctx.lineWidth = 1.5;
     ctx.beginPath();
-    ctx.moveTo(70, 185);
-    ctx.lineTo(530, 185);
+    ctx.moveTo(70, 178);
+    ctx.lineTo(530, 178);
     ctx.stroke();
 
-    // Ingredients
     ctx.fillStyle = "#e05300";
     ctx.font = "bold 15px sans-serif";
     ctx.textAlign = "left";
-    ctx.fillText("INGREDIENTS:", 70, 215);
+    ctx.fillText("INGREDIENTS:", 70, 205);
 
     ctx.fillStyle = "#3a3a3c";
     ctx.font = "14px sans-serif";
-    let startY = 240;
-    ingredients.slice(0, 8).forEach((ing) => {
+    let startY = 228;
+    ingredients.slice(0, 6).forEach((ing) => {
       ctx.fillText(`•  ${ing.length > 52 ? ing.substring(0, 49) + "..." : ing}`, 70, startY);
-      startY += 24;
+      startY += 22;
     });
 
-    // Instructions
     ctx.fillStyle = "#e05300";
     ctx.font = "bold 15px sans-serif";
-    ctx.fillText("INSTRUCTIONS:", 70, startY + 15);
-    startY += 40;
+    ctx.fillText("INSTRUCTIONS:", 70, startY + 12);
+    startY += 35;
 
     ctx.fillStyle = "#3a3a3c";
     ctx.font = "14px sans-serif";
-    instructions.slice(0, 4).forEach((inst, index) => {
+    instructions.slice(0, 3).forEach((inst, index) => {
       const stepText = `${index + 1}. ${inst}`;
       if (stepText.length > 55) {
         ctx.fillText(stepText.substring(0, 55), 70, startY);
-        ctx.fillText(stepText.substring(55), 88, startY + 20);
-        startY += 40;
+        ctx.fillText(stepText.substring(55), 88, startY + 18);
+        startY += 36;
       } else {
         ctx.fillText(stepText, 70, startY);
-        startY += 24;
+        startY += 22;
       }
     });
 
-    // Footer info
+    ctx.fillStyle = "#e05300";
+    ctx.font = "bold 15px sans-serif";
+    ctx.fillText("NUTRITIONAL VITALITY STATUS:", 70, 580);
+
+    const dialContainers = document.querySelectorAll("[data-3d-dial-score]");
+    let dialX = 56;
+    dialContainers.forEach((container) => {
+      const scoreVal = container.getAttribute("data-3d-dial-score") || "0";
+      const labelVal = container.getAttribute("data-3d-dial-label") || "";
+      const dialCanvas = container.querySelector("canvas");
+
+      if (dialCanvas) {
+        ctx.drawImage(dialCanvas, dialX, 605, 80, 80);
+      }
+
+      ctx.fillStyle = "#1c1c1e";
+      ctx.font = "bold 13px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(`${scoreVal}%`, dialX + 40, 649);
+
+      ctx.fillStyle = "#8e8e93";
+      ctx.font = "bold 10px sans-serif";
+      ctx.fillText(labelVal.toUpperCase(), dialX + 40, 698);
+
+      dialX += 80 + 56;
+    });
+
     ctx.fillStyle = "#8e8e93";
     ctx.font = "italic 11px sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText("Generated client-side via Tropical AI Chef app 🥤", 300, 735);
+    ctx.fillText("Generated client-side via Tropical AI Chef app 🥤", 300, 785);
 
-    // Download trigger
     const link = document.createElement("a");
     link.download = `tropical-recipe-${title.toLowerCase().replace(/\s+/g, "-")}.png`;
     link.href = canvas.toDataURL("image/png");
@@ -328,53 +501,14 @@ export const RecipeDisplay = ({ recipe }: RecipeDisplayProps) => {
                   <Sparkles className="w-5 h-5 text-secondary" />
                   Visual Health Dashboard
                 </h3>
-                <div className="space-y-4">
-                  {/* Hydration */}
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-xs font-semibold">
-                      <span className="flex items-center gap-1">💧 Hydration Index</span>
-                      <span className="text-blue-500">{scores.hydration}%</span>
-                    </div>
-                    <div className="h-2 w-full bg-blue-100 dark:bg-blue-950/40 rounded-full overflow-hidden">
-                      <div className="h-full bg-blue-500 rounded-full transition-all duration-1000" style={{ width: `${scores.hydration}%` }} />
-                    </div>
-                  </div>
-
-                  {/* Immunity */}
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-xs font-semibold">
-                      <span className="flex items-center gap-1">🛡️ Immunity Booster</span>
-                      <span className="text-emerald-500">{scores.immunity}%</span>
-                    </div>
-                    <div className="h-2 w-full bg-emerald-100 dark:bg-emerald-950/40 rounded-full overflow-hidden">
-                      <div className="h-full bg-emerald-500 rounded-full transition-all duration-1000" style={{ width: `${scores.immunity}%` }} />
-                    </div>
-                  </div>
-
-                  {/* Energy */}
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-xs font-semibold">
-                      <span className="flex items-center gap-1">⚡ Energy Level</span>
-                      <span className="text-orange-500">{scores.energy}%</span>
-                    </div>
-                    <div className="h-2 w-full bg-orange-100 dark:bg-orange-950/40 rounded-full overflow-hidden">
-                      <div className="h-full bg-orange-500 rounded-full transition-all duration-1000" style={{ width: `${scores.energy}%` }} />
-                    </div>
-                  </div>
-
-                  {/* Detox */}
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-xs font-semibold">
-                      <span className="flex items-center gap-1">🌿 Detox Score</span>
-                      <span className="text-purple-500">{scores.detox}%</span>
-                    </div>
-                    <div className="h-2 w-full bg-purple-100 dark:bg-purple-950/40 rounded-full overflow-hidden">
-                      <div className="h-full bg-purple-500 rounded-full transition-all duration-1000" style={{ width: `${scores.detox}%` }} />
-                    </div>
-                  </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 justify-items-center">
+                  <ThreeDProgressDial score={scores.hydration} label="Hydration" emoji="💧" color="#06b6d4" glowColor="#0891b2" />
+                  <ThreeDProgressDial score={scores.immunity} label="Immunity" emoji="🛡️" color="#10b981" glowColor="#059669" />
+                  <ThreeDProgressDial score={scores.energy} label="Energy" emoji="⚡" color="#f59e0b" glowColor="#d97706" />
+                  <ThreeDProgressDial score={scores.detox} label="Detox" emoji="🌿" color="#8b5cf6" glowColor="#7c3aed" />
                 </div>
                 <p className="text-[10px] text-muted-foreground mt-3 text-center">
-                  Calculated dynamically from fruit benefits and botanical profiles.
+                  Interactive 3D dials. Hover to tilt and increase glow intensity.
                 </p>
               </div>
             </div>

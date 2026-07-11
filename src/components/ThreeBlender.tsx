@@ -60,6 +60,16 @@ interface Particle3D {
   angle: number;
 }
 
+interface SplashParticle {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  color: string;
+  size: number;
+  life: number;
+}
+
 export const ThreeBlender = ({
   selectedFruits,
   selectedVegetables,
@@ -74,6 +84,13 @@ export const ThreeBlender = ({
   const fluidHeightRef = useRef(0);
   const blendTimerRef = useRef(0);
 
+  // Interaction variables
+  const isMouseDownRef = useRef(false);
+  const lastInteractionXRef = useRef(0);
+  const lastInteractionYRef = useRef(0);
+  const shakeAmountRef = useRef(0);
+  const splashesRef = useRef<SplashParticle[]>([]);
+
   // Sync state
   useEffect(() => {
     isBlendingRef.current = isBlending;
@@ -87,7 +104,6 @@ export const ThreeBlender = ({
 
   // Sync fruit objects
   useEffect(() => {
-    // Keep track of active items in simulation
     const activeSet = new Set(activeItems);
 
     // Remove unselected fruits
@@ -170,7 +186,6 @@ export const ThreeBlender = ({
     // Get average color of selected items
     const updateFluidColor = () => {
       if (activeItems.length === 0) return;
-      // Get colors
       const colors = activeItems.map((id) => FRUIT_COLORS[id] || "#ffbb00");
 
       // Simple hex blender
@@ -195,6 +210,20 @@ export const ThreeBlender = ({
       updateFluidColor();
       ctx.clearRect(0, 0, width, height);
 
+      // Apply screen shake translation
+      ctx.save();
+      if (isBlendingRef.current) {
+        shakeAmountRef.current = 2.5; // continuous blending vibration
+      } else {
+        shakeAmountRef.current *= 0.88; // decay click shake
+      }
+      
+      if (shakeAmountRef.current > 0.08) {
+        const dx = (Math.random() - 0.5) * shakeAmountRef.current;
+        const dy = (Math.random() - 0.5) * shakeAmountRef.current;
+        ctx.translate(dx, dy);
+      }
+
       const floorY = -50;
       const wallR = 40;
       const gravity = 0.6;
@@ -210,7 +239,6 @@ export const ThreeBlender = ({
         particlesRef.current.forEach((p) => {
           p.angle += p.speed;
           const radius = Math.sqrt(p.x * p.x + p.z * p.z);
-          // Vortex effect: swirl around Center and bob up
           p.x = Math.cos(p.angle) * radius;
           p.z = Math.sin(p.angle) * radius;
           p.y += 1.5;
@@ -237,7 +265,7 @@ export const ThreeBlender = ({
         bladeAngle += 0.02; // Idle spin
       }
 
-      // 1. Physics update for fruits
+      // Physics update for fruits
       fruitsRef.current.forEach((f) => {
         if (f.isDestroyed) return;
 
@@ -261,6 +289,10 @@ export const ThreeBlender = ({
           f.y += f.vy;
           f.x += f.vx;
           f.z += f.vz;
+
+          // Friction in air
+          f.vx *= 0.98;
+          f.vz *= 0.98;
 
           // Floor bounce
           if (f.y < floorY + f.radius) {
@@ -289,11 +321,19 @@ export const ThreeBlender = ({
         }
       });
 
+      // Update splash particles
+      splashesRef.current.forEach((s) => {
+        s.vy -= 0.28; // gravity
+        s.x += s.vx;
+        s.y += s.vy;
+        s.life -= 0.025; // fade out
+      });
+      splashesRef.current = splashesRef.current.filter((s) => s.life > 0);
+
       // Filter out destroyed fruits
       fruitsRef.current = fruitsRef.current.filter((f) => !f.isDestroyed);
 
       // --- RENDERING PIPELINE (3D Projection + Painter's Algorithm) ---
-      // We will render elements back-to-front (sorted by Z value)
       interface RenderItem {
         z: number;
         render: () => void;
@@ -301,20 +341,17 @@ export const ThreeBlender = ({
 
       const drawQueue: RenderItem[] = [];
 
-      // A. Draw blender base (always background-ish but drawn at bottom)
+      // A. Draw blender base
       const drawBlenderBase = () => {
-        // Draw dark grey base pedestal
         ctx.fillStyle = "#2d2d2d";
         ctx.strokeStyle = "#1a1a1a";
         ctx.lineWidth = 2;
 
         ctx.beginPath();
-        // Top ellipse of base
         ctx.ellipse(centerX, centerY - floorY, 52, 10, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
 
-        // Base body
         ctx.beginPath();
         ctx.moveTo(centerX - 52, centerY - floorY);
         ctx.lineTo(centerX - 62, centerY - floorY + 40);
@@ -324,13 +361,11 @@ export const ThreeBlender = ({
         ctx.fill();
         ctx.stroke();
 
-        // Base bottom ellipse
         ctx.beginPath();
         ctx.ellipse(centerX, centerY - floorY + 40, 62, 12, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
 
-        // Metallic collar ring
         ctx.fillStyle = "#e0e0e0";
         ctx.beginPath();
         ctx.ellipse(centerX, centerY - floorY - 5, 45, 8, 0, 0, Math.PI * 2);
@@ -338,47 +373,43 @@ export const ThreeBlender = ({
         ctx.stroke();
       };
 
-      // Draw base first (bottom layer)
       drawBlenderBase();
 
       // B. Draw back half of pitcher glass
       drawQueue.push({
-        z: 100, // Far Z
+        z: 100,
         render: () => {
           ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
           ctx.lineWidth = 1.5;
           ctx.fillStyle = "rgba(240, 248, 255, 0.05)";
           ctx.beginPath();
-          ctx.ellipse(centerX, centerY - floorY, 44, 8, 0, 0, Math.PI, true); // back half of bottom
+          ctx.ellipse(centerX, centerY - floorY, 44, 8, 0, 0, Math.PI, true);
           ctx.lineTo(centerX - 48, centerY - floorY - 110);
-          ctx.ellipse(centerX, centerY - floorY - 110, 48, 9, 0, Math.PI, 0, true); // back half of top
+          ctx.ellipse(centerX, centerY - floorY - 110, 48, 9, 0, Math.PI, 0, true);
           ctx.lineTo(centerX + 44, centerY - floorY);
           ctx.fill();
           ctx.stroke();
         },
       });
 
-      // C. Draw Blender Blades (at floorY)
+      // C. Draw Blender Blades
       drawQueue.push({
         z: 0.1,
         render: () => {
           ctx.strokeStyle = "#8e8e93";
           ctx.lineWidth = 3;
           ctx.beginPath();
-          // Draw metallic blades spinning
           const bl1x = Math.cos(bladeAngle) * 18;
           const bl1z = Math.sin(bladeAngle) * 6;
           const bl2x = Math.cos(bladeAngle + Math.PI / 2) * 18;
           const bl2z = Math.sin(bladeAngle + Math.PI / 2) * 6;
 
-          // Projected coords
           ctx.moveTo(centerX - bl1x, centerY - floorY - bl1z);
           ctx.lineTo(centerX + bl1x, centerY - floorY + bl1z);
           ctx.moveTo(centerX - bl2x, centerY - floorY - bl2z);
           ctx.lineTo(centerX + bl2x, centerY - floorY + bl2z);
           ctx.stroke();
 
-          // Center cap
           ctx.fillStyle = "#3a3a3c";
           ctx.beginPath();
           ctx.arc(centerX, centerY - floorY, 4, 0, Math.PI * 2);
@@ -386,7 +417,7 @@ export const ThreeBlender = ({
         },
       });
 
-      // D. Fluid rendering (if active)
+      // D. Fluid rendering
       if (fluidOpacityRef.current > 0) {
         drawQueue.push({
           z: 0,
@@ -395,16 +426,12 @@ export const ThreeBlender = ({
             ctx.fillStyle = fluidColor;
             ctx.globalAlpha = fluidOpacityRef.current;
 
-            // Draw fluid cylinder
             ctx.beginPath();
-            // Bottom ellipse of fluid
             ctx.ellipse(centerX, centerY - floorY, 43, 8, 0, 0, Math.PI * 2);
             ctx.fill();
 
-            // Fluid body
             ctx.beginPath();
             ctx.moveTo(centerX - 43, centerY - floorY);
-            // Calculate scale top radius
             const topRad = 43 + (h / 110) * 5;
             ctx.lineTo(centerX - topRad, centerY - floorY - h);
             ctx.lineTo(centerX + topRad, centerY - floorY - h);
@@ -412,15 +439,12 @@ export const ThreeBlender = ({
             ctx.closePath();
             ctx.fill();
 
-            // Top ellipse of fluid (surface)
             ctx.beginPath();
             ctx.ellipse(centerX, centerY - floorY - h, topRad, 8, 0, 0, Math.PI * 2);
-            // Swirl pattern inside top surface
             ctx.fill();
 
             ctx.globalAlpha = 1.0;
 
-            // Swirl ring overlay on surface
             ctx.strokeStyle = "rgba(255,255,255,0.4)";
             ctx.lineWidth = 1;
             ctx.beginPath();
@@ -436,7 +460,6 @@ export const ThreeBlender = ({
           drawQueue.push({
             z: p.z,
             render: () => {
-              // 3D projection
               const scale = fov / (p.z + cameraZ);
               const projX = p.x * scale + centerX;
               const projY = -p.y * scale + centerY;
@@ -450,12 +473,26 @@ export const ThreeBlender = ({
         });
       }
 
-      // F. Draw Fruits
+      // F. Draw Splash Particles
+      splashesRef.current.forEach((s) => {
+        drawQueue.push({
+          z: -10, // Draw on top of background glass
+          render: () => {
+            ctx.fillStyle = s.color;
+            ctx.globalAlpha = s.life;
+            ctx.beginPath();
+            ctx.arc(s.x + centerX, -s.y + centerY, s.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1.0;
+          }
+        });
+      });
+
+      // G. Draw Fruits
       fruitsRef.current.forEach((f) => {
         drawQueue.push({
           z: f.z,
           render: () => {
-            // 3D projection
             const scale = fov / (f.z + cameraZ);
             const projX = f.x * scale + centerX;
             const projY = -f.y * scale + centerY;
@@ -463,7 +500,6 @@ export const ThreeBlender = ({
 
             if (projR <= 0) return;
 
-            // Draw fruit with radial gradient shading for 3D look!
             const grad = ctx.createRadialGradient(
               projX - projR * 0.3,
               projY - projR * 0.3,
@@ -474,7 +510,6 @@ export const ThreeBlender = ({
             );
             grad.addColorStop(0, "#ffffff");
             grad.addColorStop(0.2, f.color);
-            // Dark shadow side
             grad.addColorStop(1, darkenHex(f.color, 0.4));
 
             ctx.fillStyle = grad;
@@ -482,7 +517,6 @@ export const ThreeBlender = ({
             ctx.arc(projX, projY, projR, 0, Math.PI * 2);
             ctx.fill();
 
-            // Specular reflection stroke
             ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
             ctx.lineWidth = 0.8;
             ctx.stroke();
@@ -490,21 +524,19 @@ export const ThreeBlender = ({
         });
       });
 
-      // G. Front glass reflections & highlights
+      // H. Front glass reflections & highlights
       drawQueue.push({
-        z: -100, // Near Z
+        z: -100,
         render: () => {
-          // Front glass outline
           ctx.strokeStyle = "rgba(255, 255, 255, 0.28)";
           ctx.lineWidth = 2.5;
           ctx.beginPath();
-          ctx.ellipse(centerX, centerY - floorY, 44, 8, 0, 0, Math.PI); // front half bottom
+          ctx.ellipse(centerX, centerY - floorY, 44, 8, 0, 0, Math.PI);
           ctx.lineTo(centerX - 48, centerY - floorY - 110);
-          ctx.ellipse(centerX, centerY - floorY - 110, 48, 9, 0, Math.PI, 0); // front half top
+          ctx.ellipse(centerX, centerY - floorY - 110, 48, 9, 0, Math.PI, 0);
           ctx.lineTo(centerX + 44, centerY - floorY);
           ctx.stroke();
 
-          // Glass shine streak (reflective light)
           const gradShine = ctx.createLinearGradient(centerX - 35, 0, centerX - 10, 0);
           gradShine.addColorStop(0, "rgba(255, 255, 255, 0)");
           gradShine.addColorStop(0.5, "rgba(255, 255, 255, 0.15)");
@@ -519,7 +551,6 @@ export const ThreeBlender = ({
           ctx.closePath();
           ctx.fill();
 
-          // Black plastic lid
           ctx.fillStyle = "#1e1e1e";
           ctx.strokeStyle = "#000000";
           ctx.lineWidth = 1;
@@ -534,7 +565,6 @@ export const ThreeBlender = ({
           ctx.fill();
           ctx.stroke();
 
-          // Connection of lid layers
           ctx.beginPath();
           ctx.moveTo(centerX - 49, centerY - floorY - 115);
           ctx.lineTo(centerX - 49, centerY - floorY - 110);
@@ -542,12 +572,10 @@ export const ThreeBlender = ({
           ctx.lineTo(centerX + 49, centerY - floorY - 115);
           ctx.fill();
 
-          // Glass handle overlay
           ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
           ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
           ctx.lineWidth = 3;
           ctx.beginPath();
-          // Draw handle shape
           ctx.ellipse(centerX + 45, centerY - floorY - 55, 12, 35, 0, -Math.PI / 2, Math.PI / 2);
           ctx.stroke();
         },
@@ -556,6 +584,8 @@ export const ThreeBlender = ({
       // Sort by Z and draw
       drawQueue.sort((a, b) => b.z - a.z);
       drawQueue.forEach((item) => item.render());
+
+      ctx.restore(); // Restore context to remove shake translation for next frame
 
       animationId = requestAnimationFrame(render);
     };
@@ -566,6 +596,100 @@ export const ThreeBlender = ({
       cancelAnimationFrame(animationId);
     };
   }, [activeItems]);
+
+  // Touch and Mouse Interaction Handler
+  const handleInteraction = (clientX: number, clientY: number, isDrag = false) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = ((clientX - rect.left) / rect.width) * canvas.width;
+    const mouseY = ((clientY - rect.top) / rect.height) * canvas.height;
+
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2 + 30;
+    const floorY = -50;
+
+    const clickX = mouseX - centerX;
+    const clickY = -(mouseY - centerY);
+
+    // Filter to click inside the pitcher cylinder area
+    if (clickY < floorY || clickY > floorY + 120 || Math.abs(clickX) > 46) return;
+
+    // Apply vibration shake on click
+    if (!isDrag) {
+      shakeAmountRef.current = 6;
+    } else {
+      shakeAmountRef.current = Math.max(shakeAmountRef.current, 1.5);
+    }
+
+    // Apply physical velocity impulse to nearby fruits
+    fruitsRef.current.forEach((f) => {
+      const dx = f.x - clickX;
+      const dy = f.y - clickY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist < 55) {
+        const force = (55 - dist) / 55;
+        const angle = Math.atan2(dy, dx);
+        
+        // Push fruit away
+        f.vx += Math.cos(angle) * force * 5;
+        f.vy += Math.sin(angle) * force * 5 + 2.5; // pop up
+        f.bounceCount = 0; // allow bounce again
+      }
+    });
+
+    // Spawn splash particles matching a fruit's color
+    const activeColors = fruitsRef.current.map((f) => f.color);
+    const splashColor = activeColors.length > 0 
+      ? activeColors[Math.floor(Math.random() * activeColors.length)]
+      : "#ffa500";
+
+    const count = isDrag ? 2 : 12;
+    for (let i = 0; i < count; i++) {
+      const angle = (Math.random() - 0.5) * Math.PI + Math.PI / 2; // upward splash direction
+      const speed = Math.random() * 4.5 + 1.5;
+      splashesRef.current.push({
+        x: clickX,
+        y: clickY,
+        vx: Math.cos(angle) * speed + (isDrag ? (clickX - lastInteractionXRef.current) * 0.15 : 0),
+        vy: Math.sin(angle) * speed + 1.2,
+        color: splashColor,
+        size: Math.random() * 3.5 + 1.2,
+        life: 1.0,
+      });
+    }
+
+    lastInteractionXRef.current = clickX;
+    lastInteractionYRef.current = clickY;
+  };
+
+  const onMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    isMouseDownRef.current = true;
+    handleInteraction(e.clientX, e.clientY);
+  };
+
+  const onMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!isMouseDownRef.current) return;
+    handleInteraction(e.clientX, e.clientY, true);
+  };
+
+  const onMouseUp = () => {
+    isMouseDownRef.current = false;
+  };
+
+  const onTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    isMouseDownRef.current = true;
+    const touch = e.touches[0];
+    if (touch) handleInteraction(touch.clientX, touch.clientY);
+  };
+
+  const onTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (!isMouseDownRef.current) return;
+    const touch = e.touches[0];
+    if (touch) handleInteraction(touch.clientX, touch.clientY, true);
+  };
 
   // Helper function to darken hex colors
   const darkenHex = (hex: string, percent: number) => {
@@ -585,7 +709,17 @@ export const ThreeBlender = ({
 
   return (
     <div className="relative w-full h-[320px] md:h-[400px] flex items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-b from-primary/5 to-secondary/5 border border-muted/50 backdrop-blur-sm shadow-inner">
-      <canvas ref={canvasRef} className="w-full h-full max-w-[300px] max-h-[350px]" />
+      <canvas 
+        ref={canvasRef} 
+        className="w-full h-full max-w-[300px] max-h-[350px] cursor-grab active:cursor-grabbing touch-none" 
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
+        onMouseUp={onMouseUp}
+        onMouseLeave={onMouseUp}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onMouseUp}
+      />
       <div className="absolute top-4 left-4 flex gap-1.5 items-center bg-black/20 px-2.5 py-1 rounded-full backdrop-blur-sm border border-white/10">
         <span className="relative flex h-2 w-2">
           <span className={`relative inline-flex rounded-full h-2 w-2 ${isBlending ? "bg-red-500 animate-pulse" : "bg-emerald-500"}`}></span>
@@ -595,7 +729,7 @@ export const ThreeBlender = ({
         </span>
       </div>
       <div className="absolute bottom-4 right-4 pointer-events-none select-none text-[9px] text-foreground/40 font-mono">
-        3D Projected Canvas
+        Click / Drag to Splash 🍊
       </div>
     </div>
   );
