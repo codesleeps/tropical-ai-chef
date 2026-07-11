@@ -50,7 +50,6 @@ import {
   OLLAMA_MODELS,
 } from "@/utils/ollamaRecipeGenerator";
 import { env, hasOpenAIKey, hasGeminiKey } from "@/config/environment";
-import { ThreeBlender } from "@/components/ThreeBlender";
 import { Mic } from "lucide-react";
 
 interface RecipeGeneratorProps {
@@ -145,7 +144,6 @@ export const RecipeGenerator = ({
   const [selectedVegetables, setSelectedVegetables] = useState<string[]>([]);
 
   const [isGenerating, setIsGenerating] = useState(false);
-  const [isBlending, setIsBlending] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [availableServices, setAvailableServices] = useState<
     GenerationService[]
@@ -509,74 +507,7 @@ ${recipe.model ? `*Generated with ${recipe.model}*` : ""}
 ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
   };
 
-  const onThreeBlendingComplete = async () => {
-    setIsBlending(false);
 
-    await handleSecureSubmit(async () => {
-      const result = await handleAsyncError(
-        async () => {
-          // Track recipe generation attempt
-          trackEngagement("recipe_generation_started", {
-            fruits: selectedFruits,
-            fruit_count: selectedFruits.length,
-            vegetables: selectedVegetables,
-            vegetable_count: selectedVegetables.length,
-            style: formData.style,
-            service: selectedService,
-            has_vegetables: selectedVegetables.length > 0,
-            has_dietary_restrictions: !!formData.dietaryRestrictions.trim(),
-          });
-
-          // Measure performance of recipe generation
-          const recipe = await measureFunction(
-            "recipe_generation_duration",
-            () => generateWithFallback(formData)
-          );
-
-          const formattedRecipe = formatRecipeForDisplay(recipe);
-
-          onRecipeGenerated(formattedRecipe);
-
-          // Track successful recipe generation
-          trackRecipeGeneration({
-            fruit: formData.fruit,
-            style: formData.style,
-            service: selectedService,
-            success: true,
-            duration: recipe.generationTime,
-          });
-
-          toast.success("Your tropical recipe is ready! 🥤✨", {
-            description: `Generated: ${recipe.title}`,
-            duration: 5000,
-          });
-
-          // Reset retry count on success
-          setRetryCount(0);
-
-          return recipe;
-        },
-        {
-          context: "recipe_generation",
-          showToast: false, // We handle our own toasts
-          onError: (error) => {
-            // Track failed recipe generation
-            trackRecipeGeneration({
-              fruit: formData.fruit,
-              style: formData.style,
-              service: selectedService,
-              success: false,
-            });
-
-            setLastError(error.message);
-            setRetryCount((prev) => prev + 1);
-          },
-        }
-      );
-
-      setIsGenerating(false);
-    });
-  };
 
   const handleGenerateRecipe = async () => {
     if (!validateForm()) return;
@@ -586,7 +517,6 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
       return;
     }
 
-    setIsBlending(true);
     setIsGenerating(true);
     setLastError(null);
   };

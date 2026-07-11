@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     // Set base path for GitHub Pages deployment
-    base: mode === "production" ? "/tropical-ai-chef/" : "/",
+    base: "/",
     server: {
       host: "::",
       port: 8080,
