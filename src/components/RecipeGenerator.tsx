@@ -49,6 +49,7 @@ import {
 } from "@/utils/ollamaRecipeGenerator";
 import { env, hasOpenAIKey, hasGeminiKey } from "@/config/environment";
 import { Mic } from "lucide-react";
+import { getSpeechRecognition } from "@/utils/speechRecognition";
 
 interface RecipeGeneratorProps {
   onRecipeGenerated: (recipe: string) => void;
@@ -232,8 +233,7 @@ export const RecipeGenerator = ({
   });
 
   const handleVoiceCommand = () => {
-    const SpeechRecognition =
-      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const SpeechRecognition = getSpeechRecognition();
 
     if (!SpeechRecognition) {
       toast.error("Voice search is not supported in this browser. Please try Chrome or Safari! 🎙️");
@@ -259,7 +259,7 @@ export const RecipeGenerator = ({
       setIsListening(false);
     };
 
-    recognition.onresult = (event: any) => {
+    recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
       toast.success(`Transcribed: "${transcript}" 🍍`, { id: "voice-listen" });
 
