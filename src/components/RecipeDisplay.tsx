@@ -1,161 +1,74 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Clock, Users, Heart, Download, Sparkles, CheckCircle2, Bookmark } from "lucide-react";
 import { toast } from "sonner";
-import * as THREE from "three";
 
 interface RecipeDisplayProps {
   recipe: string;
 }
 
-interface ThreeDProgressDialProps {
+interface HealthDialProps {
   score: number;
   label: string;
   emoji: string;
   color: string;
-  glowColor: string;
 }
 
-const ThreeDProgressDial = ({ score, label, emoji, color, glowColor }: ThreeDProgressDialProps) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+const DIAL_SIZE = 100;
+const RING_RADIUS = 40;
+const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
+
+const HealthDial = ({ score, label, emoji, color }: HealthDialProps) => {
+  const clamped = Math.max(0, Math.min(100, score));
+  const [animatedScore, setAnimatedScore] = useState(0);
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    const id = requestAnimationFrame(() => setAnimatedScore(clamped));
+    return () => cancelAnimationFrame(id);
+  }, [clamped]);
 
-    const width = 100;
-    const height = 100;
-
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
-    camera.position.z = 4.5;
-
-    const renderer = new THREE.WebGLRenderer({ 
-      antialias: true, 
-      alpha: true,
-      preserveDrawingBuffer: true
-    });
-    renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    containerRef.current.appendChild(renderer.domElement);
-    rendererRef.current = renderer;
-
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-    scene.add(ambientLight);
-
-    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    dirLight.position.set(2, 3, 4);
-    scene.add(dirLight);
-
-    const pointLight = new THREE.PointLight(new THREE.Color(glowColor), 1.5, 10);
-    pointLight.position.set(0, 0, 2);
-    scene.add(pointLight);
-
-    const dialGroup = new THREE.Group();
-    scene.add(dialGroup);
-
-    // Background track torus
-    const bgGeometry = new THREE.TorusGeometry(1.3, 0.15, 16, 100);
-    const bgMaterial = new THREE.MeshStandardMaterial({
-      color: 0x3a3a3c,
-      roughness: 0.8,
-      metalness: 0.1,
-      transparent: true,
-      opacity: 0.15
-    });
-    const bgMesh = new THREE.Mesh(bgGeometry, bgMaterial);
-    dialGroup.add(bgMesh);
-
-    // Progress torus geometry
-    const targetArc = (score / 100) * Math.PI * 2;
-    const activeColor = new THREE.Color(color);
-    const progressMaterial = new THREE.MeshStandardMaterial({
-      color: activeColor,
-      roughness: 0.2,
-      metalness: 0.8,
-      emissive: new THREE.Color(glowColor),
-      emissiveIntensity: 0.35,
-    });
-
-    let progressMesh: THREE.Mesh | null = null;
-    let currentArc = 0;
-
-    let isHovered = false;
-    const onMouseEnter = () => { isHovered = true; };
-    const onMouseLeave = () => { isHovered = false; };
-    
-    const container = containerRef.current;
-    container.addEventListener("mouseenter", onMouseEnter);
-    container.addEventListener("mouseleave", onMouseLeave);
-
-    let animationFrameId: number;
-    const clock = new THREE.Clock();
-
-    const animate = () => {
-      animationFrameId = requestAnimationFrame(animate);
-
-      if (currentArc < targetArc) {
-        currentArc = Math.min(targetArc, currentArc + (targetArc - currentArc) * 0.08 + 0.005);
-        
-        if (progressMesh) {
-          dialGroup.remove(progressMesh);
-          progressMesh.geometry.dispose();
-        }
-        
-        const progressGeometry = new THREE.TorusGeometry(1.3, 0.18, 16, 100, currentArc);
-        progressMesh = new THREE.Mesh(progressGeometry, progressMaterial);
-        progressMesh.rotation.set(0, 0, Math.PI / 2);
-        progressMesh.scale.set(1, -1, 1); // Clockwise rotation
-        dialGroup.add(progressMesh);
-      }
-
-      const elapsedTime = clock.getElapsedTime();
-      if (isHovered) {
-        dialGroup.rotation.y = Math.sin(elapsedTime * 4) * 0.2;
-        dialGroup.rotation.x = Math.cos(elapsedTime * 4) * 0.2;
-        progressMaterial.emissiveIntensity = 0.65 + Math.sin(elapsedTime * 8) * 0.15;
-      } else {
-        dialGroup.rotation.y += (0 - dialGroup.rotation.y) * 0.1;
-        dialGroup.rotation.x += (0 - dialGroup.rotation.x) * 0.1;
-        progressMaterial.emissiveIntensity = 0.35;
-      }
-
-      renderer.render(scene, camera);
-    };
-
-    animate();
-
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-      container.removeEventListener("mouseenter", onMouseEnter);
-      container.removeEventListener("mouseleave", onMouseLeave);
-      
-      bgGeometry.dispose();
-      bgMaterial.dispose();
-      if (progressMesh) {
-        progressMesh.geometry.dispose();
-      }
-      progressMaterial.dispose();
-      
-      if (containerRef.current && renderer.domElement.parentNode === containerRef.current) {
-        containerRef.current.removeChild(renderer.domElement);
-      }
-      renderer.dispose();
-    };
-  }, [score, color, glowColor]);
+  const dashOffset = RING_CIRCUMFERENCE * (1 - animatedScore / 100);
 
   return (
-    <div className="flex flex-col items-center select-none group relative">
-      <div 
-        ref={containerRef} 
-        className="w-[100px] h-[100px] relative cursor-pointer"
-        data-3d-dial-score={score}
-        data-3d-dial-label={label}
-      />
-      <div className="absolute top-[34px] flex flex-col items-center justify-center pointer-events-none">
-        <span className="text-lg font-black text-foreground tracking-tight group-hover:scale-110 transition-transform">{score}%</span>
+    <div className="flex flex-col items-center select-none group">
+      <div className="relative w-[100px] h-[100px]">
+        <svg
+          width={DIAL_SIZE}
+          height={DIAL_SIZE}
+          viewBox={`0 0 ${DIAL_SIZE} ${DIAL_SIZE}`}
+          role="img"
+          aria-label={`${label} score ${clamped} percent`}
+          className="-rotate-90"
+        >
+          <circle
+            cx={DIAL_SIZE / 2}
+            cy={DIAL_SIZE / 2}
+            r={RING_RADIUS}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="8"
+            className="text-muted opacity-30"
+          />
+          <circle
+            cx={DIAL_SIZE / 2}
+            cy={DIAL_SIZE / 2}
+            r={RING_RADIUS}
+            fill="none"
+            stroke={color}
+            strokeWidth="8"
+            strokeLinecap="round"
+            strokeDasharray={RING_CIRCUMFERENCE}
+            strokeDashoffset={dashOffset}
+            style={{ transition: "stroke-dashoffset 900ms cubic-bezier(0.22, 1, 0.36, 1)" }}
+          />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <span className="text-lg font-black text-foreground tracking-tight group-hover:scale-110 transition-transform">
+            {clamped}%
+          </span>
+        </div>
       </div>
       <div className="text-center mt-1.5 space-y-0.5">
         <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center justify-center gap-1">
@@ -277,6 +190,13 @@ export const RecipeDisplay = ({ recipe }: RecipeDisplayProps) => {
 
   const scores = calculateScores();
 
+  const dialData = [
+    { key: "hydration", score: scores.hydration, label: "Hydration", emoji: "💧", color: "#06b6d4" },
+    { key: "immunity", score: scores.immunity, label: "Immunity", emoji: "🛡️", color: "#10b981" },
+    { key: "energy", score: scores.energy, label: "Energy", emoji: "⚡", color: "#f59e0b" },
+    { key: "detox", score: scores.detox, label: "Detox", emoji: "🌿", color: "#8b5cf6" },
+  ];
+
   const handleExportRecipe = () => {
     const canvas = document.createElement("canvas");
     canvas.width = 600;
@@ -364,25 +284,34 @@ export const RecipeDisplay = ({ recipe }: RecipeDisplayProps) => {
     ctx.font = "bold 15px sans-serif";
     ctx.fillText("NUTRITIONAL VITALITY STATUS:", 70, 580);
 
-    const dialContainers = document.querySelectorAll("[data-3d-dial-score]");
-    let dialX = 56;
-    dialContainers.forEach((container) => {
-      const scoreVal = container.getAttribute("data-3d-dial-score") || "0";
-      const labelVal = container.getAttribute("data-3d-dial-label") || "";
-      const dialCanvas = container.querySelector("canvas");
+    // Draw the four health dials directly onto the card canvas
+    let dialX = 66;
+    dialData.forEach((dial) => {
+      const cx = dialX + 40;
+      const cy = 645;
+      const radius = 32;
 
-      if (dialCanvas) {
-        ctx.drawImage(dialCanvas, dialX, 605, 80, 80);
-      }
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+      ctx.strokeStyle = "#e5e5ea";
+      ctx.lineWidth = 8;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, -Math.PI / 2, -Math.PI / 2 + (dial.score / 100) * Math.PI * 2);
+      ctx.strokeStyle = dial.color;
+      ctx.lineWidth = 8;
+      ctx.lineCap = "round";
+      ctx.stroke();
 
       ctx.fillStyle = "#1c1c1e";
       ctx.font = "bold 13px sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText(`${scoreVal}%`, dialX + 40, 649);
+      ctx.fillText(`${dial.score}%`, cx, cy + 4);
 
       ctx.fillStyle = "#8e8e93";
       ctx.font = "bold 10px sans-serif";
-      ctx.fillText(labelVal.toUpperCase(), dialX + 40, 698);
+      ctx.fillText(dial.label.toUpperCase(), cx, 698);
 
       dialX += 80 + 56;
     });
@@ -402,7 +331,7 @@ export const RecipeDisplay = ({ recipe }: RecipeDisplayProps) => {
   const handleLocalSave = () => {
     try {
       const saved = JSON.parse(localStorage.getItem("tropical_saved_recipes") || "[]");
-      const alreadySaved = saved.some((r: any) => r.title === title);
+      const alreadySaved = saved.some((r: { title: string }) => r.title === title);
       if (alreadySaved) {
         toast.info("Recipe is already saved in your chest!");
         return;
@@ -502,13 +431,18 @@ export const RecipeDisplay = ({ recipe }: RecipeDisplayProps) => {
                   Visual Health Dashboard
                 </h3>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 justify-items-center">
-                  <ThreeDProgressDial score={scores.hydration} label="Hydration" emoji="💧" color="#06b6d4" glowColor="#0891b2" />
-                  <ThreeDProgressDial score={scores.immunity} label="Immunity" emoji="🛡️" color="#10b981" glowColor="#059669" />
-                  <ThreeDProgressDial score={scores.energy} label="Energy" emoji="⚡" color="#f59e0b" glowColor="#d97706" />
-                  <ThreeDProgressDial score={scores.detox} label="Detox" emoji="🌿" color="#8b5cf6" glowColor="#7c3aed" />
+                  {dialData.map((dial) => (
+                    <HealthDial
+                      key={dial.key}
+                      score={dial.score}
+                      label={dial.label}
+                      emoji={dial.emoji}
+                      color={dial.color}
+                    />
+                  ))}
                 </div>
                 <p className="text-[10px] text-muted-foreground mt-3 text-center">
-                  Interactive 3D dials. Hover to tilt and increase glow intensity.
+                  Scores estimated from your ingredient list. Hover a dial to zoom the readout.
                 </p>
               </div>
             </div>

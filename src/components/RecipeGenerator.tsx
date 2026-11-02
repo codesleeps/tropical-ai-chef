@@ -599,10 +599,8 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
           </Alert>
         )}
 
-        {/* Form Fields & 3D Blender Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Left Column: Form Fields */}
-          <div className="lg:col-span-7 space-y-8">
+        {/* Form Fields */}
+        <div className="space-y-8">
           {/* AI Service Selection */}
           <div className="space-y-4">
             <div className="text-center">
@@ -1024,36 +1022,6 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
                 )}
               </div>
             </div>
-          </div>
-          </div>
-
-          {/* Right Column: 3D Blender */}
-          <div className="lg:col-span-5 lg:sticky lg:top-6 space-y-4 bg-card/60 p-6 rounded-2xl border shadow-sm backdrop-blur-sm">
-            <div className="text-center lg:text-left">
-              <h3 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                3D Tropical Blender 🌪️
-              </h3>
-              <p className="text-xs text-muted-foreground mb-3">
-                Watch fruits bounce and blend in 3D as you select them
-              </p>
-            </div>
-            <ThreeBlender
-              selectedFruits={selectedFruits}
-              selectedVegetables={selectedVegetables}
-              isBlending={isBlending}
-              onBlendingComplete={onThreeBlendingComplete}
-            />
-            {(selectedFruits.length > 0 || selectedVegetables.length > 0) && (
-              <div className="text-xs text-center text-muted-foreground mt-2 flex flex-wrap gap-1 justify-center bg-muted/40 p-2.5 rounded-xl border border-muted-foreground/10">
-                <span className="font-semibold w-full mb-1">Blender contents:</span>
-                {selectedFruits.map(f => (
-                  <span key={f} className="px-2 py-0.5 rounded bg-primary/10 text-primary font-medium text-[10px]">{f}</span>
-                ))}
-                {selectedVegetables.map(v => (
-                  <span key={v} className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 font-medium text-[10px]">{v}</span>
-                ))}
-              </div>
-            )}
           </div>
         </div>
 
