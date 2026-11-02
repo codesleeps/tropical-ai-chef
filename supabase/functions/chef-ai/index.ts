@@ -84,6 +84,7 @@ const buildRecipePrompt = (payload: Record<string, unknown>) => {
 Main Fruits: ${fruits}
 Style: ${clean(payload.style, 60)}
 Additional Vegetables: ${clean(payload.vegetables, 200) || "none"}
+Healthy Add-ins: ${Array.isArray(payload.addIns) && payload.addIns.length > 0 ? (payload.addIns as unknown[]).map((a) => clean(a, 120)).join("; ") : "none"}
 Dietary Restrictions: ${clean(payload.dietaryRestrictions, 300) || "none"}
 
 Make it creative, delicious, and include tropical flavors. The recipe should be healthy and appealing.`;

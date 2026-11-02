@@ -43,6 +43,7 @@ import {
   type Recipe,
 } from "@/utils/aiRecipeGenerator";
 import { chefAiRecipe, isChefAiConfigured } from "@/utils/chefAi";
+import { ADD_IN_CATEGORIES, SMOOTHIE_ADD_INS } from "@/data/smoothieAddins";
 import {
   generateRecipeWithOllama,
   checkOllamaAvailability,
@@ -143,6 +144,7 @@ export const RecipeGenerator = ({
 
   const [selectedFruits, setSelectedFruits] = useState<string[]>([]);
   const [selectedVegetables, setSelectedVegetables] = useState<string[]>([]);
+  const [selectedAddIns, setSelectedAddIns] = useState<string[]>([]);
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [isListening, setIsListening] = useState(false);
@@ -183,6 +185,20 @@ export const RecipeGenerator = ({
   );
   const { trackRecipeGeneration, trackEngagement } = useAnalytics();
   const { measureFunction } = usePerformanceTracking();
+
+  // Healthy add-ins picked from the Scout research set
+  const selectedAddInData = SMOOTHIE_ADD_INS.filter((a) => selectedAddIns.includes(a.id));
+  const addInPayload = selectedAddInData.map((a) => `${a.name} - ${a.dose}`);
+  const selectedAddInDoses = selectedAddInData.map((a) => `${a.name}: ${a.dose}`);
+  const selectedAddInCautions = selectedAddInData
+    .map((a) => a.cautions)
+    .filter((c): c is string => Boolean(c));
+
+  const toggleAddIn = (id: string) => {
+    setSelectedAddIns((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
 
   // Check available services on component mount
   const checkAvailableServices = useCallback(async () => {
@@ -367,6 +383,7 @@ export const RecipeGenerator = ({
             fruits: cleanRequest.fruits,
             style: cleanRequest.style,
             vegetables: cleanRequest.vegetables,
+            addIns: cleanRequest.addIns,
             dietaryRestrictions: cleanRequest.dietaryRestrictions,
           });
           return { ...parseRecipeFromText(markdown), model: "deepseek-chat" };
@@ -439,7 +456,8 @@ export const RecipeGenerator = ({
                   fruits: cleanRequest.fruits,
                   style: cleanRequest.style,
                   vegetables: cleanRequest.vegetables,
-                  dietaryRestrictions: cleanRequest.dietaryRestrictions,
+                  addIns: cleanRequest.addIns,
+            dietaryRestrictions: cleanRequest.dietaryRestrictions,
                 });
                 return { ...parseRecipeFromText(markdown), model: "deepseek-chat" };
               }
@@ -544,6 +562,7 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
       ...formData,
       fruit: selectedFruits[0] || formData.fruit,
       fruits: selectedFruits,
+      addIns: addInPayload.length > 0 ? addInPayload : undefined,
       vegetables:
         selectedVegetables.length > 0
           ? selectedVegetables.join(", ")
@@ -1049,6 +1068,65 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
                     );
                   })}
                 </div>
+              </div>
+
+              {/* Healthy add-ins - sourced from the Scout research brief (2026-11-02) */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-base font-medium">Healthy Add-ins (optional)</Label>
+                  <span className="text-xs text-muted-foreground">
+                    {selectedAddIns.length} selected
+                  </span>
+                </div>
+                {ADD_IN_CATEGORIES.map((category) => {
+                  const items = SMOOTHIE_ADD_INS.filter((a) => a.category === category.id);
+                  if (items.length === 0) return null;
+                  return (
+                    <div key={category.id} className="space-y-1.5">
+                      <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                        <span>{category.emoji}</span>
+                        <span>{category.label}</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {items.map((addIn) => {
+                          const isSelected = selectedAddIns.includes(addIn.id);
+                          return (
+                            <button
+                              key={addIn.id}
+                              type="button"
+                              onClick={() => toggleAddIn(addIn.id)}
+                              aria-pressed={isSelected}
+                              title={`${addIn.rationale} - ${addIn.dose}`}
+                              className={`flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs transition-all ${category.color} ${
+                                isSelected
+                                  ? "border-primary font-medium text-foreground ring-1 ring-primary/40"
+                                  : "border-transparent hover:border-primary/50"
+                              }`}
+                            >
+                              <span>{addIn.emoji}</span>
+                              <span>{addIn.name}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+                {selectedAddInCautions.length > 0 && (
+                  <div className="space-y-1 rounded-lg border border-amber-300 bg-amber-50 p-2.5 text-xs text-amber-900">
+                    <div className="font-medium">Watch-outs for your selection</div>
+                    <ul className="list-disc space-y-0.5 pl-4">
+                      {selectedAddInCautions.map((caution, idx) => (
+                        <li key={idx}>{caution}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {selectedAddInDoses.length > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    {selectedAddInDoses.join(" · ")}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">

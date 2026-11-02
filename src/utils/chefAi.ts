@@ -11,6 +11,7 @@ export interface RecipeRequestPayload {
   fruits?: string[];
   style: string;
   vegetables?: string;
+  addIns?: string[];
   dietaryRestrictions?: string;
 }
 

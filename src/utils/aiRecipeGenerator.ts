@@ -15,6 +15,7 @@ export interface RecipeRequest {
   fruits?: string[]; // Multiple fruits array
   style: string;
   vegetables?: string;
+  addIns?: string[];
   dietaryRestrictions?: string;
 }
 
@@ -507,11 +508,14 @@ function createPrompt(request: RecipeRequest): string {
       : request.fruit;
 
   return `Create a detailed tropical juice recipe with the following requirements:
-    
+
 Main Fruits: ${fruits}
 Style: ${request.style}
 Additional Vegetables: ${request.vegetables || "none"}
+Healthy Add-ins: ${request.addIns && request.addIns.length > 0 ? request.addIns.join("; ") : "none"}
 Dietary Restrictions: ${request.dietaryRestrictions || "none"}
+
+Use the add-ins listed above at the stated dose - do not invent extra supplements. If an add-in needs the mixture blended, say so in the instructions.
 
 Please provide a recipe in this exact format:
 
