@@ -4,6 +4,29 @@
 
 const DEEPSEEK_URL = "https://api.deepseek.com/chat/completions";
 const MODEL = Deno.env.get("DEEPSEEK_MODEL") ?? "deepseek-chat";
+const DAILY_LIMIT = Number(Deno.env.get("AI_DAILY_LIMIT") ?? "100");
+
+// Daily spend guard: one shared counter per UTC day, incremented atomically in Postgres.
+// The service-role key is injected by Supabase and never reaches the client.
+const consumeQuota = async (): Promise<number | null> => {
+  const url = Deno.env.get("SUPABASE_URL");
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !serviceKey) return null;
+
+  const res = await fetch(`${url}/rest/v1/rpc/consume_ai_quota`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      apikey: serviceKey,
+      Authorization: `Bearer ${serviceKey}`,
+    },
+    body: JSON.stringify({ p_limit: DAILY_LIMIT }),
+  });
+
+  if (!res.ok) return null;
+  const used = Number(await res.json());
+  return Number.isFinite(used) ? used : null;
+};
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -87,6 +110,24 @@ Deno.serve(async (req: Request) => {
   }
 
   const action = payload.action === "recipe" ? "recipe" : "chat";
+
+  // Spend guard: fail open if the counter is unreachable (Local AI still answers),
+  // but refuse once the shared daily budget is used up.
+  const used = await consumeQuota();
+  if (used !== null && used > DAILY_LIMIT) {
+    return new Response(
+      JSON.stringify({
+        error: "daily_limit_reached",
+        limit: DAILY_LIMIT,
+        message: `Chef AI has hit its ${DAILY_LIMIT} requests/day limit. Try again after midnight UTC.`,
+      }),
+      {
+        status: 429,
+        headers: { ...CORS_HEADERS, "Content-Type": "application/json", "Retry-After": "3600" },
+      },
+    );
+  }
+
   let messages: ChatTurn[];
   let maxTokens: number;
   let temperature: number;
