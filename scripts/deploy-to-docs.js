@@ -105,6 +105,17 @@ function updateIndexHtmlForGitHubPages() {
   }
 }
 
+// GitHub Pages has no SPA rewrite, so a deep link like /tropical-ai-chef/recipes
+// would 404. Serving index.html as 404.html lets the router take over.
+function writeSpaFallback() {
+  const indexPath = path.join(destDir, "index.html");
+  const fallbackPath = path.join(destDir, "404.html");
+  if (fs.existsSync(indexPath)) {
+    fs.copyFileSync(indexPath, fallbackPath);
+    console.log("✅ Wrote 404.html SPA fallback for GitHub Pages");
+  }
+}
+
 // Remove old docs folder
 if (fs.existsSync(destDir)) {
   removeDirSync(destDir);
@@ -118,5 +129,8 @@ updateManifestForGitHubPages();
 
 // Update index.html for GitHub Pages
 updateIndexHtmlForGitHubPages();
+
+// SPA deep-link fallback
+writeSpaFallback();
 
 console.log("✅ Deployment files copied to docs/. Push to GitHub to deploy!");

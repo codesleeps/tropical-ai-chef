@@ -8,8 +8,8 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
 
   return {
-    // Set base path for GitHub Pages deployment
-    base: "/",
+    // Base path: GitHub Pages serves this project from /tropical-ai-chef/
+    base: env.VITE_BASE_PATH || "/",
     server: {
       host: "::",
       port: 8080,
