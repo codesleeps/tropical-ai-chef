@@ -32,8 +32,6 @@ import { RecipeGenerationLoader } from "@/components/LoadingStates";
 import { useErrorHandler } from "@/hooks/use-error-handler";
 import { useSecureForm } from "@/hooks/use-security";
 import { useAnalytics, usePerformanceTracking } from "@/hooks/use-analytics";
-import { useFormSubmission } from "@/hooks/useLoadingState";
-import { HoverScale } from "@/components/PageTransition";
 import { toast } from "sonner";
 import {
   generateRecipeWithOpenAI,
@@ -176,23 +174,12 @@ export const RecipeGenerator = ({
     safeLocalStorage.setItem("custom_ai_model", customModel);
   }, [customModel]);
 
-  const { handleError, handleAsyncError, handleApiError } = useErrorHandler();
-  const {
-    validateField,
-    handleSecureSubmit,
-    formErrors,
-    checkRateLimit,
-    getSecurityStatus,
-  } = useSecureForm("recipe-generator");
+  const { handleError, handleApiError } = useErrorHandler();
+  const { validateField, formErrors, checkRateLimit } = useSecureForm(
+    "recipe-generator"
+  );
   const { trackRecipeGeneration, trackEngagement } = useAnalytics();
   const { measureFunction } = usePerformanceTracking();
-  const {
-    isSubmitting,
-    submitError,
-    submitSuccess,
-    submitForm,
-    resetSubmission,
-  } = useFormSubmission<Recipe>();
 
   // Check available services on component mount
   const checkAvailableServices = useCallback(async () => {
@@ -519,6 +506,59 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
 
     setIsGenerating(true);
     setLastError(null);
+
+    const request: RecipeRequest = {
+      ...formData,
+      fruit: selectedFruits[0] || formData.fruit,
+      fruits: selectedFruits,
+      vegetables:
+        selectedVegetables.length > 0
+          ? selectedVegetables.join(", ")
+          : formData.vegetables,
+    };
+
+    const startedAt = Date.now();
+
+    try {
+      const recipe = await measureFunction("recipe_generation", () =>
+        generateWithFallback(request)
+      );
+
+      const formatted = formatRecipeForDisplay({
+        ...recipe,
+        generationTime: recipe.generationTime ?? Date.now() - startedAt,
+      });
+
+      onRecipeGenerated(formatted);
+      setRetryCount(0);
+      toast.success("Your tropical recipe is ready! 🥤🌴");
+
+      trackRecipeGeneration({
+        fruit: request.fruits?.join(", ") || request.fruit,
+        style: request.style,
+        service: selectedService,
+        success: true,
+        duration: Date.now() - startedAt,
+      });
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+
+      handleError(err, { context: "recipe_generation", severity: "medium" });
+      setLastError(
+        err.message || "Failed to generate recipe. Please try again."
+      );
+      setRetryCount((count) => count + 1);
+
+      trackRecipeGeneration({
+        fruit: request.fruits?.join(", ") || request.fruit,
+        style: request.style,
+        service: selectedService,
+        success: false,
+        duration: Date.now() - startedAt,
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleRetryGeneration = () => {

@@ -87,10 +87,10 @@ export const RecipeDisplay = ({ recipe }: RecipeDisplayProps) => {
   // --- PARSE MARKDOWN RECIPE ---
   const lines = recipe.split("\n");
   let title = "Tropical Paradise Juice";
-  let ingredients: string[] = [];
-  let instructions: string[] = [];
-  let benefits: string[] = [];
-  let tips: string[] = [];
+  const ingredients: string[] = [];
+  const instructions: string[] = [];
+  const benefits: string[] = [];
+  const tips: string[] = [];
   let prepTime = "5 mins";
   let servings = "2 servings";
   let modelInfo = "";
