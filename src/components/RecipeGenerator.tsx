@@ -45,6 +45,11 @@ import {
 import { chefAiRecipe, isChefAiConfigured } from "@/utils/chefAi";
 import { ADD_IN_CATEGORIES, SMOOTHIE_ADD_INS } from "@/data/smoothieAddins";
 import {
+  addInsByIds,
+  checkAddInConflicts,
+  detectRestrictions,
+} from "@/utils/dietaryConflicts";
+import {
   generateRecipeWithOllama,
   checkOllamaAvailability,
   getAvailableModels,
@@ -194,6 +199,11 @@ export const RecipeGenerator = ({
     .map((a) => a.cautions)
     .filter((c): c is string => Boolean(c));
 
+  // Dietary safety: never hand someone an add-in that clashes with a stated restriction.
+  const dietConflicts = checkAddInConflicts(formData.dietaryRestrictions, selectedAddInData);
+  const hardBlocks = dietConflicts.filter((c) => c.severity === "block");
+  const recognisedRestrictions = detectRestrictions(formData.dietaryRestrictions);
+
   const toggleAddIn = (id: string) => {
     setSelectedAddIns((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
@@ -339,6 +349,13 @@ export const RecipeGenerator = ({
   };
 
   const validateForm = (): boolean => {
+    if (hardBlocks.length > 0) {
+      toast.error(
+        "These add-ins clash with your dietary restrictions - remove them to continue",
+      );
+      return;
+    }
+
     if (selectedFruits.length === 0 || !formData.style) {
       toast.error(
         "Please select at least one fruit and a style for your recipe"
@@ -1187,6 +1204,54 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
               Generate Your Recipe
             </h3>
             <p className="text-sm text-muted-foreground">
+              {(dietConflicts.length > 0 || recognisedRestrictions.length > 0) && (
+                <div
+                  role="alert"
+                  className={`space-y-1.5 rounded-lg border p-3 ${
+                    hardBlocks.length > 0
+                      ? "border-destructive/50 bg-destructive/5 text-destructive"
+                      : "border-amber-300 bg-amber-50 text-amber-900"
+                  }`}
+                >
+                  {hardBlocks.length > 0 && (
+                    <>
+                      <div className="text-sm font-medium">
+                        These add-ins clash with your dietary restrictions
+                      </div>
+                      <ul className="list-disc space-y-0.5 pl-4 text-xs">
+                        {hardBlocks.map((conflict) => (
+                          <li key={`${conflict.addInId}-${conflict.reason}`}>
+                            <span className="font-medium">{conflict.addInName}</span> -
+                            {" "}{conflict.reason}
+                          </li>
+                        ))}
+                      </ul>
+                      <p className="text-xs">
+                        Remove the flagged add-ins, or amend your dietary restrictions, to
+                        continue.
+                      </p>
+                    </>
+                  )}
+                  {dietConflicts.length > hardBlocks.length && (
+                    <ul className="list-disc space-y-0.5 pl-4 text-xs">
+                      {dietConflicts
+                        .filter((c) => c.severity === "warn")
+                        .map((conflict) => (
+                          <li key={`${conflict.addInId}-${conflict.reason}`}>
+                            <span className="font-medium">{conflict.addInName}</span> -
+                            {" "}{conflict.reason}
+                          </li>
+                        ))}
+                    </ul>
+                  )}
+                  {recognisedRestrictions.length > 0 && (
+                    <p className="text-xs">
+                      Checking add-ins against: {recognisedRestrictions.join(", ")}
+                    </p>
+                  )}
+                </div>
+              )}
+
               {selectedFruits.length > 0 && formData.style
                 ? `Ready to create your ${selectedFruits.join(", ")} ${
                     formData.style
@@ -1207,7 +1272,7 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
                 onClick={handleGenerateRecipe}
                 size="lg"
                 className="gradient-tropical text-foreground font-bold text-lg px-12 py-6 hover:scale-105 transition-all duration-200 shadow-tropical min-w-[280px]"
-                disabled={selectedFruits.length === 0 || !formData.style}
+                disabled={selectedFruits.length === 0 || !formData.style || hardBlocks.length > 0}
               >
                 <Sparkles className="w-6 h-6 mr-3" />
                 Generate My Perfect Recipe
