@@ -38,9 +38,11 @@ import {
   generateRecipeLocally,
   generateRecipeWithCustomProvider,
   generateRecipeWithGemini,
+  parseRecipeFromText,
   type RecipeRequest,
   type Recipe,
 } from "@/utils/aiRecipeGenerator";
+import { chefAiRecipe, isChefAiConfigured } from "@/utils/chefAi";
 import {
   generateRecipeWithOllama,
   checkOllamaAvailability,
@@ -55,7 +57,7 @@ interface RecipeGeneratorProps {
   onRecipeGenerated: (recipe: string) => void;
 }
 
-type GenerationService = "local" | "ollama" | "openai" | "gemini" | "custom";
+type GenerationService = "chef" | "local" | "ollama" | "openai" | "gemini" | "custom";
 
 const TROPICAL_FRUITS = [
   { id: "mango", name: "Mango", emoji: "🥭", color: "bg-orange-100" },
@@ -146,7 +148,7 @@ export const RecipeGenerator = ({
   const [isListening, setIsListening] = useState(false);
   const [availableServices, setAvailableServices] = useState<
     GenerationService[]
-  >(["local", "custom"]);
+  >(isChefAiConfigured() ? ["chef", "local", "custom"] : ["local", "custom"]);
   const [selectedService, setSelectedService] =
     useState<GenerationService>("local");
   const [ollamaModels, setOllamaModels] = useState<string[]>([]);
@@ -186,6 +188,11 @@ export const RecipeGenerator = ({
   const checkAvailableServices = useCallback(async () => {
     const services: GenerationService[] = ["local", "custom"]; // Always available
 
+    // Server-side AI proxy (Supabase Edge Function) - no key in the bundle
+    if (isChefAiConfigured()) {
+      services.unshift("chef");
+    }
+
     // Check OpenAI availability
     if (hasOpenAIKey()) {
       services.push("openai");
@@ -214,7 +221,9 @@ export const RecipeGenerator = ({
     setAvailableServices(services);
 
     // Set default service preference
-    if (services.includes("gemini")) {
+    if (services.includes("chef")) {
+      setSelectedService("chef");
+    } else if (services.includes("gemini")) {
       setSelectedService("gemini");
     } else if (services.includes("openai")) {
       setSelectedService("openai");
@@ -352,6 +361,17 @@ export const RecipeGenerator = ({
     // Try primary service first
     try {
       switch (selectedService) {
+        case "chef": {
+          const markdown = await chefAiRecipe({
+            fruit: cleanRequest.fruit,
+            fruits: cleanRequest.fruits,
+            style: cleanRequest.style,
+            vegetables: cleanRequest.vegetables,
+            dietaryRestrictions: cleanRequest.dietaryRestrictions,
+          });
+          return { ...parseRecipeFromText(markdown), model: "deepseek-chat" };
+        }
+
         case "openai":
           if (!hasOpenAIKey()) {
             throw new Error("OpenAI API key not configured");
@@ -412,6 +432,19 @@ export const RecipeGenerator = ({
           toast.info(`Trying ${fallbackService} as fallback...`);
 
           switch (fallbackService) {
+            case "chef":
+              if (isChefAiConfigured()) {
+                const markdown = await chefAiRecipe({
+                  fruit: cleanRequest.fruit,
+                  fruits: cleanRequest.fruits,
+                  style: cleanRequest.style,
+                  vegetables: cleanRequest.vegetables,
+                  dietaryRestrictions: cleanRequest.dietaryRestrictions,
+                });
+                return { ...parseRecipeFromText(markdown), model: "deepseek-chat" };
+              }
+              break;
+
             case "local":
               return generateRecipeLocally(cleanRequest);
 
@@ -573,6 +606,8 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
 
   const getServiceDisplayName = (service: GenerationService): string => {
     switch (service) {
+      case "chef":
+        return "Chef AI (DeepSeek)";
       case "openai":
         return "OpenAI GPT";
       case "gemini":
@@ -590,6 +625,8 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
 
   const getServiceDescription = (service: GenerationService): string => {
     switch (service) {
+      case "chef":
+        return "Real AI recipes, generated securely on our server";
       case "openai":
         return "Premium AI with highest quality results";
       case "gemini":

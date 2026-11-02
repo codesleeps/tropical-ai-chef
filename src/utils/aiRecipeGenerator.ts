@@ -8,6 +8,7 @@ import {
   OLLAMA_MODELS,
   type OllamaRecipeRequest,
 } from "./ollamaRecipeGenerator";
+import { chefAiChat } from "./chefAi";
 
 export interface RecipeRequest {
   fruit: string; // Primary fruit (for backward compatibility)
@@ -534,7 +535,7 @@ Please provide a recipe in this exact format:
 Make it creative, delicious, and include tropical flavors. The recipe should be healthy and appealing.`;
 }
 
-function parseRecipeFromText(text: string): Recipe {
+export function parseRecipeFromText(text: string): Recipe {
   // Simple parsing logic - you can enhance this
   const lines = text.split("\n").filter((line) => line.trim());
 
@@ -661,6 +662,21 @@ export async function chatWithCoco(
 Use tropical emojis (🥥, 🍍, 🥭, 🍹, 🌴, 🍋) frequently, keep your tone sunny, warm, and helpful.
 Answer general healthy fruit nutrition questions, suggest combinations, and walk them through recipes.
 CRITICAL: If the user explicitly asks for a recipe, you MUST generate a complete recipe and format it exactly inside your message as a markdown block starting with "# [Recipe Name] 🥤" followed by "## Ingredients:", "## Instructions:", "## Nutritional Benefits:", "## Tips:", "## Prep Time:", and "## Servings:" so our application can automatically render it as a premium recipe card!`;
+
+  // Server-side proxy (Supabase Edge Function) - preferred when configured
+  if (service === "chef") {
+    try {
+      const turns = messages.map((msg) => ({
+        role: (msg.role === "model" || msg.role === "assistant" ? "assistant" : "user") as
+          | "assistant"
+          | "user",
+        content: msg.content,
+      }));
+      return await chefAiChat(turns);
+    } catch (e) {
+      console.error("Chef AI chat error, falling back", e);
+    }
+  }
 
   if (service === "gemini" && apiKeys.gemini) {
     try {

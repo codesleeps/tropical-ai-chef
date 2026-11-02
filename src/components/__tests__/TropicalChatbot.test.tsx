@@ -1,11 +1,21 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, userEvent, waitFor } from "@/test/test-utils";
 import { TropicalChatbot } from "../TropicalChatbot";
+import { chefAiChat, isChefAiConfigured } from "@/utils/chefAi";
+
+// Keep the chat offline by default; individual tests opt into the server-side proxy
+vi.mock("@/utils/chefAi", () => ({
+  CHEF_AI_URL: "http://test.local/functions/v1/chef-ai",
+  isChefAiConfigured: vi.fn(() => false),
+  chefAiChat: vi.fn(),
+  chefAiRecipe: vi.fn(),
+}));
 
 // Force the local chef engine so the chat never touches the network
 describe("TropicalChatbot (Coco)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(isChefAiConfigured).mockReturnValue(false);
     localStorage.clear();
     global.fetch = vi.fn();
   });
@@ -79,5 +89,23 @@ describe("TropicalChatbot (Coco)", () => {
     await user.click(screen.getByRole("button", { name: /open coco/i }));
 
     expect(screen.getByText(/hello there/i)).toBeInTheDocument();
+  });
+
+  it("uses the server-side proxy when it is configured", async () => {
+    const user = userEvent.setup();
+    vi.mocked(isChefAiConfigured).mockReturnValue(true);
+    vi.mocked(chefAiChat).mockResolvedValue("Fresh from the server! 🥥");
+
+    render(<TropicalChatbot />);
+    await user.click(screen.getByRole("button", { name: /open coco/i }));
+    expect(screen.getByText(/DeepSeek AI/i)).toBeInTheDocument();
+
+    await user.type(screen.getByLabelText(/message coco/i), "hello");
+    await user.click(screen.getByRole("button", { name: /send message/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/Fresh from the server/i)).toBeInTheDocument();
+    });
+    expect(chefAiChat).toHaveBeenCalledTimes(1);
   });
 });

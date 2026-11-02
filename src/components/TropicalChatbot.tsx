@@ -6,6 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageSquare, X, Send, Mic, ChefHat, Heart, ShoppingCart } from "lucide-react";
 import { chatWithCoco } from "@/utils/aiRecipeGenerator";
 import { getSpeechRecognition } from "@/utils/speechRecognition";
+import { isChefAiConfigured } from "@/utils/chefAi";
 import { env, hasGeminiKey, hasOpenAIKey } from "@/config/environment";
 import { toast } from "sonner";
 
@@ -50,10 +51,19 @@ const loadStoredMessages = (): Message[] => {
 };
 
 const getActiveAIService = (): string => {
+  if (isChefAiConfigured()) return "chef";
   if (hasGeminiKey()) return "gemini";
   if (hasOpenAIKey()) return "openai";
   if (env.customAiApiKey) return "custom";
   return "local";
+};
+
+const ENGINE_LABELS: Record<string, string> = {
+  chef: "DeepSeek AI",
+  gemini: "Gemini",
+  openai: "OpenAI",
+  custom: "Custom AI",
+  local: "Local Chef AI",
 };
 
 export const TropicalChatbot = () => {
@@ -65,7 +75,7 @@ export const TropicalChatbot = () => {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   const activeService = getActiveAIService();
-  const engineLabel = activeService === "local" ? "Local Chef AI" : activeService;
+  const engineLabel = ENGINE_LABELS[activeService] ?? activeService;
 
   // Persist the conversation so it survives reloads and page navigation
   useEffect(() => {
