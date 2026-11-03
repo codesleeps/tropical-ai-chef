@@ -16,19 +16,23 @@ on:
           - production
           - staging
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+# NOTE: this workflow does NOT publish to GitHub Pages. deploy.yml is the sole
+# Pages publisher because it runs scripts/deploy-to-docs.js, which rewrites the
+# canonical/OG URLs to the codesleeps.github.io origin and writes docs/404.html
+# (the SPA deep-link fallback). Publishing a raw ./dist here as well meant the
+# last workflow to finish won the race, shipping a build with Vercel canonicals
+# and no 404 fallback.
 permissions:
   contents: read
-  pages: write
-  id-token: write
   # Required by github/codeql-action/upload-sarif to publish the Trivy SARIF to
   # the repo's code-scanning tab. Without it the upload step fails with
   # "Resource not accessible by integration".
   security-events: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# Build/verify only — keep a group of our own so we never queue behind (or race)
+# the Pages deployment in deploy.yml.
 concurrency:
-  group: "pages"
+  group: "production-build"
   cancel-in-progress: false
 
 jobs:
@@ -94,16 +98,6 @@ jobs:
           retention-days: 30
         if: github.event_name == 'push' && matrix.node-version == '20.x'
 
-      - name: Setup Pages (for production builds)
-        uses: actions/configure-pages@v4
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && matrix.node-version == '20.x'
-
-      - name: Upload to GitHub Pages
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: "./dist"
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && matrix.node-version == '20.x'
-
   # Security scan job
   security-scan:
     runs-on: ubuntu-latest
@@ -129,47 +123,24 @@ jobs:
           sarif_file: "trivy-results.sarif"
         if: always()
 
-  # Deployment job (only for production)
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: [build-and-test, security-scan]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
-
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-
-      - name: Verify deployment
-        run: |
-          echo "Deployment completed successfully!"
-          echo "Application URL: ${{ steps.deployment.outputs.page_url }}"
-
-          # Optional: Test deployment endpoint
-          sleep 30
-          curl -f -s -o /dev/null "${{ steps.deployment.outputs.page_url }}" || echo "Deployment verification failed"
-
-  # Lighthouse performance audit (post-deployment)
+  # Lighthouse performance audit (runs against the deploy.yml Pages deployment)
   lighthouse-audit:
     runs-on: ubuntu-latest
-    needs: deploy
+    needs: [build-and-test, security-scan]
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Wait for deployment
-        run: sleep 60 # Give deployment time to propagate
+      - name: Wait for the Pages deployment to propagate
+        run: sleep 60 # Give deploy.yml time to publish
 
       - name: Run Lighthouse CI
         uses: treosh/lighthouse-ci-action@v10
         with:
           urls: |
-            ${{ needs.deploy.outputs.page_url }}
+            ${{ vars.PAGES_URL || 'https://codesleeps.github.io/tropical-ai-chef/' }}
           uploadArtifacts: true
           temporaryPublicStorage: true
           configPath: "./.lighthouserc.json"
@@ -178,22 +149,21 @@ jobs:
   # Notification job
   notify:
     runs-on: ubuntu-latest
-    needs: [build-and-test, security-scan, deploy, lighthouse-audit]
+    needs: [build-and-test, security-scan, lighthouse-audit]
     if: always() && github.event_name == 'push'
 
     steps:
-      - name: Deployment Status Notification
+      - name: Build Status Notification
         run: |
-          if [ "${{ needs.deploy.result }}" == "success" ]; then
-            echo "✅ Deployment successful!"
-            echo "🚀 Application is live and ready for production use"
+          if [ "${{ needs.build-and-test.result }}" == "success" ]; then
+            echo "✅ Production build successful!"
+            echo "🚀 GitHub Pages publishes via the 'Deploy to GitHub Pages' workflow"
           else
-            echo "❌ Deployment failed"
+            echo "❌ Production build failed"
             echo "🔍 Check the logs for more details"
           fi
 
           echo "📊 Build Results:"
           echo "  - Build & Test: ${{ needs.build-and-test.result }}"
           echo "  - Security Scan: ${{ needs.security-scan.result }}"
-          echo "  - Deployment: ${{ needs.deploy.result }}"
           echo "  - Lighthouse Audit: ${{ needs.lighthouse-audit.result }}"
