@@ -21,6 +21,10 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  # Required by github/codeql-action/upload-sarif to publish the Trivy SARIF to
+  # the repo's code-scanning tab. Without it the upload step fails with
+  # "Resource not accessible by integration".
+  security-events: write
 
 # Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
 concurrency:
