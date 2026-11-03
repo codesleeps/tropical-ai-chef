@@ -53,7 +53,7 @@ export const useAnalytics = (options: UseAnalyticsOptions = {}) => {
 
   // Track custom events
   const trackEvent = useCallback(
-    (eventName: string, parameters: Record<string, any> = {}) => {
+    (eventName: string, parameters: Record<string, unknown> = {}) => {
       AnalyticsManager.trackEvent(eventName, parameters);
     },
     []
@@ -87,7 +87,7 @@ export const useAnalytics = (options: UseAnalyticsOptions = {}) => {
 
   // Track user engagement
   const trackEngagement = useCallback(
-    (action: string, details: Record<string, any> = {}) => {
+    (action: string, details: Record<string, unknown> = {}) => {
       AnalyticsManager.trackUserEngagement(action, details);
     },
     []
@@ -164,7 +164,7 @@ export const useErrorTracking = () => {
   const { trackEvent } = useAnalytics();
 
   const trackError = useCallback(
-    (error: Error, context: Record<string, any> = {}) => {
+    (error: Error, context: Record<string, unknown> = {}) => {
       trackEvent(ANALYTICS_CONFIG.customEvents.errorOccurred, {
         error_message: error.message,
         error_stack: error.stack?.substring(0, 500), // Truncate for analytics
@@ -178,7 +178,7 @@ export const useErrorTracking = () => {
   const trackAsyncError = useCallback(
     async <T>(
       asyncFn: () => Promise<T>,
-      context: Record<string, any> = {}
+      context: Record<string, unknown> = {}
     ): Promise<T | null> => {
       try {
         return await asyncFn();

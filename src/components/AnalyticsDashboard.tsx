@@ -24,11 +24,39 @@ import { useAnalyticsData } from "@/hooks/use-analytics";
 import { cn } from "@/lib/utils";
 import { env } from "@/config/environment";
 
+// Records produced by AnalyticsManager (see src/utils/analytics.ts). The
+// error/metric/consent collections are optional because the manager does not
+// always populate them.
+interface AnalyticsEvent {
+  name: string;
+  data?: Record<string, unknown>;
+  timestamp: number;
+}
+
+interface AnalyticsError {
+  message: string;
+  stack?: string;
+  timestamp: number;
+}
+
+interface PerformanceMetric {
+  name: string;
+  value: number;
+  timestamp: number;
+}
+
+interface ConsentRecord {
+  granted: boolean;
+  timestamp?: number;
+}
+
 interface AnalyticsData {
-  events: any[];
-  errors: any[];
-  metrics: any[];
-  consent: any;
+  events: AnalyticsEvent[];
+  initialized?: boolean;
+  eventCount?: number;
+  errors?: AnalyticsError[];
+  metrics?: PerformanceMetric[];
+  consent?: ConsentRecord;
 }
 
 export const AnalyticsDashboard = () => {
@@ -90,15 +118,20 @@ export const AnalyticsDashboard = () => {
   }
 
   const recentEvents = data.events.slice(-10);
-  const recentErrors = data.errors.slice(-5);
-  const recentMetrics = data.metrics.slice(-10);
+  // AnalyticsManager does not populate these collections yet - fall back to
+  // empty defaults so the dashboard renders instead of throwing.
+  const errors = data.errors ?? [];
+  const metrics = data.metrics ?? [];
+  const consent = data.consent ?? { granted: false };
+  const recentErrors = errors.slice(-5);
+  const recentMetrics = metrics.slice(-10);
 
   const eventTypes = data.events.reduce((acc, event) => {
     acc[event.name] = (acc[event.name] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
 
-  const avgPerformanceMetrics = data.metrics.reduce((acc, metric) => {
+  const avgPerformanceMetrics = metrics.reduce((acc, metric) => {
     if (!acc[metric.name]) {
       acc[metric.name] = { total: 0, count: 0 };
     }
@@ -173,7 +206,7 @@ export const AnalyticsDashboard = () => {
                   Errors
                 </p>
                 <p className="text-2xl font-bold text-red-500">
-                  {data.errors.length}
+                  {errors.length}
                 </p>
               </div>
               <AlertTriangle className="w-8 h-8 text-red-500" />
@@ -188,7 +221,7 @@ export const AnalyticsDashboard = () => {
                 <p className="text-sm font-medium text-muted-foreground">
                   Performance Metrics
                 </p>
-                <p className="text-2xl font-bold">{data.metrics.length}</p>
+                <p className="text-2xl font-bold">{metrics.length}</p>
               </div>
               <TrendingUp className="w-8 h-8 text-green-500" />
             </div>
@@ -203,7 +236,7 @@ export const AnalyticsDashboard = () => {
                   Consent Status
                 </p>
                 <p className="text-2xl font-bold">
-                  {data.consent.granted ? (
+                  {consent.granted ? (
                     <Badge className="bg-green-500">Granted</Badge>
                   ) : (
                     <Badge variant="secondary">Not Given</Badge>
@@ -266,9 +299,9 @@ export const AnalyticsDashboard = () => {
                           {new Date(event.timestamp).toLocaleTimeString()}
                         </span>
                       </div>
-                      {Object.keys(event.parameters).length > 0 && (
+                      {Object.keys(event.data ?? {}).length > 0 && (
                         <div className="mt-1 text-muted-foreground">
-                          {JSON.stringify(event.parameters, null, 2).substring(
+                          {JSON.stringify(event.data, null, 2).substring(
                             0,
                             100
                           )}
@@ -431,17 +464,17 @@ export const AnalyticsDashboard = () => {
                   <span>Consent Given</span>
                   <Badge
                     className={
-                      data.consent.granted ? "bg-green-500" : "bg-gray-500"
+                      consent.granted ? "bg-green-500" : "bg-gray-500"
                     }
                   >
-                    {data.consent.granted ? "Yes" : "No"}
+                    {consent.granted ? "Yes" : "No"}
                   </Badge>
                 </div>
-                {data.consent.timestamp && (
+                {consent.timestamp && (
                   <div className="flex items-center justify-between">
                     <span>Consent Date</span>
                     <span className="text-sm text-muted-foreground">
-                      {new Date(data.consent.timestamp).toLocaleDateString()}
+                      {new Date(consent.timestamp).toLocaleDateString()}
                     </span>
                   </div>
                 )}

@@ -83,13 +83,14 @@ export const useLoadingState = (config: LoadingConfig = {}) => {
 // Hook for API calls with loading states
 export const useAsyncOperation = <T>(
   operation: () => Promise<T>,
-  deps: any[] = []
+  deps: unknown[] = []
 ) => {
   const [data, setData] = useState<T | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const execute = async (...args: any[]) => {
+  const execute = async (...args: unknown[]) => {
+    void args;
     try {
       setIsLoading(true);
       setError(null);

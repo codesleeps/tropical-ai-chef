@@ -10,6 +10,12 @@ interface PerformanceMetrics {
   timeToFirstByte: number;
 }
 
+// Cumulative Layout Shift entry (not part of the standard TS DOM lib yet)
+interface LayoutShiftEntry extends PerformanceEntry {
+  hadRecentInput: boolean;
+  value: number;
+}
+
 // Core Web Vitals monitoring
 export class PerformanceMonitor {
   private metrics: Partial<PerformanceMetrics> = {};
@@ -25,7 +31,7 @@ export class PerformanceMonitor {
       try {
         const lcpObserver = new PerformanceObserver((list) => {
           const entries = list.getEntries();
-          const lastEntry = entries[entries.length - 1] as any;
+          const lastEntry = entries[entries.length - 1] as PerformanceEntry;
           this.metrics.largestContentfulPaint = lastEntry.startTime;
         });
         lcpObserver.observe({ entryTypes: ["largest-contentful-paint"] });
@@ -38,7 +44,7 @@ export class PerformanceMonitor {
       try {
         const fidObserver = new PerformanceObserver((list) => {
           const entries = list.getEntries();
-          entries.forEach((entry: any) => {
+          entries.forEach((entry: PerformanceEventTiming) => {
             this.metrics.firstInputDelay =
               entry.processingStart - entry.startTime;
           });
@@ -53,7 +59,8 @@ export class PerformanceMonitor {
       try {
         const clsObserver = new PerformanceObserver((list) => {
           let clsValue = 0;
-          list.getEntries().forEach((entry: any) => {
+          const entries = list.getEntries() as LayoutShiftEntry[];
+          entries.forEach((entry) => {
             if (!entry.hadRecentInput) {
               clsValue += entry.value;
             }
@@ -187,12 +194,21 @@ export const measureBundleSize = () => {
   }, 1000);
 };
 
-// Memory usage monitoring
-export const monitorMemoryUsage = () => {
-  if (typeof window === "undefined" || !(window as any).performance?.memory)
-    return;
+// Memory usage monitoring. Chrome exposes a non-standard Heap Size API on
+// performance; model just the parts we read.
+interface PerformanceMemory {
+  usedJSHeapSize: number;
+  totalJSHeapSize: number;
+  jsHeapSizeLimit: number;
+}
 
-  const memory = (window as any).performance.memory;
+type WindowWithMemory = Window & {
+  performance: Performance & { memory?: PerformanceMemory };
+};
+
+export const monitorMemoryUsage = () => {
+  const memory = (window as WindowWithMemory | undefined)?.performance?.memory;
+  if (typeof window === "undefined" || !memory) return;
 
   console.group("🧠 Memory Usage");
   console.log(`Used: ${(memory.usedJSHeapSize / 1048576).toFixed(2)} MB`);
@@ -265,7 +281,7 @@ export const registerServiceWorker = async () => {
 };
 
 // Debounced resize handler for performance
-export const useDebounced = <T extends (...args: any[]) => any>(
+export const useDebounced = <T extends (...args: unknown[]) => unknown>(
   callback: T,
   delay: number
 ): T => {

@@ -24,6 +24,23 @@ export default tseslint.config(
         { allowConstantExport: true },
       ],
       "@typescript-eslint/no-unused-vars": "off",
+      // React/shadcn wrapper props and test-library matcher augmentations are
+      // legitimately declared as `interface X extends Y {}`. Allow that exact
+      // shape (a single supertype, no members) instead of forcing a type alias,
+      // which cannot participate in declaration merging.
+      "@typescript-eslint/no-empty-object-type": [
+        "error",
+        { allowInterfaces: "with-single-extends" },
+      ],
+    },
+  },
+  // Ambient declaration files must mirror upstream generic defaults verbatim
+  // (e.g. vitest declares `interface Assertion<T = any>`); declaration merging
+  // rejects any deviation, so `any` is unavoidable there.
+  {
+    files: ["**/*.d.ts"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
     },
   }
 );

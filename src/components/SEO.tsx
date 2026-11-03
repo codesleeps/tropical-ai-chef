@@ -18,7 +18,7 @@ export interface SEOProps {
 
 interface StructuredDataProps {
   type: "WebSite" | "WebApplication" | "Article" | "Recipe" | "Organization";
-  data: Record<string, any>;
+  data: Record<string, unknown>;
 }
 
 // Default SEO configuration
