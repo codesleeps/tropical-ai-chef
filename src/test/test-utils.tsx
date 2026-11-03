@@ -1,5 +1,6 @@
 import React, { ReactElement } from "react";
 import { render, RenderOptions } from "@testing-library/react";
+import type { UserEvent } from "@testing-library/user-event";
 import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HelmetProvider } from "react-helmet-async";
@@ -116,7 +117,7 @@ export const measureRenderTime = async (renderFn: () => void) => {
 
 // Form testing helpers
 export const fillForm = async (
-  user: any,
+  user: UserEvent,
   form: HTMLElement,
   data: Record<string, string>
 ) => {
@@ -131,7 +132,7 @@ export const fillForm = async (
   }
 };
 
-export const submitForm = async (user: any, form: HTMLElement) => {
+export const submitForm = async (user: UserEvent, form: HTMLElement) => {
   const submitButton = form.querySelector(
     '[type="submit"]'
   ) as HTMLButtonElement;

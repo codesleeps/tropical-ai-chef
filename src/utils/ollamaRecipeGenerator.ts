@@ -67,14 +67,19 @@ export async function checkOllamaAvailability(): Promise<boolean> {
   }
 }
 
+// Shape of the Ollama /api/tags response we consume
+interface OllamaTagsResponse {
+  models?: Array<{ name: string }>;
+}
+
 // Get available models from Ollama
 export async function getAvailableModels(): Promise<string[]> {
   try {
     const response = await fetch('http://localhost:11434/api/tags');
     if (!response.ok) return [];
     
-    const data = await response.json();
-    return data.models?.map((model: any) => model.name) || [];
+    const data = (await response.json()) as OllamaTagsResponse;
+    return data.models?.map((model) => model.name) || [];
   } catch {
     return [];
   }

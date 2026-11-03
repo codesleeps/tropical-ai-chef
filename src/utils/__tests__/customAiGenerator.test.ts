@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
 import { generateRecipeWithCustomProvider } from "../aiRecipeGenerator";
 
 describe("generateRecipeWithCustomProvider", () => {
@@ -68,7 +68,9 @@ describe("generateRecipeWithCustomProvider", () => {
       })
     );
 
-    const body = JSON.parse((global.fetch as any).mock.calls[0][1].body);
+    const body = JSON.parse(
+      (global.fetch as unknown as Mock).mock.calls[0][1].body
+    );
     expect(body.model).toBe("test-model");
     expect(body.messages[1].content).toContain("Main Fruits: mango, pineapple");
     expect(body.messages[1].content).toContain("Style: smoothie");

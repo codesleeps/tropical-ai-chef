@@ -1,5 +1,5 @@
 vi.mock("@/config/environment", async (importOriginal) => {
-  const actual = await importOriginal() as any;
+  const actual = await importOriginal<typeof import("@/config/environment")>();
   return {
     ...actual,
     env: { ...actual.env, appName: "Test", environment: "test", enableAnalytics: false },
@@ -12,7 +12,7 @@ vi.mock("@/config/environment", async (importOriginal) => {
 });
 
 vi.mock("@/hooks/use-analytics", async (importOriginal) => {
-  const actual = await importOriginal() as any;
+  const actual = await importOriginal<typeof import("@/hooks/use-analytics")>();
   return {
     ...actual,
     useAnalytics: () => ({ 
@@ -29,7 +29,7 @@ vi.mock("@/hooks/use-analytics", async (importOriginal) => {
 });
 
 vi.mock("@/utils/security", async (importOriginal) => {
-  const actual = await importOriginal() as any;
+  const actual = await importOriginal<typeof import("@/utils/security")>();
   return {
     ...actual,
     initializeSecurity: vi.fn(),

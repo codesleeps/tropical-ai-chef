@@ -64,7 +64,11 @@ const execCommand = (command, options = {}) => {
       stdio: "pipe",
       ...options,
     });
-    return { success: true, output: result.trim() };
+    // When a caller passes `stdio: "inherit"` (we do this for the vite build so
+    // its progress streams live) execSync resolves to `null` instead of the
+    // captured output. Guard against that, otherwise `result.trim()` throws and
+    // a perfectly successful command is reported as a failure.
+    return { success: true, output: result == null ? "" : String(result).trim() };
   } catch (error) {
     return {
       success: false,
@@ -184,6 +188,13 @@ const runLinting = () => {
   }
 };
 
+// Resolve a binary from the local node_modules/.bin directory.
+// Prepending it to the command is what makes `vite` resolvable when this
+// script is run directly (`node scripts/build-production.js`) instead of via
+// an npm script (npm puts node_modules/.bin on PATH; a raw /bin/sh child does not).
+const localBin = (name) =>
+  join(rootDir, "node_modules", ".bin", process.platform === "win32" ? `${name}.cmd` : name);
+
 // Build the application
 const buildApp = (environment = "production") => {
   const config = BUILD_CONFIG[environment] || BUILD_CONFIG.production;
@@ -193,7 +204,7 @@ const buildApp = (environment = "production") => {
   // Set environment variables
   process.env.NODE_ENV = config.mode;
 
-  const buildCommand = `vite build --mode ${config.mode} --outDir ${config.outDir}`;
+  const buildCommand = `"${localBin("vite")}" build --mode ${config.mode} --outDir ${config.outDir}`;
   const buildResult = execCommand(buildCommand, { stdio: "inherit" });
 
   if (buildResult.success) {

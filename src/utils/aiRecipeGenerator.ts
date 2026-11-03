@@ -544,10 +544,10 @@ export function parseRecipeFromText(text: string): Recipe {
   const lines = text.split("\n").filter((line) => line.trim());
 
   let title = "Tropical Paradise Blend";
-  let ingredients: string[] = [];
-  let instructions: string[] = [];
-  let nutritionalBenefits: string[] = [];
-  let tips: string[] = [];
+  const ingredients: string[] = [];
+  const instructions: string[] = [];
+  const nutritionalBenefits: string[] = [];
+  const tips: string[] = [];
   let prepTime = "5 minutes";
   let servings = "2 servings";
 

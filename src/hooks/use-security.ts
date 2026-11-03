@@ -76,33 +76,36 @@ export const useSecurity = (config: SecurityHookConfig = {}) => {
       }
 
       switch (type) {
-        case "email":
+        case "email": {
           const isValidEmail = InputValidator.isValidEmail(input);
           return {
             isValid: isValidEmail,
             sanitized: input.trim().toLowerCase(),
             errors: isValidEmail ? [] : ["Invalid email format"],
           };
+        }
 
-        case "url":
+        case "url": {
           const isValidURL = InputValidator.isValidURL(input);
           return {
             isValid: isValidURL,
             sanitized: input.trim(),
             errors: isValidURL ? [] : ["Invalid URL format"],
           };
+        }
 
         case "recipe":
           return InputValidator.validateRecipeInput(input);
 
         case "text":
-        default:
+        default: {
           const sanitized = InputValidator.sanitizeText(input);
           return {
             isValid: sanitized.length > 0,
             sanitized,
             errors: sanitized.length === 0 ? ["Input cannot be empty"] : [],
           };
+        }
       }
     },
     [enableInputValidation]

@@ -15,7 +15,7 @@ interface CacheOptions {
   staleWhileRevalidate?: boolean; // Return stale data while fetching fresh
 }
 
-export class MemoryCache<T = any> {
+export class MemoryCache<T = unknown> {
   private cache = new Map<string, CacheEntry<T>>();
   private options: Required<CacheOptions>;
 
@@ -128,7 +128,7 @@ export class MemoryCache<T = any> {
 }
 
 // Local storage cache with compression
-export class PersistentCache<T = any> {
+export class PersistentCache<T = unknown> {
   private prefix: string;
   private compression: boolean;
 
@@ -205,8 +205,16 @@ export class PersistentCache<T = any> {
   }
 }
 
+// Cache key describing a recipe request (also used to key AI responses)
+export interface RecipeCacheKey {
+  fruit: string;
+  style: string;
+  vegetables?: string;
+  dietaryRestrictions?: string;
+}
+
 // Recipe cache specifically optimized for AI responses
-export class RecipeCache extends MemoryCache<any> {
+export class RecipeCache extends MemoryCache<unknown> {
   constructor() {
     super({
       ttl: 30 * 60 * 1000, // 30 minutes for recipes
@@ -216,12 +224,7 @@ export class RecipeCache extends MemoryCache<any> {
   }
 
   // Generate cache key from recipe request
-  generateKey(request: {
-    fruit: string;
-    style: string;
-    vegetables?: string;
-    dietaryRestrictions?: string;
-  }): string {
+  generateKey(request: RecipeCacheKey): string {
     const normalized = {
       fruit: request.fruit.toLowerCase().trim(),
       style: request.style.toLowerCase().trim(),
@@ -233,12 +236,12 @@ export class RecipeCache extends MemoryCache<any> {
     return `recipe_${JSON.stringify(normalized)}`;
   }
 
-  cacheRecipe(request: any, recipe: any): void {
+  cacheRecipe(request: RecipeCacheKey, recipe: unknown): void {
     const key = this.generateKey(request);
     this.set(key, recipe);
   }
 
-  getCachedRecipe(request: any): any {
+  getCachedRecipe(request: RecipeCacheKey): unknown {
     const key = this.generateKey(request);
     return this.get(key);
   }
@@ -324,7 +327,7 @@ export const useCachedData = <T>(
         // Try memory cache first
         const cached = memoryCache.get(key);
         if (cached) {
-          setData(cached);
+          setData(cached as T);
           setLoading(false);
           return;
         }
@@ -333,7 +336,7 @@ export const useCachedData = <T>(
         if (options.persistToStorage) {
           const persistent = persistentCache.get(key);
           if (persistent) {
-            setData(persistent);
+            setData(persistent as T);
             setLoading(false);
             memoryCache.set(key, persistent, options.ttl);
             return;

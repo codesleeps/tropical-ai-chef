@@ -16,8 +16,11 @@ export const ANALYTICS_CONFIG = {
 // Privacy-first analytics manager
 export class AnalyticsManager {
   private static initialized = false;
-  private static events: Array<{ name: string; data: any; timestamp: number }> =
-    [];
+  private static events: Array<{
+    name: string;
+    data: Record<string, unknown>;
+    timestamp: number;
+  }> = [];
   private static maxEvents = 100;
 
   static initialize() {
@@ -33,7 +36,10 @@ export class AnalyticsManager {
     console.log("Analytics initialized (privacy-first mode)");
   }
 
-  static trackEvent(eventName: string, parameters: Record<string, any> = {}) {
+  static trackEvent(
+    eventName: string,
+    parameters: Record<string, unknown> = {}
+  ) {
     if (!this.initialized || !ConsentManager.hasAnalyticsConsent()) return;
 
     const event = {
@@ -79,7 +85,7 @@ export class AnalyticsManager {
 
   static trackUserEngagement(
     action: string,
-    details: Record<string, any> = {}
+    details: Record<string, unknown> = {}
   ) {
     this.trackEvent(ANALYTICS_CONFIG.customEvents.userEngagement, {
       action,

@@ -38,14 +38,20 @@ export const useSEO = (customSEO?: Partial<SEOData>) => {
   return finalSEO;
 };
 
+// Minimal typing for the gtag global injected by Google Analytics
+interface GtagWindow extends Window {
+  gtag?: (...args: unknown[]) => void;
+}
+
 // Hook for tracking page views (for analytics)
 export const usePageView = () => {
   const location = useLocation();
 
   useEffect(() => {
     // Track page view - integrate with analytics service
-    if (typeof window !== "undefined" && (window as any).gtag) {
-      (window as any).gtag("config", "GA_MEASUREMENT_ID", {
+    const gtag = typeof window !== "undefined" ? (window as GtagWindow).gtag : undefined;
+    if (gtag) {
+      gtag("config", "GA_MEASUREMENT_ID", {
         page_path: location.pathname,
         page_title: document.title,
       });
@@ -59,7 +65,7 @@ export const usePageView = () => {
 };
 
 // Hook for managing structured data
-export const useStructuredData = (type: string, data: Record<string, any>) => {
+export const useStructuredData = (type: string, data: Record<string, unknown>) => {
   useEffect(() => {
     const structuredData = {
       "@context": "https://schema.org",
