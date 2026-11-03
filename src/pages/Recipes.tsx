@@ -2,6 +2,8 @@ import { useState } from "react";
 import { RecipeGenerator } from "@/components/RecipeGenerator";
 import { RecipeDisplay } from "@/components/RecipeDisplay";
 import { CostCalculator } from "@/components/CostCalculator";
+import { PantryMode } from "@/components/PantryMode";
+import { FEATURED_RECIPES } from "@/data/recipeCatalog";
 import {
   Card,
   CardContent,
@@ -11,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Heart, Share2, Save, Calculator } from "lucide-react";
+import { Sparkles, Heart, Share2, Save, Calculator, PackageOpen } from "lucide-react";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import SEO, { StructuredData } from "@/components/SEO";
@@ -54,159 +56,11 @@ ${baseIngredients}
 
 const Recipes = () => {
   const [currentRecipe, setCurrentRecipe] = useState("");
+  const [mode, setMode] = useState<"creator" | "pantry">("creator");
 
   const handleRecipeGenerated = (recipe: string) => {
     setCurrentRecipe(recipe);
   };
-
-  const featuredRecipes = [
-    {
-      name: "Tropical Paradise Smoothie",
-      fruits: ["Mango", "Pineapple", "Coconut"],
-      style: "Smoothie",
-      time: "5 mins",
-      rating: 4.9,
-      reviews: 128,
-      description:
-        "A creamy blend of tropical fruits that tastes like vacation in a glass",
-    },
-    {
-      name: "Green Goddess Detox",
-      fruits: ["Kiwi", "Spinach", "Apple"],
-      style: "Detox",
-      time: "3 mins",
-      rating: 4.7,
-      reviews: 95,
-      description:
-        "Cleansing green juice packed with vitamins and antioxidants",
-    },
-    {
-      name: "Dragon Fruit Energy Blast",
-      fruits: ["Dragon Fruit", "Passion Fruit", "Ginger"],
-      style: "Energy",
-      time: "4 mins",
-      rating: 4.8,
-      reviews: 76,
-      description: "Exotic energy booster with natural caffeine alternatives",
-    },
-    {
-      name: "Pineapple Coconut Refresher",
-      fruits: ["Pineapple", "Coconut", "Lime"],
-      style: "Refresher",
-      time: "3 mins",
-      rating: 4.9,
-      reviews: 215,
-      description: "Refreshing hydration with a cool mint finish",
-    },
-    {
-      name: "Mango Banana Bliss",
-      fruits: ["Mango", "Banana", "Almond Milk"],
-      style: "Smoothie",
-      time: "4 mins",
-      rating: 4.8,
-      reviews: 189,
-      description: "Creamy and indulgent tropical treat",
-    },
-    {
-      name: "Berry Tropical Fusion",
-      fruits: ["Blueberry", "Strawberry", "Mango"],
-      style: "Smoothie",
-      time: "4 mins",
-      rating: 4.7,
-      reviews: 156,
-      description: "Antioxidant-rich blend with berries and tropical fruits",
-    },
-    {
-      name: "Pear Ginger Zing",
-      fruits: ["Pear", "Ginger", "Lemon"],
-      style: "Juice",
-      time: "3 mins",
-      rating: 4.6,
-      reviews: 89,
-      description: "Warming and immune-boosting combination",
-    },
-    {
-      name: "Coconut Mango Delight",
-      fruits: ["Coconut", "Mango", "Papaya"],
-      style: "Smoothie",
-      time: "5 mins",
-      rating: 4.9,
-      reviews: 234,
-      description: "Ultra-creamy tropical paradise in a glass",
-    },
-    {
-      name: "Pineapple Mint Cooler",
-      fruits: ["Pineapple", "Mint", "Cucumber"],
-      style: "Refresher",
-      time: "3 mins",
-      rating: 4.8,
-      reviews: 167,
-      description: "Refreshing hydration with a cool mint finish",
-    },
-    {
-      name: "Banana Oat Breakfast",
-      fruits: ["Banana", "Oat Milk", "Honey"],
-      style: "Smoothie",
-      time: "4 mins",
-      rating: 4.7,
-      reviews: 198,
-      description: "Filling breakfast smoothie with sustained energy",
-    },
-    {
-      name: "Blueberry Acai Bowl",
-      fruits: ["Blueberry", "Acai", "Banana"],
-      style: "Bowl",
-      time: "5 mins",
-      rating: 4.9,
-      reviews: 312,
-      description: "Instagram-worthy acai bowl with fresh toppings",
-    },
-    {
-      name: "Tropical Citrus Burst",
-      fruits: ["Orange", "Mango", "Pineapple", "Grapefruit"],
-      style: "Juice",
-      time: "4 mins",
-      rating: 4.8,
-      reviews: 145,
-      description: "Vitamin C-packed citrus explosion",
-    },
-    {
-      name: "Coconut Water Recovery",
-      fruits: ["Coconut Water", "Banana", "Spinach"],
-      style: "Recovery",
-      time: "3 mins",
-      rating: 4.6,
-      reviews: 78,
-      description: "Post-workout recovery drink with electrolytes",
-    },
-    {
-      name: "Mango Peach Summer",
-      fruits: ["Mango", "Peach", "Vanilla"],
-      style: "Smoothie",
-      time: "4 mins",
-      rating: 4.9,
-      reviews: 267,
-      description: "Sweet summer stone fruit tropical blend",
-    },
-    {
-      name: "Pear Apple Wellness",
-      fruits: ["Pear", "Apple", "Celery"],
-      style: "Juice",
-      time: "3 mins",
-      rating: 4.5,
-      reviews: 92,
-      description: "Classic fruit and veggie combination for wellness",
-    },
-    {
-      name: "Tropical Berry Antioxidant",
-      fruits: ["Blueberry", "Raspberry", "Mango", "Pineapple"],
-      style: "Smoothie",
-      time: "4 mins",
-      rating: 4.8,
-      reviews: 176,
-      description: "Power-packed antioxidant smoothie",
-    },
-  ];
 
   const renderStars = (rating: number) => {
     const stars = [];
@@ -232,7 +86,7 @@ const Recipes = () => {
     return stars;
   };
 
-  const handleFeaturedRecipeClick = (recipe: typeof featuredRecipes[0]) => {
+  const handleFeaturedRecipeClick = (recipe: typeof FEATURED_RECIPES[0]) => {
     const md = generateFeaturedRecipeMarkdown(recipe);
     setCurrentRecipe(md);
     // Use setTimeout to ensure the DOM section renders before scrolling
@@ -284,12 +138,54 @@ const Recipes = () => {
         {/* Recipe Generator */}
         <section className="px-6 pb-12">
           <div className="container mx-auto">
-            <div className="text-center mb-12">
+            <div className="text-center mb-8">
               <h2 className="text-4xl md:text-5xl font-bold mb-6 relative">
-                Custom Recipe Creator
+                {mode === "creator" ? "Custom Recipe Creator" : "Cook From Your Pantry"}
               </h2>
+              <div
+                role="tablist"
+                aria-label="Recipe mode"
+                className="inline-flex items-center gap-1 rounded-full border border-border bg-card p-1 shadow-sm"
+              >
+                <button
+                  role="tab"
+                  aria-selected={mode === "creator"}
+                  onClick={() => setMode("creator")}
+                  className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all ${
+                    mode === "creator"
+                      ? "gradient-tropical text-foreground shadow"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Sparkles className="w-4 h-4" />
+                  Custom Creator
+                </button>
+                <button
+                  role="tab"
+                  aria-selected={mode === "pantry"}
+                  onClick={() => setMode("pantry")}
+                  className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all ${
+                    mode === "pantry"
+                      ? "gradient-tropical text-foreground shadow"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <PackageOpen className="w-4 h-4" />
+                  Pantry Mode
+                </button>
+              </div>
+              {mode === "pantry" && (
+                <p className="mt-3 text-sm text-muted-foreground">
+                  Already got the ingredients? We'll find the recipes you can make
+                  right now.
+                </p>
+              )}
             </div>
-            <RecipeGenerator onRecipeGenerated={handleRecipeGenerated} />
+            {mode === "creator" ? (
+              <RecipeGenerator onRecipeGenerated={handleRecipeGenerated} />
+            ) : (
+              <PantryMode onRecipeGenerated={handleRecipeGenerated} />
+            )}
           </div>
         </section>
 
@@ -316,7 +212,7 @@ const Recipes = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {featuredRecipes.map((recipe, index) => (
+              {FEATURED_RECIPES.map((recipe, index) => (
                 <Card
                   key={index}
                   className="shadow-tropical border-0 hover:scale-105 transition-bounce cursor-pointer"
