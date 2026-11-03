@@ -2,6 +2,8 @@
 // Source: Scout research brief, 2026-11-02 (NIH ODS, Harvard Nutrition Source, EFSA,
 // Monash FODMAP, Clean Label Project, Consumer Reports + named 2025 meta-analyses).
 // Full report: /root/.hermes/profiles/scout/workspace/outputs/smoothie-addins-2026-11-02.md
+// Sea moss (id: sea-moss-gel): Scout research brief, 2026-11-03 — full report:
+// /root/.hermes/profiles/scout/workspace/outputs/seamoss-drinks-2026-11-03.md
 
 export interface SmoothieAddIn {
   id: string;
@@ -222,6 +224,16 @@ export const SMOOTHIE_ADD_INS: SmoothieAddIn[] = [
     dose: "1 tsp (2g) per 2 servings",
     tags: ["vegan", "gluten-free", "low-fodmap", "caffeine"],
     cautions: "Delivers caffeine (~60mg per 2g) and is EASILY OVER-CONSUMED — keep under ~4g/day. Clumps; sift before adding.",
+  },
+  {
+    id: "sea-moss-gel",
+    name: "Sea Moss Gel",
+    emoji: "🌊",
+    category: "greens-superfoods",
+    rationale: "Gel-forming red seaweed (carrageenan/agar) that thickens smoothies with almost no taste; supplies iodine and a little soluble fibre",
+    dose: "Not recommended by default; if offered, 1 tbsp (10g) gel per 2 servings",
+    tags: ["vegan", "gluten-free", "low-fodmap", "food-safety-flag", "evidence-weak"],
+    cautions: "FOOD-SAFETY FLAG — iodine content is unpredictable (measured dried Irish moss differs ~50-fold between studies) and has caused thyroid harm; keep total daily iodine under the EFSA adult UL of 600µg. AVOID if you have thyroid disease, heart or kidney disease, are pregnant/breastfeeding, or take thyroid or lithium medication. Raw seaweed bioaccumulates arsenic, lead, cadmium and mercury — buy batch-tested (COA) product. The viral '92 minerals' claim is fabricated and no human trial supports the immunity/skin/thyroid marketing. Recommend excluding from the default picker.",
   },
   {
     id: "greek-yogurt",
