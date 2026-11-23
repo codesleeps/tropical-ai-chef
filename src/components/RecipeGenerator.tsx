@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, Fragment } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,7 +17,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   ChefHat,
@@ -27,6 +39,11 @@ import {
   Zap,
   Shield,
   Settings,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Check,
+  Mic,
 } from "lucide-react";
 import { RecipeGenerationLoader } from "@/components/LoadingStates";
 import { useErrorHandler } from "@/hooks/use-error-handler";
@@ -56,7 +73,6 @@ import {
   OLLAMA_MODELS,
 } from "@/utils/ollamaRecipeGenerator";
 import { env, hasOpenAIKey, hasGeminiKey } from "@/config/environment";
-import { Mic } from "lucide-react";
 import { getSpeechRecognition } from "@/utils/speechRecognition";
 
 interface RecipeGeneratorProps {
@@ -64,6 +80,19 @@ interface RecipeGeneratorProps {
 }
 
 type GenerationService = "chef" | "local" | "ollama" | "openai" | "gemini" | "custom";
+
+/**
+ * Guided 3-step wizard ("1 Pick fruit -> 2 Tailor it -> 3 Generate").
+ *
+ * Progressive disclosure: only the required inputs (fruit + style) live on the
+ * first screen; optional extras are collapsed until the user opens them, and all
+ * AI-provider plumbing (service/model/API key) is hidden behind the gear icon.
+ */
+const STEPS = [
+  { id: 1, label: "Pick fruit" },
+  { id: 2, label: "Tailor it" },
+  { id: 3, label: "Generate" },
+] as const;
 
 const TROPICAL_FRUITS = [
   { id: "mango", name: "Mango", emoji: "🥭", color: "bg-orange-100" },
@@ -134,8 +163,37 @@ const safeLocalStorage = {
     } catch (e) {
       console.warn("localStorage not available:", e);
     }
-  }
+  },
 };
+
+/**
+ * Collapsed, opt-in section used inside step 2. Keeps optional controls out of
+ * the way until the user explicitly opens them.
+ */
+const OptionalSection = ({
+  title,
+  hint,
+  children,
+}: {
+  title: string;
+  hint?: string;
+  children: React.ReactNode;
+}) => (
+  <Collapsible className="rounded-xl border border-border bg-card/60">
+    <CollapsibleTrigger className="flex w-full items-center justify-between gap-2 rounded-xl p-4 text-left transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+      <span>
+        <span className="block text-sm font-medium text-foreground">{title}</span>
+        {hint && (
+          <span className="block text-xs text-muted-foreground">{hint}</span>
+        )}
+      </span>
+      <ChevronDown className="h-4 w-4 shrink-0 transition-transform data-[state=open]:rotate-180" />
+    </CollapsibleTrigger>
+    <CollapsibleContent className="space-y-3 px-4 pb-4">
+      {children}
+    </CollapsibleContent>
+  </Collapsible>
+);
 
 export const RecipeGenerator = ({
   onRecipeGenerated,
@@ -146,6 +204,9 @@ export const RecipeGenerator = ({
     vegetables: "none",
     dietaryRestrictions: "",
   });
+
+  // Guided flow: which step is on screen (1..3).
+  const [activeStep, setActiveStep] = useState(1);
 
   const [selectedFruits, setSelectedFruits] = useState<string[]>([]);
   const [selectedVegetables, setSelectedVegetables] = useState<string[]>([]);
@@ -171,6 +232,7 @@ export const RecipeGenerator = ({
   );
   const [retryCount, setRetryCount] = useState(0);
   const [lastError, setLastError] = useState<string | null>(null);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
 
   useEffect(() => {
     safeLocalStorage.setItem("custom_ai_base_url", customBaseUrl);
@@ -203,6 +265,9 @@ export const RecipeGenerator = ({
   const dietConflicts = checkAddInConflicts(formData.dietaryRestrictions, selectedAddInData);
   const hardBlocks = dietConflicts.filter((c) => c.severity === "block");
   const recognisedRestrictions = detectRestrictions(formData.dietaryRestrictions);
+
+  // Step 1 is the only place with required inputs; nothing may advance past it empty.
+  const canLeaveStep1 = selectedFruits.length > 0 && Boolean(formData.style);
 
   const toggleAddIn = (id: string) => {
     setSelectedAddIns((prev) =>
@@ -246,7 +311,7 @@ export const RecipeGenerator = ({
 
     setAvailableServices(services);
 
-    // Set default service preference
+    // Set default service preference: chef -> gemini -> openai -> ollama -> custom -> local
     if (services.includes("chef")) {
       setSelectedService("chef");
     } else if (services.includes("gemini")) {
@@ -262,7 +327,7 @@ export const RecipeGenerator = ({
     }
   }, []);
 
-  // Initialize on component mount
+  // Initialize on component mount (lazy initialiser = runs once)
   useState(() => {
     checkAvailableServices();
   });
@@ -353,7 +418,7 @@ export const RecipeGenerator = ({
       toast.error(
         "These add-ins clash with your dietary restrictions - remove them to continue",
       );
-      return;
+      return false;
     }
 
     if (selectedFruits.length === 0 || !formData.style) {
@@ -562,8 +627,6 @@ ${recipe.model ? `*Generated with ${recipe.model}*` : ""}
 ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
   };
 
-
-
   const handleGenerateRecipe = async () => {
     if (!validateForm()) return;
 
@@ -678,9 +741,19 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
     }
   };
 
+  const goToStep = (step: number) => {
+    // Gate forward navigation on the required inputs from step 1.
+    if (step > 1 && !canLeaveStep1) {
+      toast.error("Please select at least one fruit and a style to continue");
+      return;
+    }
+    setActiveStep(step);
+    trackEngagement("wizard_step", { step });
+  };
+
   return (
     <Card className="w-full max-w-4xl mx-auto shadow-tropical">
-      <CardHeader className="text-center">
+      <CardHeader className="text-center relative">
         <CardTitle className="text-3xl font-bold gradient-fresh bg-clip-text text-transparent flex items-center gap-2 justify-center">
           <ChefHat className="w-8 h-8" />
           AI Recipe Generator
@@ -688,90 +761,76 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
         <CardDescription className="text-lg">
           Create your perfect tropical juice recipe with AI assistance
         </CardDescription>
-      </CardHeader>
 
-      <CardContent className="space-y-6">
-        {/* Error Display */}
-        {lastError && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription className="flex items-center justify-between">
-              <span>{lastError}</span>
-              {retryCount < 3 && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleRetryGeneration}
-                  disabled={isGenerating}
-                >
-                  <RefreshCw className="w-3 h-3 mr-1" />
-                  Retry ({retryCount + 1}/3)
-                </Button>
-              )}
-            </AlertDescription>
-          </Alert>
-        )}
+        {/* Advanced settings (AI provider plumbing) lives behind the gear icon */}
+        <Dialog open={advancedOpen} onOpenChange={setAdvancedOpen}>
+          <DialogTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              aria-label="Advanced settings"
+              title="Advanced settings"
+              className="absolute right-2 top-2"
+            >
+              <Settings className="h-5 w-5" />
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-h-[85vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" /> Advanced settings
+              </DialogTitle>
+              <DialogDescription>
+                Power-user options. Choose the AI service that generates your
+                recipe. Most people can leave this on the default.
+              </DialogDescription>
+            </DialogHeader>
 
-        {/* Form Fields */}
-        <div className="space-y-8">
-          {/* AI Service Selection */}
-          <div className="space-y-4">
-            <div className="text-center">
-              <h3 className="text-2xl font-bold text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">
-                AI Service
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                Select the AI service to generate your recipe
+            {/* AI Service Selection */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">AI Service</Label>
+              <div className="flex flex-wrap gap-2">
+                {availableServices.map((service) => (
+                  <button
+                    key={service}
+                    type="button"
+                    aria-pressed={selectedService === service}
+                    className={`flex items-center gap-1 rounded-full border px-3 py-1.5 text-sm transition-all ${
+                      selectedService === service
+                        ? "border-primary bg-primary text-primary-foreground shadow-md"
+                        : "border-border hover:bg-accent"
+                    }`}
+                    onClick={() => {
+                      setSelectedService(service);
+                      trackEngagement("ai_service_selected", {
+                        service,
+                        previous_service: selectedService,
+                        available_services: availableServices.length,
+                      });
+                    }}
+                  >
+                    {service === "openai" && <Zap className="w-3 h-3" />}
+                    {service === "ollama" && <Sparkles className="w-3 h-3" />}
+                    {service === "local" && <ChefHat className="w-3 h-3" />}
+                    {service === "custom" && <Settings className="w-3 h-3" />}
+                    {getServiceDisplayName(service)}
+                  </button>
+                ))}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {getServiceDescription(selectedService)}
               </p>
             </div>
-            <div className="flex flex-wrap gap-2 justify-center">
-              {availableServices.map((service) => (
-                <Badge
-                  key={service}
-                  variant={selectedService === service ? "default" : "outline"}
-                  className={`cursor-pointer transition-all hover:scale-105 px-4 py-2 text-sm ${
-                    selectedService === service
-                      ? "bg-primary text-primary-foreground shadow-md"
-                      : "hover:bg-accent"
-                  }`}
-                  onClick={() => {
-                    setSelectedService(service);
-                    trackEngagement("ai_service_selected", {
-                      service,
-                      previous_service: selectedService,
-                      available_services: availableServices.length,
-                    });
-                  }}
-                >
-                  {service === "openai" && <Zap className="w-3 h-3 mr-1" />}
-                  {service === "ollama" && (
-                    <Sparkles className="w-3 h-3 mr-1" />
-                  )}
-                  {service === "local" && <ChefHat className="w-3 h-3 mr-1" />}
-                  {service === "custom" && <Settings className="w-3 h-3 mr-1" />}
-                  {getServiceDisplayName(service)}
-                </Badge>
-              ))}
-            </div>
-            <p className="text-xs text-muted-foreground text-center">
-              {getServiceDescription(selectedService)}
-            </p>
-          </div>
 
-          {/* Ollama Model Selection */}
-          {selectedService === "ollama" && ollamaModels.length > 0 && (
-            <div className="space-y-4">
-              <div className="text-center">
-                <h3 className="text-lg font-semibold text-foreground mb-2">
-                  Select Ollama Model
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Choose the AI model for recipe generation
-                </p>
-              </div>
-              <div className="max-w-md mx-auto">
+            {/* Ollama Model Selection */}
+            {selectedService === "ollama" && ollamaModels.length > 0 && (
+              <div className="space-y-2">
+                <Label htmlFor="ollama-model" className="text-sm font-medium">
+                  Ollama model
+                </Label>
                 <Select value={selectedModel} onValueChange={setSelectedModel}>
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger id="ollama-model" className="w-full">
                     <SelectValue placeholder="Select an Ollama model" />
                   </SelectTrigger>
                   <SelectContent>
@@ -793,22 +852,11 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
                   </SelectContent>
                 </Select>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Custom API Configuration */}
-          {selectedService === "custom" && (
-            <Card className="max-w-md mx-auto border-dashed border-2 border-primary/40 bg-accent/10 shadow-sm">
-              <CardHeader className="pb-3 text-center">
-                <CardTitle className="text-lg flex items-center justify-center gap-2 font-semibold">
-                  <Settings className="w-5 h-5 text-primary animate-spin-slow" />
-                  Custom AI Settings
-                </CardTitle>
-                <CardDescription>
-                  Configure any OpenAI-compatible API (DeepSeek, Kimi, MiniMax, etc.)
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
+            {/* Custom API Configuration */}
+            {selectedService === "custom" && (
+              <div className="space-y-4 rounded-lg border border-dashed border-2 border-primary/40 bg-accent/10 p-4">
                 <div className="space-y-2">
                   <Label htmlFor="customBaseUrl" className="text-sm font-medium">API Base URL</Label>
                   <Input
@@ -880,136 +928,201 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
                     className="h-9"
                   />
                 </div>
-              </CardContent>
-            </Card>
-          )}
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+      </CardHeader>
 
-          {/* Ingredients */}
-          <div className="space-y-4">
+      <CardContent className="space-y-6">
+        {/* Step progress */}
+        <nav aria-label="Recipe steps" className="flex items-center justify-center gap-2 sm:gap-3">
+          {STEPS.map((step, idx) => {
+            const isActive = activeStep === step.id;
+            const isComplete = activeStep > step.id;
+            const isLocked = step.id > 1 && !canLeaveStep1;
+            return (
+              <Fragment key={step.id}>
+                <button
+                  type="button"
+                  onClick={() => goToStep(step.id)}
+                  disabled={isLocked}
+                  aria-current={isActive ? "step" : undefined}
+                  className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
+                    isActive
+                      ? "border-primary bg-primary text-primary-foreground shadow-md"
+                      : isComplete
+                      ? "border-primary/40 text-primary hover:bg-primary/10"
+                      : "border-border text-muted-foreground hover:bg-accent"
+                  }`}
+                >
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-background/20 text-xs">
+                    {isComplete ? <Check className="h-3 w-3" /> : step.id}
+                  </span>
+                  <span className="hidden sm:inline">{step.label}</span>
+                </button>
+                {idx < STEPS.length - 1 && (
+                  <span aria-hidden="true" className="h-px w-4 bg-border sm:w-8" />
+                )}
+              </Fragment>
+            );
+          })}
+        </nav>
+
+        {/* Error Display */}
+        {lastError && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription className="flex items-center justify-between">
+              <span>{lastError}</span>
+              {retryCount < 3 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRetryGeneration}
+                  disabled={isGenerating}
+                >
+                  <RefreshCw className="w-3 h-3 mr-1" />
+                  Retry ({retryCount + 1}/3)
+                </Button>
+              )}
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* ---------------- Step 1: Pick fruit + style ---------------- */}
+        {activeStep === 1 && (
+          <div className="space-y-6">
             <div className="text-center">
-              <h3 className="text-2xl font-bold text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">
-                Ingredients
+              <h3 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                Pick your fruit
               </h3>
-              <p className="text-sm text-muted-foreground">
-                Select your primary ingredients and style preferences
+              <p className="text-sm text-muted-foreground mt-1">
+                Choose up to 5 tropical fruits and a style - that's all you need
+                to get started.
               </p>
             </div>
 
-            <div className="space-y-6">
-              <div className="space-y-4">
-                <Label className="text-base font-medium">
-                  Tropical Fruits * (Select up to 5)
-                </Label>
-                <p className="text-sm text-muted-foreground mb-3">
-                  {selectedFruits.length}/5 selected
-                </p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                  {TROPICAL_FRUITS.map((fruit) => {
-                    const isSelected = selectedFruits.includes(fruit.name);
-                    const canSelect = selectedFruits.length < 5 || isSelected;
+            <div className="space-y-2">
+              <Label className="text-base font-medium">
+                Tropical Fruits * (Select up to 5)
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                {selectedFruits.length}/5 selected
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                {TROPICAL_FRUITS.map((fruit) => {
+                  const isSelected = selectedFruits.includes(fruit.name);
+                  const canSelect = selectedFruits.length < 5 || isSelected;
 
-                    return (
-                      <div
-                        key={fruit.id}
-                        onClick={() => {
-                          if (!canSelect && !isSelected) return;
+                  return (
+                    <div
+                      key={fruit.id}
+                      onClick={() => {
+                        if (!canSelect && !isSelected) return;
 
-                          let newSelected;
-                          if (isSelected) {
-                            // Remove from selection
-                            newSelected = selectedFruits.filter(
-                              (f) => f !== fruit.name
-                            );
-                          } else {
-                            // Add to selection
-                            newSelected = [...selectedFruits, fruit.name];
-                          }
-
-                          setSelectedFruits(newSelected);
-                          // Update formData.fruit with primary fruit (first selected)
-                          setFormData((prev) => ({
-                            ...prev,
-                            fruit: newSelected.length > 0 ? newSelected[0] : "",
+                        // Functional update keeps rapid clicks correct.
+                        setSelectedFruits((prev) => {
+                          const next = prev.includes(fruit.name)
+                            ? prev.filter((f) => f !== fruit.name)
+                            : [...prev, fruit.name];
+                          // Keep formData.fruit in sync with the primary fruit.
+                          setFormData((fd) => ({
+                            ...fd,
+                            fruit: next.length > 0 ? next[0] : "",
                           }));
-
                           trackEngagement("ingredient_selected", {
                             type: "fruit",
                             value: fruit.name,
-                            total_selected: newSelected.length,
+                            total_selected: next.length,
                             step: 1,
                           });
-                        }}
-                        className={`cursor-pointer rounded-xl p-4 text-center transition-all duration-200 hover:scale-105 border-2 relative ${
-                          isSelected
-                            ? "border-primary bg-primary/10 shadow-lg"
-                            : canSelect
-                            ? "border-border bg-card hover:border-primary/50"
-                            : "border-border bg-card opacity-50 cursor-not-allowed"
-                        } ${fruit.color}`}
-                      >
-                        {isSelected && (
-                          <div className="absolute -top-2 -right-2 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-bold">
-                            {selectedFruits.indexOf(fruit.name) + 1}
-                          </div>
-                        )}
-                        <div className="text-3xl mb-2">{fruit.emoji}</div>
-                        <div className="text-sm font-medium text-foreground">
-                          {fruit.name}
+                          return next;
+                        });
+                      }}
+                      className={`cursor-pointer rounded-xl p-4 text-center transition-all duration-200 hover:scale-105 border-2 relative ${
+                        isSelected
+                          ? "border-primary bg-primary/10 shadow-lg"
+                          : canSelect
+                          ? "border-border bg-card hover:border-primary/50"
+                          : "border-border bg-card opacity-50 cursor-not-allowed"
+                      } ${fruit.color}`}
+                    >
+                      {isSelected && (
+                        <div className="absolute -top-2 -right-2 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-bold">
+                          {selectedFruits.indexOf(fruit.name) + 1}
                         </div>
+                      )}
+                      <div className="text-3xl mb-2">{fruit.emoji}</div>
+                      <div className="text-sm font-medium text-foreground">
+                        {fruit.name}
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="style" className="text-base font-medium">
-                  Juice Style *
-                </Label>
-                <Select
-                  value={formData.style}
-                  onValueChange={(value) => {
-                    setFormData((prev) => ({ ...prev, style: value }));
-                    trackEngagement("recipe_style_selected", {
-                      style: value,
-                      step: 2,
-                    });
-                  }}
-                >
-                  <SelectTrigger id="style" className="h-12" aria-label="Juice Style">
-                    <SelectValue placeholder="🥤 Select your style" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {JUICE_STYLES.map((style) => (
-                      <SelectItem key={style} value={style}>
-                        {style}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                    </div>
+                  );
+                })}
               </div>
             </div>
-          </div>
 
-          {/* Additions */}
+            <div className="space-y-2">
+              <Label htmlFor="style" className="text-base font-medium">
+                Juice Style *
+              </Label>
+              <Select
+                value={formData.style}
+                onValueChange={(value) => {
+                  setFormData((prev) => ({ ...prev, style: value }));
+                  trackEngagement("recipe_style_selected", {
+                    style: value,
+                    step: 2,
+                  });
+                }}
+              >
+                <SelectTrigger id="style" className="h-12" aria-label="Juice Style">
+                  <SelectValue placeholder="🥤 Select your style" />
+                </SelectTrigger>
+                <SelectContent>
+                  {JUICE_STYLES.map((style) => (
+                    <SelectItem key={style} value={style}>
+                      {style}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        )}
+
+        {/* ---------------- Step 2: Tailor it (all optional, collapsed) ---------------- */}
+        {activeStep === 2 && (
           <div className="space-y-4">
             <div className="text-center">
-              <h3 className="text-2xl font-bold text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">
-                Additions
+              <h3 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                Tailor it
               </h3>
-              <p className="text-sm text-muted-foreground">
-                Enhance your recipe with vegetables and dietary preferences
+              <p className="text-sm text-muted-foreground mt-1">
+                Optional extras. Open only the ones you want - your recipe works
+                great without them.
               </p>
             </div>
 
-            <div className="space-y-4 max-w-2xl mx-auto">
-              <div className="space-y-4">
-                <Label className="text-base font-medium">
-                  Additional Vegetables (Select up to 5)
-                </Label>
-                <p className="text-sm text-muted-foreground mb-3">
-                  {selectedVegetables.length}/5 selected
-                </p>
+            <div className="space-y-3 max-w-2xl mx-auto">
+              {/* Vegetables */}
+              <OptionalSection
+                title="Add vegetables"
+                hint={
+                  selectedVegetables.length > 0
+                    ? `${selectedVegetables.length} selected`
+                    : "Optional - greens, ginger, turmeric..."
+                }
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">
+                    Select up to 5
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {selectedVegetables.length}/5 selected
+                  </span>
+                </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                   <div
                     onClick={() => {
@@ -1040,29 +1153,18 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
                         onClick={() => {
                           if (!canSelect && !isSelected) return;
 
-                          let newSelected;
-                          if (isSelected) {
-                            // Remove from selection
-                            newSelected = selectedVegetables.filter(
-                              (v) => v !== vegetable.name
-                            );
-                          } else {
-                            // Add to selection
-                            newSelected = [
-                              ...selectedVegetables,
-                              vegetable.name,
-                            ];
-                          }
-
-                          setSelectedVegetables(newSelected);
-                          // Update formData.vegetables with comma-separated list
-                          setFormData((prev) => ({
-                            ...prev,
-                            vegetables:
-                              newSelected.length > 0
-                                ? newSelected.join(", ")
-                                : "none",
-                          }));
+                          // Functional update keeps rapid clicks correct.
+                          setSelectedVegetables((prev) => {
+                            const next = prev.includes(vegetable.name)
+                              ? prev.filter((v) => v !== vegetable.name)
+                              : [...prev, vegetable.name];
+                            setFormData((fd) => ({
+                              ...fd,
+                              vegetables:
+                                next.length > 0 ? next.join(", ") : "none",
+                            }));
+                            return next;
+                          });
                         }}
                         className={`cursor-pointer rounded-xl p-3 text-center transition-all duration-200 hover:scale-105 border-2 relative ${
                           isSelected
@@ -1085,12 +1187,21 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
                     );
                   })}
                 </div>
-              </div>
+              </OptionalSection>
 
               {/* Healthy add-ins - sourced from the Scout research brief (2026-11-02) */}
-              <div className="space-y-2">
+              <OptionalSection
+                title="Healthy add-ins"
+                hint={
+                  selectedAddIns.length > 0
+                    ? `${selectedAddIns.length} selected`
+                    : "Optional - boosts, powders, seeds..."
+                }
+              >
                 <div className="flex items-center justify-between">
-                  <Label className="text-base font-medium">Healthy Add-ins (optional)</Label>
+                  <span className="text-sm text-muted-foreground">
+                    Tap to add or remove
+                  </span>
                   <span className="text-xs text-muted-foreground">
                     {selectedAddIns.length} selected
                   </span>
@@ -1144,12 +1255,20 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
                     {selectedAddInDoses.join(" · ")}
                   </p>
                 )}
-              </div>
+              </OptionalSection>
 
-              <div className="space-y-2">
+              {/* Dietary restrictions */}
+              <OptionalSection
+                title="Dietary restrictions & preferences"
+                hint={
+                  formData.dietaryRestrictions.trim()
+                    ? "Set"
+                    : "Optional - vegan, gluten-free, low sugar..."
+                }
+              >
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="dietary" className="text-base font-medium">
-                    Dietary Restrictions & Preferences
+                  <Label htmlFor="dietary" className="text-sm font-medium">
+                    Tell us what to avoid
                   </Label>
                   <Button
                     type="button"
@@ -1192,22 +1311,65 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
                     ))}
                   </div>
                 )}
-              </div>
+              </OptionalSection>
             </div>
           </div>
-        </div>
+        )}
 
-        {/* Generate Recipe Section */}
-        <div className="space-y-6 pt-6 border-t border-border">
-          <div className="text-center">
-            <h3 className="text-2xl font-bold text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">
-              Generate Your Recipe
-            </h3>
-            <p className="text-sm text-muted-foreground">
+        {/* ---------------- Step 3: Generate ---------------- */}
+        {activeStep === 3 && (
+          <div className="space-y-6">
+            <div className="text-center space-y-3">
+              <h3 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                Generate Your Recipe
+              </h3>
+
+              {/* Review summary */}
+              <div className="mx-auto max-w-lg rounded-xl border bg-card/60 p-4 text-left text-sm">
+                <div className="flex justify-between gap-3 py-1">
+                  <span className="text-muted-foreground">Fruit</span>
+                  <span className="font-medium text-foreground">
+                    {selectedFruits.length > 0
+                      ? selectedFruits.join(", ")
+                      : "-"}
+                  </span>
+                </div>
+                <div className="flex justify-between gap-3 py-1">
+                  <span className="text-muted-foreground">Style</span>
+                  <span className="font-medium text-foreground">
+                    {formData.style || "-"}
+                  </span>
+                </div>
+                {selectedVegetables.length > 0 && (
+                  <div className="flex justify-between gap-3 py-1">
+                    <span className="text-muted-foreground">Vegetables</span>
+                    <span className="font-medium text-foreground">
+                      {selectedVegetables.join(", ")}
+                    </span>
+                  </div>
+                )}
+                {selectedAddIns.length > 0 && (
+                  <div className="flex justify-between gap-3 py-1">
+                    <span className="text-muted-foreground">Add-ins</span>
+                    <span className="font-medium text-foreground text-right">
+                      {selectedAddInData.map((a) => a.name).join(", ")}
+                    </span>
+                  </div>
+                )}
+                {formData.dietaryRestrictions.trim() && (
+                  <div className="flex justify-between gap-3 py-1">
+                    <span className="text-muted-foreground">Dietary</span>
+                    <span className="font-medium text-foreground text-right">
+                      {formData.dietaryRestrictions}
+                    </span>
+                  </div>
+                )}
+              </div>
+
               {(dietConflicts.length > 0 || recognisedRestrictions.length > 0) && (
                 <div
                   role="alert"
-                  className={`space-y-1.5 rounded-lg border p-3 ${
+                  className={`space-y-1.5 rounded-lg border p-3 text-left text-sm ${
                     hardBlocks.length > 0
                       ? "border-destructive/50 bg-destructive/5 text-destructive"
                       : "border-amber-300 bg-amber-50 text-amber-900"
@@ -1252,38 +1414,64 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
                 </div>
               )}
 
-              {selectedFruits.length > 0 && formData.style
-                ? `Ready to create your ${selectedFruits.join(", ")} ${
-                    formData.style
-                  }!`
-                : "Select at least one fruit and style to get started"}
-            </p>
+              <p className="text-sm text-muted-foreground">
+                {selectedFruits.length > 0 && formData.style
+                  ? `Ready to create your ${selectedFruits.join(", ")} ${
+                      formData.style
+                    }!`
+                  : "Select at least one fruit and style to get started"}
+              </p>
+            </div>
+
+            {isGenerating ? (
+              <div className="space-y-4">
+                <RecipeGenerationLoader
+                  aiService={getServiceDisplayName(selectedService)}
+                />
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-4">
+                <Button
+                  onClick={handleGenerateRecipe}
+                  size="lg"
+                  className="gradient-tropical text-foreground font-bold text-lg px-12 py-6 hover:scale-105 transition-all duration-200 shadow-tropical min-w-[280px]"
+                  disabled={selectedFruits.length === 0 || !formData.style || hardBlocks.length > 0}
+                >
+                  <Sparkles className="w-6 h-6 mr-3" />
+                  Generate My Perfect Recipe
+                </Button>
+
+                {(selectedFruits.length === 0 || !formData.style) && (
+                  <p className="text-sm text-amber-600 bg-amber-50 px-4 py-2 rounded-md border border-amber-200">
+                    💡 Please select at least one fruit and a style to continue
+                  </p>
+                )}
+              </div>
+            )}
           </div>
+        )}
 
-          {isGenerating ? (
-            <div className="space-y-4">
-              <RecipeGenerationLoader
-                aiService={getServiceDisplayName(selectedService)}
-              />
-            </div>
-          ) : (
-            <div className="flex flex-col items-center gap-4">
-              <Button
-                onClick={handleGenerateRecipe}
-                size="lg"
-                className="gradient-tropical text-foreground font-bold text-lg px-12 py-6 hover:scale-105 transition-all duration-200 shadow-tropical min-w-[280px]"
-                disabled={selectedFruits.length === 0 || !formData.style || hardBlocks.length > 0}
-              >
-                <Sparkles className="w-6 h-6 mr-3" />
-                Generate My Perfect Recipe
-              </Button>
+        {/* Wizard navigation */}
+        <div className="flex items-center justify-between gap-3 border-t pt-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => goToStep(Math.max(1, activeStep - 1))}
+            disabled={activeStep === 1 || isGenerating}
+          >
+            <ChevronLeft className="h-4 w-4 mr-1" />
+            Back
+          </Button>
 
-              {(selectedFruits.length === 0 || !formData.style) && (
-                <p className="text-sm text-amber-600 bg-amber-50 px-4 py-2 rounded-md border border-amber-200">
-                  💡 Please select at least one fruit and a style to continue
-                </p>
-              )}
-            </div>
+          {activeStep < 3 && (
+            <Button
+              type="button"
+              onClick={() => goToStep(activeStep + 1)}
+              disabled={activeStep === 1 && !canLeaveStep1}
+            >
+              {activeStep === 1 ? "Next: tailor it" : "Next: generate"}
+              <ChevronRight className="h-4 w-4 ml-1" />
+            </Button>
           )}
         </div>
 

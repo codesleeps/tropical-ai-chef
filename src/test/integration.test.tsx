@@ -117,6 +117,12 @@ describe("Integration Tests - User Workflows", () => {
       const smoothieOption = screen.getByRole("option", { name: "Smoothie" });
       await user.click(smoothieOption);
 
+      // Advance the wizard: step 1 -> 2 -> 3 before generating
+      await user.click(
+        screen.getByRole("button", { name: /next: tailor it/i })
+      );
+      await user.click(screen.getByRole("button", { name: /next: generate/i }));
+
       const generateButton = screen.getByRole("button", {
         name: /Generate My Perfect Recipe/i,
       });
