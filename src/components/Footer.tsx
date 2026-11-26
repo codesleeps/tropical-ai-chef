@@ -10,6 +10,7 @@ const Footer: React.FC = () => {
       title: "Platform",
       links: [
         { name: "Recipe Generator", path: "/recipes" },
+        { name: "Cost Calculator", path: "/cost-calculator" },
         { name: "About Us", path: "/about" },
         { name: "Health Benefits", path: "/benefits" },
         { name: "Blog", path: "/blog" },

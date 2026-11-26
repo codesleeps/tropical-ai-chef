@@ -74,6 +74,7 @@ export const Navigation = () => {
   const navItems = [
     { name: "Home", path: "/" },
     { name: "Recipe Generator", path: "/recipes" },
+    { name: "Cost Calculator", path: "/cost-calculator" },
     { name: "About", path: "/about" },
     { name: "Benefits", path: "/benefits" },
     { name: "Blog", path: "/blog" },

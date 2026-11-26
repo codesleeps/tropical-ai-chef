@@ -22,7 +22,7 @@ describe("detectRestrictions", () => {
 
 describe("checkAddInConflicts", () => {
   it("blocks a nut ingredient for a nut allergy", () => {
-    const conflicts = checkAddInConflicts("nut allergy", pick("cashew-butter"));
+    const conflicts = checkAddInConflicts("nut allergy", pick("cashews"));
     expect(conflicts[0].severity).toBe("block");
     expect(conflicts[0].addInName).toMatch(/cashew/i);
   });
@@ -47,7 +47,7 @@ describe("checkAddInConflicts", () => {
   });
 
   it("blocks high-FODMAP choices for IBS", () => {
-    const conflicts = checkAddInConflicts("ibs", pick("cashew-butter", "dates"));
+    const conflicts = checkAddInConflicts("ibs", pick("cashews", "dates"));
     expect(conflicts.filter((c) => c.severity === "block")).toHaveLength(2);
   });
 

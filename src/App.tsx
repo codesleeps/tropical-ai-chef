@@ -11,6 +11,7 @@ import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import Orders from "./pages/Orders";
 import Recipes from "./pages/Recipes";
+import CostCalculatorPage from "./pages/CostCalculatorPage";
 import Analytics from "./pages/Analytics";
 import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
@@ -130,6 +131,7 @@ const App = () => {
                 <Route path="/blog/:slug" element={<BlogPost />} />
                 <Route path="/orders" element={<Orders />} />
                 <Route path="/recipes" element={<Recipes />} />
+                <Route path="/cost-calculator" element={<CostCalculatorPage />} />
                 <Route path="/legal" element={<Legal />} />
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                 <Route path="/terms-of-service" element={<TermsOfService />} />

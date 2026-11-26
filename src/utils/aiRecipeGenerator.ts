@@ -266,7 +266,7 @@ export function generateRecipeLocally(request: RecipeRequest): Recipe {
     smoothie: [
       `${(Math.random() * 0.5 + 0.25).toFixed(1)} cup ${["Greek yogurt", "coconut yogurt", "almond yogurt", "silken tofu"][Math.floor(Math.random() * 4)]}`,
       `${["1/2", "3/4", "1"][Math.floor(Math.random() * 3)]} ${["banana", "frozen banana", "avocado", "mango chunks"][Math.floor(Math.random() * 4)]}`,
-      `${(Math.random() * 1 + 0.5).toFixed(1)} tablespoon ${["peanut butter", "almond butter", "cashew butter", "sunflower seed butter"][Math.floor(Math.random() * 4)]}`,
+      `${(Math.random() * 1 + 0.5).toFixed(1)} tablespoon ${["peanuts", "almonds", "cashews", "sunflower seeds"][Math.floor(Math.random() * 4)]}`,
     ],
     detox: [
       `${Math.floor(Math.random() * 3 + 1)} cup ${["spinach", "kale", "mixed greens", "arugula", "swiss chard"][Math.floor(Math.random() * 5)]}`,
