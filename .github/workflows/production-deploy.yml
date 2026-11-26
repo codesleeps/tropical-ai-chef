@@ -147,7 +147,7 @@ jobs:
         if: always()
         with:
           name: lighthouse-reports
-          path: .lighthouseci/
+          path: lighthouse-results/
           retention-days: 14
 
   # Notification job
