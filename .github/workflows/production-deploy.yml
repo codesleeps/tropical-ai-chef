@@ -143,7 +143,7 @@ jobs:
             ${{ vars.PAGES_URL || 'https://codesleeps.github.io/tropical-ai-chef/' }}
           uploadArtifacts: true
           temporaryPublicStorage: true
-          configPath: "./.lighthouserc.json"
+          configPath: "./.lighthouserc.ci.json"
         continue-on-error: true # Don't fail the workflow on performance issues
 
   # Notification job
