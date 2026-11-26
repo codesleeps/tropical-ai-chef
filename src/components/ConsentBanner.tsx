@@ -125,6 +125,7 @@ export const ConsentBanner = () => {
                 size="sm"
                 onClick={handleDismiss}
                 className="p-1 h-auto"
+                aria-label="Dismiss cookie banner"
               >
                 <X className="w-4 h-4" />
               </Button>

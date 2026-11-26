@@ -137,14 +137,18 @@ jobs:
         run: sleep 60 # Give deploy.yml time to publish
 
       - name: Run Lighthouse CI
-        uses: treosh/lighthouse-ci-action@v10
-        with:
-          urls: |
-            ${{ vars.PAGES_URL || 'https://codesleeps.github.io/tropical-ai-chef/' }}
-          uploadArtifacts: true
-          temporaryPublicStorage: true
-          configPath: "./.lighthouserc.ci.json"
+        run: |
+          npm install -g @lhci/cli@0.14.0
+          lhci autorun --config=./.lighthouserc.ci.json
         continue-on-error: true # Don't fail the workflow on performance issues
+
+      - name: Upload Lighthouse reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-reports
+          path: .lighthouseci/
+          retention-days: 14
 
   # Notification job
   notify:

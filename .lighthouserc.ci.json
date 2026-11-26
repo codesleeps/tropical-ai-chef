@@ -1,6 +1,7 @@
 {
   "ci": {
     "collect": {
+      "url": ["https://codesleeps.github.io/tropical-ai-chef/"],
       "numberOfRuns": 3,
       "settings": {
         "chromeFlags": "--no-sandbox --disable-dev-shm-usage",
@@ -40,8 +41,7 @@
       }
     },
     "upload": {
-      "target": "temporary-public-storage",
-      "reportFilenamePattern": "lighthouse-%%PATHNAME%%-%%DATETIME%%.report.html"
+      "target": "filesystem"
     }
   }
 }

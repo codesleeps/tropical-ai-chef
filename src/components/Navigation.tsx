@@ -123,7 +123,7 @@ export const Navigation = () => {
                 key={item.path}
                 to={item.path}
                 className={`font-medium transition-colors duration-200 hover:text-primary ${
-                  isActive(item.path) ? "text-primary" : "text-foreground/70"
+                  isActive(item.path) ? "text-foreground font-semibold" : "text-foreground/70"
                 }`}
               >
                 {item.name}
@@ -195,7 +195,7 @@ export const Navigation = () => {
                     onClick={() => setIsOpen(false)}
                     className={`text-lg font-medium transition-colors duration-200 hover:text-primary ${
                       isActive(item.path)
-                        ? "text-primary"
+                        ? "text-foreground font-semibold"
                         : "text-foreground/70"
                     }`}
                   >
