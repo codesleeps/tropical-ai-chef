@@ -1004,6 +1004,33 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="style" className="text-base font-medium">
+                Juice Style *
+              </Label>
+              <Select
+                value={formData.style}
+                onValueChange={(value) => {
+                  setFormData((prev) => ({ ...prev, style: value }));
+                  trackEngagement("recipe_style_selected", {
+                    style: value,
+                    step: 1,
+                  });
+                }}
+              >
+                <SelectTrigger id="style" className="h-12" aria-label="Juice Style">
+                  <SelectValue placeholder="🥤 Select your style" />
+                </SelectTrigger>
+                <SelectContent>
+                  {JUICE_STYLES.map((style) => (
+                    <SelectItem key={style} value={style}>
+                      {style}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
               <Label className="text-base font-medium">
                 Tropical Fruits * (Select up to 5)
               </Label>
@@ -1061,33 +1088,6 @@ ${recipe.generationTime ? ` *in ${recipe.generationTime}ms*` : ""}`;
                   );
                 })}
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="style" className="text-base font-medium">
-                Juice Style *
-              </Label>
-              <Select
-                value={formData.style}
-                onValueChange={(value) => {
-                  setFormData((prev) => ({ ...prev, style: value }));
-                  trackEngagement("recipe_style_selected", {
-                    style: value,
-                    step: 2,
-                  });
-                }}
-              >
-                <SelectTrigger id="style" className="h-12" aria-label="Juice Style">
-                  <SelectValue placeholder="🥤 Select your style" />
-                </SelectTrigger>
-                <SelectContent>
-                  {JUICE_STYLES.map((style) => (
-                    <SelectItem key={style} value={style}>
-                      {style}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
           </div>
         )}
