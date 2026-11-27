@@ -124,11 +124,9 @@ if (fs.existsSync(destDir)) {
 // Copy dist to docs
 copyRecursiveSync(srcDir, destDir);
 
-// Update manifest.json for GitHub Pages
-updateManifestForGitHubPages();
-
-// Update index.html for GitHub Pages
-updateIndexHtmlForGitHubPages();
+// SKIP: no longer prefixed — base: './' in Vite works from both custom domain and GH Pages
+// updateManifestForGitHubPages();
+// updateIndexHtmlForGitHubPages();
 
 // SPA deep-link fallback
 writeSpaFallback();

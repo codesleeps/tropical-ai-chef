@@ -32,6 +32,8 @@ jobs:
         
       - name: Build project
         run: npm run build:gh
+        env:
+          VITE_BASE_PATH: './'
         
       - name: Deploy to docs folder
         run: node scripts/deploy-to-docs.js
