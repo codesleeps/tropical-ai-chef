@@ -8,6 +8,7 @@ import { chatWithCoco } from "@/utils/aiRecipeGenerator";
 import { getSpeechRecognition } from "@/utils/speechRecognition";
 import { isChefAiConfigured } from "@/utils/chefAi";
 import { env, hasGeminiKey, hasOpenAIKey } from "@/config/environment";
+import { useAuth } from "@/components/auth/AuthContext";
 import { toast } from "sonner";
 
 interface Message {
@@ -50,8 +51,11 @@ const loadStoredMessages = (): Message[] => {
   return [GREETING];
 };
 
-const getActiveAIService = (): string => {
-  if (isChefAiConfigured()) return "chef";
+// DeepSeek ("chef") is a paid/authenticated-only engine: the server-side proxy
+// costs money per call, so it is reserved for logged-in users. Anonymous
+// visitors (and the public test build) fall through to a free local engine.
+const getActiveAIService = (isAuthed: boolean): string => {
+  if (isAuthed && isChefAiConfigured()) return "chef";
   if (hasGeminiKey()) return "gemini";
   if (hasOpenAIKey()) return "openai";
   if (env.customAiApiKey) return "custom";
@@ -67,6 +71,7 @@ const ENGINE_LABELS: Record<string, string> = {
 };
 
 export const TropicalChatbot = () => {
+  const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>(loadStoredMessages);
@@ -74,7 +79,7 @@ export const TropicalChatbot = () => {
   const [isListening, setIsListening] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  const activeService = getActiveAIService();
+  const activeService = getActiveAIService(Boolean(user));
   const engineLabel = ENGINE_LABELS[activeService] ?? activeService;
 
   // Persist the conversation so it survives reloads and page navigation

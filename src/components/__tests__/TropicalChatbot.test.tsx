@@ -11,6 +11,14 @@ vi.mock("@/utils/chefAi", () => ({
   chefAiRecipe: vi.fn(),
 }));
 
+// DeepSeek ("chef") is authenticated-only; fake an authed user when a test
+// needs it, logged-out (null) the rest of the time.
+vi.mock("@/components/auth/AuthContext", () => ({
+  useAuth: () => ({ user: mockUser, session: null, loading: false,
+    signUp: vi.fn(), signIn: vi.fn(), signInWithProvider: vi.fn(), signOut: vi.fn() }),
+}));
+let mockUser: unknown = null;
+
 // Force the local chef engine so the chat never touches the network
 describe("TropicalChatbot (Coco)", () => {
   beforeEach(() => {
@@ -95,6 +103,7 @@ describe("TropicalChatbot (Coco)", () => {
     const user = userEvent.setup();
     vi.mocked(isChefAiConfigured).mockReturnValue(true);
     vi.mocked(chefAiChat).mockResolvedValue("Fresh from the server! 🥥");
+    mockUser = { id: "test-user" } as unknown;
 
     render(<TropicalChatbot />);
     await user.click(screen.getByRole("button", { name: /open coco/i }));

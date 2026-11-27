@@ -12,15 +12,22 @@ interface AuthContextType {
   signOut: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
+// Logged-out default so components outside the provider (e.g. the public
+// recipe generator, or unit tests) can read auth state safely and simply see
+// "no user" rather than throwing.
+const defaultAuth: AuthContextType = {
+  user: null,
+  session: null,
+  loading: false,
+  signUp: async () => ({ error: null }),
+  signIn: async () => ({ error: null }),
+  signInWithProvider: async () => ({ error: null }),
+  signOut: async () => {},
 };
+
+const AuthContext = createContext<AuthContextType>(defaultAuth);
+
+export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);

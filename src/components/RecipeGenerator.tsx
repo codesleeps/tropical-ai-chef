@@ -60,6 +60,7 @@ import {
   type Recipe,
 } from "@/utils/aiRecipeGenerator";
 import { chefAiRecipe, isChefAiConfigured } from "@/utils/chefAi";
+import { useAuth } from "@/components/auth/AuthContext";
 import { ADD_IN_CATEGORIES, SMOOTHIE_ADD_INS } from "@/data/smoothieAddins";
 import {
   addInsByIds,
@@ -216,7 +217,7 @@ export const RecipeGenerator = ({
   const [isListening, setIsListening] = useState(false);
   const [availableServices, setAvailableServices] = useState<
     GenerationService[]
-  >(isChefAiConfigured() ? ["chef", "local", "custom"] : ["local", "custom"]);
+  >(["local", "custom"]);
   const [selectedService, setSelectedService] =
     useState<GenerationService>("local");
   const [ollamaModels, setOllamaModels] = useState<string[]>([]);
@@ -253,6 +254,11 @@ export const RecipeGenerator = ({
   const { trackRecipeGeneration, trackEngagement } = useAnalytics();
   const { measureFunction } = usePerformanceTracking();
 
+  // DeepSeek ("chef") is paid/authenticated-only; anonymous visitors get the
+  // free local engine by default.
+  const { user, loading } = useAuth();
+  const isAuthed = Boolean(user);
+
   // Healthy add-ins picked from the Scout research set
   const selectedAddInData = SMOOTHIE_ADD_INS.filter((a) => selectedAddIns.includes(a.id));
   const addInPayload = selectedAddInData.map((a) => `${a.name} - ${a.dose}`);
@@ -280,7 +286,8 @@ export const RecipeGenerator = ({
     const services: GenerationService[] = ["local", "custom"]; // Always available
 
     // Server-side AI proxy (Supabase Edge Function) - no key in the bundle
-    if (isChefAiConfigured()) {
+    // Reserved for authenticated (paid) users only.
+    if (isChefAiConfigured() && isAuthed) {
       services.unshift("chef");
     }
 
@@ -325,12 +332,14 @@ export const RecipeGenerator = ({
     } else {
       setSelectedService("local");
     }
-  }, []);
+  }, [isAuthed]);
 
-  // Initialize on component mount (lazy initialiser = runs once)
-  useState(() => {
-    checkAvailableServices();
-  });
+  // Re-run service detection once auth has resolved (and on any login change).
+  useEffect(() => {
+    if (!loading) {
+      checkAvailableServices();
+    }
+  }, [loading, checkAvailableServices]);
 
   const handleVoiceCommand = () => {
     const SpeechRecognition = getSpeechRecognition();

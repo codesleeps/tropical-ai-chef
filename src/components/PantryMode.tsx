@@ -22,6 +22,7 @@ import {
   type PantryMatch,
 } from "@/utils/pantryMatch";
 import { chefAiRecipe, isChefAiConfigured } from "@/utils/chefAi";
+import { useAuth } from "@/components/auth/AuthContext";
 
 const PANTRY_STORAGE_KEY = "tropical_pantry";
 
@@ -65,6 +66,8 @@ interface PantryModeProps {
 }
 
 export const PantryMode = ({ onRecipeGenerated }: PantryModeProps) => {
+  const { user } = useAuth();
+  const isAuthed = Boolean(user);
   const [pantry, setPantry] = useState<string[]>(loadPantry);
   const [activeMatch, setActiveMatch] = useState<string | null>(null);
   const [isAiGenerating, setIsAiGenerating] = useState(false);
@@ -110,6 +113,10 @@ export const PantryMode = ({ onRecipeGenerated }: PantryModeProps) => {
   const makeItWithAi = async (match: PantryMatch) => {
     if (!isChefAiConfigured()) {
       toast.error("Chef AI is not configured - using the built-in recipe.");
+      return makeIt(match);
+    }
+    if (!isAuthed) {
+      toast.info("Chef AI (DeepSeek) is for members - using the built-in recipe.");
       return makeIt(match);
     }
     setActiveMatch(match.recipe.name);
