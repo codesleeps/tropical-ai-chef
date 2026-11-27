@@ -160,7 +160,6 @@ export const preloadCriticalResources = () => {
   );
 
   // Preload hero images
-  preloadImage("/hero-background.jpg");
   preloadImage("/og-image.jpg");
 };
 

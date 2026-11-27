@@ -116,9 +116,9 @@ export const generateWebManifest = () => {
         purpose: "any maskable",
       },
       {
-        src: "/icon-apple-touch.png",
+        src: "/icon-apple-touch.svg",
         sizes: "180x180",
-        type: "image/png",
+        type: "image/svg+xml",
         purpose: "any",
       },
     ],
